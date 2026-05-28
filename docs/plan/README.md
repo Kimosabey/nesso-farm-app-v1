@@ -38,6 +38,7 @@ End-to-end implementation plan for the **Nesso Farm Traceability Platform**, der
 | `11-implementation-phases.md` | Phased delivery plan with milestones |
 | `12-known-gaps.md` | Risks, security backlog, deferred items |
 | `13-ux-accessibility.md` | UX principles, WCAG 2.2 AA checklist, motion safety, modern lib inventory |
+| `14-screen-inventory.md` | Complete list of every mobile screen, web page, and QR portal page + reusable components |
 
 ### Modules (`modules/`)
 

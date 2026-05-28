@@ -1,0 +1,10 @@
+The core plan is complete (35 files, ~99 screens spec'd, every module covered). A few optional documents could still be useful before kickoff — none are blockers, but they'd tighten the build:
+
+Doc	Why it might be worth adding
+Glossary	Lots of jargon (POP, GRN, FPO, KYC, IFSC, Kharif/Rabi). A 1-page lookup for new devs onboarding.
+Testing strategy	Test pyramid is scattered across docs — a dedicated doc would consolidate coverage rules, fixtures, e2e scope, and the per-app test stacks.
+Data privacy & PII policy	India's DPDP Act 2023 compliance is mentioned in gaps but not specified — Aadhaar/bank/phone handling, retention, consent, deletion. Important if shipping in India.
+User stories per persona	End-to-end stories ("As a field officer, I want to … so that …") for the 7 personas. Acts as final QA checklist.
+Content / voice & tone guide	How error messages, button labels, empty states are written. Keeps UI copy consistent across 4 surfaces.
+Performance budgets (consolidated)	Currently in 13-ux-accessibility.md §10 — could be its own doc with monitoring & alerting tied in.
+Risk register / RACI	Who owns what; risks beyond the security backlog (vendor lock-in, team bus factor, schedule risk).
