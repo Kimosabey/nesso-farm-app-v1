@@ -1,0 +1,846 @@
+# 🌾 Nesso Farm Traceability Platform
+
+## Full Product Requirements Document (PRD)
+
+---
+
+# 1. Product Overview
+
+## Product Name
+
+**Nesso — Farm Traceability Platform**
+
+## Product Type
+
+Enterprise Farm-to-Fork Digital Traceability Ecosystem
+
+## Supported Platforms
+
+* 📱 Android App
+* 🍎 iOS App
+* 💻 Web Dashboard
+* 🔍 QR Traceability Portal
+
+---
+
+# 2. Vision Statement
+
+Build a modern, scalable, offline-first agricultural ecosystem that digitally connects:
+
+* Farmers
+* Field agents
+* Operations teams
+* Warehouses
+* Logistics
+* Consumers
+
+through real-time traceability and QR-powered transparency.
+
+---
+
+# 3. Product Goals
+
+## Business Goals
+
+* Digitize agricultural operations
+* Improve supply chain visibility
+* Build transparent traceability
+* Reduce manual workflows
+* Enable operational analytics
+* Improve consumer trust
+
+---
+
+## Technical Goals
+
+* Offline-first mobile architecture
+* Real-time synchronization
+* Scalable backend
+* Multi-language support
+* GPS farm mapping
+* QR traceability
+* Open-source infrastructure
+
+---
+
+# 4. Supported Platforms
+
+## 📱 Mobile App
+
+Platforms:
+
+* Android
+* iOS
+
+Users:
+
+* Farmers
+* Agents
+* Field Staff
+
+---
+
+## 💻 Web Dashboard
+
+Users:
+
+* Admins
+* Operations Team
+* Procurement Team
+* Warehouse Team
+* Quality Team
+
+---
+
+## 🔍 QR Traceability Portal
+
+Users:
+
+* Consumers
+* Retailers
+* Auditors
+
+---
+
+# 5. User Roles
+
+# 👨‍🌾 Farmer
+
+## Capabilities
+
+* View farms
+* View crop activities
+* View harvests
+* Upload images
+* View notifications
+* View weather updates
+
+---
+
+# 👷 Agent / Field Staff
+
+## Capabilities
+
+* Register farmers
+* Map farms
+* Add activities
+* Add harvest entries
+* Upload documents
+* Generate QR codes
+
+---
+
+# 🧑‍💼 Admin
+
+## Capabilities
+
+* Full platform management
+* Dashboard analytics
+* Inventory management
+* Warehouse monitoring
+* User management
+* Reporting
+* Batch traceability
+
+---
+
+# 🛒 Consumer
+
+## Capabilities
+
+* Scan QR codes
+* View product journey
+* View farmer & farm information
+* View harvest timeline
+
+---
+
+# 6. Product Modules
+
+---
+
+# 6.1 Authentication Module
+
+## Features
+
+* OTP login
+* Role-based authentication
+* Session persistence
+* Device registration
+* Offline login cache
+
+## APIs
+
+```http
+POST /auth/login
+POST /auth/verify-otp
+POST /auth/refresh
+POST /auth/logout
+```
+
+---
+
+# 6.2 Farmer Onboarding Module
+
+## Features
+
+* Farmer registration
+* KYC upload
+* Mobile verification
+* Multi-language forms
+* Profile management
+
+## Data Fields
+
+* Name
+* Mobile Number
+* Address
+* Village
+* District
+* State
+* Government ID
+* Profile Image
+
+## APIs
+
+```http
+POST /farmers
+GET /farmers
+GET /farmers/:id
+PATCH /farmers/:id
+```
+
+---
+
+# 6.3 Farm Mapping Module
+
+## Features
+
+* GPS farm mapping
+* Polygon drawing
+* Farm area calculation
+* Geo-coordinate storage
+* Farm image uploads
+
+## APIs
+
+```http
+POST /farms
+GET /farms
+POST /farms/:id/map
+```
+
+---
+
+# 6.4 Crop Lifecycle Module
+
+## Features
+
+* Crop cycle creation
+* Crop stage tracking
+* Season management
+* Crop history
+
+## Crop Stages
+
+* Land Preparation
+* Sowing
+* Irrigation
+* Fertilization
+* Pest Control
+* Harvest
+
+---
+
+# 6.5 Activity Tracking Module
+
+## Features
+
+* Daily farm activities
+* Geo-tagging
+* Image uploads
+* Timeline history
+* Comments & notes
+
+## Activity Types
+
+* Sowing
+* Watering
+* Fertilizer
+* Pesticide
+* Irrigation
+* Inspection
+
+## APIs
+
+```http
+POST /activities
+GET /activities
+```
+
+---
+
+# 6.6 Weather Module
+
+## Features
+
+* Current weather
+* Forecasts
+* Rain alerts
+* Temperature tracking
+
+---
+
+# 6.7 Harvest Module
+
+## Features
+
+* Harvest entry
+* Quantity tracking
+* Batch generation
+* Yield analytics
+
+## APIs
+
+```http
+POST /harvests
+POST /batches
+```
+
+---
+
+# 6.8 Inventory Module
+
+## Features
+
+* Warehouse stock
+* Goods receipt note
+* Batch tracking
+* Packaging management
+* Dispatch management
+
+---
+
+# 6.9 QR Traceability Module
+
+## Features
+
+* QR generation
+* QR scanning
+* Product timeline
+* Public traceability page
+
+## Consumer Traceability View
+
+* Farmer details
+* Farm location
+* Crop history
+* Harvest details
+* Packaging details
+* Processing timeline
+
+## APIs
+
+```http
+POST /qr/generate
+GET /trace/:qrCode
+```
+
+---
+
+# 6.10 Notifications Module
+
+## Features
+
+* Push notifications
+* Weather alerts
+* Activity reminders
+* Sync alerts
+
+---
+
+# 6.11 Reports & Analytics
+
+## Features
+
+* Yield analytics
+* Harvest reports
+* Inventory reports
+* Farmer productivity reports
+* Operational KPIs
+
+---
+
+# 7. End-to-End Product Flow
+
+# Step 1 — Farmer Registration
+
+* Agent logs in
+* Farmer registered
+* Documents uploaded
+
+---
+
+# Step 2 — Farm Mapping
+
+* GPS captured
+* Farm polygon drawn
+* Area calculated
+
+---
+
+# Step 3 — Crop Cycle Creation
+
+* Crop selected
+* Season selected
+* Crop cycle created
+
+---
+
+# Step 4 — Activity Tracking
+
+* Activities logged
+* Images uploaded
+* Geo-tags stored
+
+---
+
+# Step 5 — Harvest Recording
+
+* Harvest quantity added
+* Batch created
+* Inventory updated
+
+---
+
+# Step 6 — QR Generation
+
+* QR linked to batch
+* Traceability record created
+
+---
+
+# Step 7 — Consumer Traceability
+
+* QR scanned
+* Full timeline displayed
+
+---
+
+# 8. Mobile App UX Flow
+
+```text
+Splash
+↓
+Language Selection
+↓
+OTP Login
+↓
+Dashboard
+↓
+Farmer Management
+↓
+Farm Mapping
+↓
+Crop Tracking
+↓
+Activities
+↓
+Harvest
+↓
+QR Generation
+↓
+Offline Sync
+```
+
+---
+
+# 9. Web Dashboard UX Flow
+
+```text
+Login
+↓
+Analytics Dashboard
+↓
+Farmer Monitoring
+↓
+Farm Monitoring
+↓
+Crop Monitoring
+↓
+Harvest Tracking
+↓
+Inventory Management
+↓
+QR Traceability
+↓
+Reports
+```
+
+---
+
+# 10. Mobile App Screens
+
+## Authentication
+
+* Splash Screen
+* Login Screen
+* OTP Verification
+* Language Selection
+
+---
+
+## Dashboard
+
+* Farmer Dashboard
+* Agent Dashboard
+* Notifications
+
+---
+
+## Farmer Management
+
+* Farmer List
+* Add Farmer
+* Farmer Details
+* KYC Upload
+
+---
+
+## Farm Management
+
+* Farm List
+* Add Farm
+* GPS Mapping
+* Polygon Drawing
+
+---
+
+## Crop Management
+
+* Crop Cycle List
+* Crop Details
+* Activity Timeline
+* Add Activity
+
+---
+
+## Harvest
+
+* Harvest Entry
+* Batch Creation
+
+---
+
+## QR
+
+* QR Generator
+* QR Scanner
+* Traceability Timeline
+
+---
+
+## Offline
+
+* Offline Queue
+* Sync Status
+
+---
+
+# 11. Web Dashboard Screens
+
+## Dashboard
+
+* KPI Dashboard
+* Analytics Dashboard
+* Activity Feed
+
+---
+
+## Farmer Management
+
+* Farmer List
+* Farmer Analytics
+* Activity Timeline
+
+---
+
+## Farm Monitoring
+
+* Geo Map View
+* Heatmaps
+* Regional Monitoring
+
+---
+
+## Inventory
+
+* Warehouse Dashboard
+* Inventory Table
+* Batch Tracking
+
+---
+
+## Reports
+
+* Yield Reports
+* Harvest Reports
+* Inventory Reports
+
+---
+
+## Traceability
+
+* QR Explorer
+* Batch Timeline
+* Consumer Preview
+
+---
+
+# 12. Technology Stack
+
+# 📱 Mobile
+
+| Purpose    | Technology        |
+| ---------- | ----------------- |
+| Framework  | React Native Expo |
+| Language   | TypeScript        |
+| Styling    | NativeWind        |
+| State      | Zustand           |
+| API        | TanStack Query    |
+| Offline DB | Expo SQLite       |
+| Storage    | MMKV              |
+| Maps       | OpenStreetMap     |
+
+---
+
+# 💻 Web
+
+| Purpose    | Technology     |
+| ---------- | -------------- |
+| Framework  | Next.js 15     |
+| Styling    | Tailwind CSS   |
+| Components | shadcn/ui      |
+| Charts     | Recharts       |
+| Tables     | TanStack Table |
+
+---
+
+# ⚙️ Backend
+
+| Purpose    | Technology |
+| ---------- | ---------- |
+| Runtime    | Node.js    |
+| Framework  | NestJS     |
+| Database   | MongoDB    |
+| ODM        | Mongoose   |
+| Cache      | Redis      |
+| Validation | Zod        |
+
+---
+
+# ☁️ DevOps
+
+| Purpose       | Technology     |
+| ------------- | -------------- |
+| Containers    | Docker         |
+| Reverse Proxy | Nginx          |
+| CI/CD         | GitHub Actions |
+
+---
+
+# 13. Database Collections
+
+## users
+
+## farmers
+
+## agents
+
+## farms
+
+## cropCycles
+
+## activities
+
+## harvests
+
+## batches
+
+## inventory
+
+## qrCodes
+
+## notifications
+
+## auditLogs
+
+---
+
+# 14. Offline-First Strategy
+
+## Requirements
+
+* App must work without internet
+* Local data persistence
+* Background synchronization
+* Retry queue
+* Conflict handling
+
+## Local Storage
+
+* SQLite
+* MMKV
+
+---
+
+# 15. Security Requirements
+
+## Mobile Security
+
+* Secure token storage
+* Device validation
+* Offline encryption
+
+## Backend Security
+
+* JWT authentication
+* RBAC
+* Rate limiting
+* Audit logs
+
+---
+
+# 16. Nesso Brand Design System
+
+# Brand Colors
+
+```css
+:root {
+  --bg-color: #071410;
+  --primary-color: #147A44;
+  --accent-color: #F9D616;
+  --text-color: #F8F8F0;
+
+  --primary-glow: rgba(20, 122, 68, 0.4);
+  --accent-glow: rgba(249, 214, 22, 0.3);
+
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(20, 122, 68, 0.15);
+}
+```
+
+---
+
+# Typography
+
+| Purpose  | Font       |
+| -------- | ---------- |
+| Headings | Montserrat |
+| Body     | Inter      |
+
+---
+
+# UI Style
+
+* Modern agri-tech
+* Glassmorphism
+* Analytics dashboards
+* Floating cards
+* Smooth animations
+* Rounded components
+* Dark enterprise theme
+
+---
+
+# 17. Non-Functional Requirements
+
+## Performance
+
+* App launch < 3 sec
+* API response < 500ms
+* QR load < 2 sec
+
+## Scalability
+
+* 100K+ farmers
+* 1M+ activity records
+
+## Reliability
+
+* Offline support
+* Retry mechanisms
+* Data consistency
+
+---
+
+# 18. Future AI Roadmap
+
+## Planned AI Features
+
+* Disease detection
+* Yield prediction
+* Smart fertilizer suggestions
+* AI chatbot
+* Voice assistant
+* Weather intelligence
+
+## AI Stack
+
+* Ollama
+* Qwen
+* YOLOv8
+* PaddleOCR
+
+---
+
+# 19. Deployment Architecture
+
+```text
+React Native Expo App
+        ↓
+Offline SQLite Layer
+        ↓
+NestJS Backend APIs
+        ↓
+MongoDB + Redis
+        ↓
+Next.js Dashboard
+        ↓
+QR Traceability Portal
+```
+
+---
+
+# 20. Future Enterprise Expansion
+
+## Future Features
+
+* Blockchain traceability
+* IoT sensor integration
+* ERP integrations
+* Multi-tenant SaaS
+* Export compliance
+
+---
+
+# 21. Success Metrics
+
+## Product Metrics
+
+* Active farmers
+* Daily activities
+* QR scans
+* Harvest records
+
+## Technical Metrics
+
+* Sync success rate
+* API latency
+* Crash-free sessions
+
+---
+
+# 22. Final Summary
+
+Nesso is a modern offline-first Farm-to-Fork Traceability Platform designed for Android, iOS, and Web that enables transparent agricultural operations, real-time supply chain visibility, and QR-powered consumer traceability using scalable open-source technologies.
