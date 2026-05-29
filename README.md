@@ -208,6 +208,8 @@ nesso/
 > **First-time setup?** → Read [**SETUP.md**](SETUP.md) for the full list of tools, accounts, and phone configuration you'll need (Node, Docker, Android Studio, Firebase, Expo Go, etc.).
 >
 > **Ready to build?** → Read [**EXECUTION.md**](EXECUTION.md) — the phase-by-phase step-by-step checklist with literal commands. Tick boxes as you go.
+>
+> **Already running it?** → Read [**CONFIG.md**](CONFIG.md) — every URL, port, credential, connection string, and sample API call for the running local stack.
 
 > Implementation has **not** started yet. The full plan is approved, then we kick off Phase 0.
 > Until then, the commands below are the *intended* developer experience.

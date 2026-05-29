@@ -1,7 +1,16 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-// Auth-gated routes (anything that needs a session). Everything else is public.
-const PROTECTED_PREFIXES = ['/dashboard'];
+// Auth-gated routes — everything inside the (dashboard) route group.
+// Everything else (/, /login, /forgot) is public.
+const PROTECTED_PREFIXES = [
+  '/dashboard',
+  '/farmers',
+  '/farms',
+  '/approvals',
+  '/activities',
+  '/reports',
+  '/settings',
+];
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
