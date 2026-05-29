@@ -226,8 +226,10 @@ Stop the conflicting service, or override ports in `docker-compose.override.yml`
 ## 10 · Quick links
 
 - Main project README → [`README.md`](README.md)
+- **Execution checklist (start here once setup is done)** → [`EXECUTION.md`](EXECUTION.md)
 - Full build plan → [`docs/plan/README.md`](docs/plan/README.md)
 - Phase 0 checklist → [`docs/plan/11-implementation-phases.md`](docs/plan/11-implementation-phases.md)
+- Design handoff → [`docs/ui-ux-design-prototypes-flow/farmer-app-ui-ux-flow/design_handoff_nesso/`](docs/ui-ux-design-prototypes-flow/farmer-app-ui-ux-flow/design_handoff_nesso/)
 
 <br />
 

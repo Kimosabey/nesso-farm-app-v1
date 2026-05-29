@@ -1,0 +1,36 @@
+{
+  "app": {
+    "name": "Nesso",
+    "tagline": "Farm-to-fork traceability"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "approve": "Approve",
+    "reject": "Reject",
+    "submit": "Submit",
+    "next": "Next",
+    "back": "Back",
+    "retry": "Retry",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "sync": "Sync now"
+  },
+  "status": {
+    "loading": "Loading…",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "error": "Something went wrong",
+    "offline": "Offline",
+    "online": "Online",
+    "syncing": "Syncing…",
+    "synced": "Synced"
+  },
+  "empty": {
+    "title": "Nothing here yet",
+    "description": "When data arrives, you'll see it here."
+  }
+}

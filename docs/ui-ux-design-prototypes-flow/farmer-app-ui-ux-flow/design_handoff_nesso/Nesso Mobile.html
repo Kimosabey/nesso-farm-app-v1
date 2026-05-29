@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nesso · Mobile Hero Screens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: radial-gradient(120% 90% at 50% 0%, #eef3f0 0%, #dfe7e3 70%, #d3ddd8 100%);
+  min-height: 100%; display: flex; flex-direction: column; align-items: center;
+  padding: 40px 16px 64px; -webkit-font-smoothing: antialiased;
+}
+.mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+.display { font-family: 'Montserrat', sans-serif; }
+input { font-family: 'Inter', sans-serif; }
+
+/* ---- theme tokens scoped to the app ---- */
+.nesso-app[data-theme="light"] {
+  --primary:#0D783C; --primary-2:#207647; --primary-50:#EAF6EE; --primary-300:#5DB683;
+  --accent:#F1D412; --secondary:#518E6D; --secondary-d:#3C6B51; --secondary-bg:#EAF3EE;
+  --on-primary:#FFFFFF;
+  --bg:#FAFDFA; --bg-elevated:#FFFFFF; --bg-muted:#F1F5F2;
+  --fg:#0F1A14; --fg-muted:#4A5A52; --fg-subtle:#7A8A82;
+  --border:#DDE6E0; --border-strong:#C2D0C8; --ring:#0D783C; --glow:rgba(13,120,60,0.45);
+  --glass-bg:rgba(255,255,255,0.74); --glass-border:rgba(13,120,60,0.12);
+  --warning:#9A8407; --warning-bg:#FBF5D6; --danger:#B42318; --danger-bg:#FBEAE8;
+  --shadow-sm:0 2px 8px rgba(13,40,22,0.06); --shadow-md:0 10px 26px -8px rgba(13,40,22,0.16);
+}
+.nesso-app[data-theme="dark"] {
+  --primary:#5DB683; --primary-2:#2E8A57; --primary-50:#14271C; --primary-300:#5DB683;
+  --accent:#F8E353; --secondary:#7FB496; --secondary-d:#9BCBAD; --secondary-bg:#18271F;
+  --on-primary:#06140C;
+  --bg:#0A1410; --bg-elevated:#101C16; --bg-muted:#162720;
+  --fg:#FAFDFA; --fg-muted:#A8B7AE; --fg-subtle:#7A8A82;
+  --border:#1F2D26; --border-strong:#324339; --ring:#5DB683; --glow:rgba(93,182,131,0.4);
+  --glass-bg:rgba(16,28,22,0.62); --glass-border:rgba(93,182,131,0.18);
+  --warning:#F8E353; --warning-bg:#2A2810; --danger:#FF6B5B; --danger-bg:#2C1714;
+  --shadow-sm:0 2px 8px rgba(0,0,0,0.5); --shadow-md:0 10px 26px -8px rgba(0,0,0,0.6);
+}
+.nesso-app, .nesso-app * { transition-property: background, color, border-color, box-shadow; transition-duration: .4s; }
+.nesso-app input { transition: box-shadow .18s; }
+
+/* ---- animations ---- */
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes toastIn { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+.fab-pulse { animation: fabPulse 2.4s ease-in-out infinite; }
+@keyframes fabPulse {
+  0%,100% { box-shadow: 0 10px 26px -6px var(--glow), 0 0 0 0 rgba(13,120,60,0.32); }
+  50% { box-shadow: 0 10px 26px -6px var(--glow), 0 0 0 10px rgba(13,120,60,0); }
+}
+.bloom .petal { transform-box: fill-box; transform-origin: center; animation: petalIn .55s cubic-bezier(0.32,0.72,0,1) both; }
+.bloom .p1 { animation-delay: .10s; } .bloom .p2 { animation-delay: .20s; }
+.bloom .p3 { animation-delay: .30s; } .bloom .p4 { animation-delay: .40s; } .bloom .p5 { animation-delay: .48s; }
+.bloom .drop { transform-box: fill-box; transform-origin: top center; animation: dropIn .6s cubic-bezier(0.32,0.72,0,1) .55s both; }
+@keyframes petalIn { from { transform: scale(0.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes dropIn { from { transform: scaleY(0); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }
+.splash-word { animation: rise .6s cubic-bezier(0.32,0.72,0,1) .7s both; }
+.splash-word2 { animation: rise .6s cubic-bezier(0.32,0.72,0,1) .9s both; }
+@keyframes rise { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* polygon vertex pop */
+.vert-pop { animation: vertPop .26s cubic-bezier(0.32,0.72,0,1) both; }
+@keyframes vertPop { from { transform: translate(-50%,-50%) scale(0.2); opacity: 0; } to { transform: translate(-50%,-50%) scale(1); opacity: 1; } }
+/* scanner */
+.scan-line { animation: scanY 2.2s ease-in-out infinite; }
+@keyframes scanY { 0%,100% { top: 16px; } 50% { top: 216px; } }
+.scan-ok { animation: scanPulse .5s ease-out; }
+@keyframes scanPulse { 0% { transform: scale(1); } 40% { transform: scale(1.06); } 100% { transform: scale(1); } }
+/* pushed screen slide-in */
+.push-enter { animation: pushIn .34s cubic-bezier(0.32,0.72,0,1) both; }
+@keyframes pushIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+/* ---- presentation chrome ---- */
+.caption { margin-top: 26px; text-align: center; color: #4a5a52; max-width: 420px; }
+.caption .t { font-family: 'Montserrat'; font-weight: 700; font-size: 15px; color: #1c2a22; letter-spacing: -0.01em; }
+.caption .s { font-size: 13px; margin-top: 6px; line-height: 1.5; }
+.restart { margin-top: 14px; display: inline-flex; align-items: center; gap: 7px; background: rgba(255,255,255,0.7);
+  border: 1px solid rgba(13,120,60,0.18); color: #0D783C; font-weight: 600; font-size: 13px; font-family: 'Inter';
+  padding: 8px 16px; border-radius: 999px; cursor: pointer; }
+.restart:hover { background: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
+
+/* scrollbars inside phone */
+.nesso-app ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="app/ui.jsx"></script>
+<script type="text/babel" src="app/screens_auth.jsx"></script>
+<script type="text/babel" src="app/screens_main.jsx"></script>
+<script type="text/babel" src="app/screens_create.jsx"></script>
+<script type="text/babel" src="app/screens_create2.jsx"></script>
+<script type="text/babel" src="app/screens_settings.jsx"></script>
+<script type="text/babel" src="app/screens_feature.jsx"></script>
+<script type="text/babel" src="app/screens_detail.jsx"></script>
+<script type="text/babel" src="app/screens_quality.jsx"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useLayoutEffect } = React;
+const LS = { get: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }, set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+
+/* scales the fixed 392×850 phone to fit any viewport */
+function useFitScale(designW, designH, chrome) {
+  const [scale, setScale] = useState(1);
+  useLayoutEffect(() => {
+    const fit = () => {
+      const availW = window.innerWidth - 28;
+      const availH = window.innerHeight - chrome;
+      setScale(Math.min(1, availW / designW, availH / designH));
+    };
+    fit();
+    window.addEventListener('resize', fit);
+    return () => window.removeEventListener('resize', fit);
+  }, []);
+  return scale;
+}
+
+function App() {
+  const [theme, setTheme] = useState(() => LS.get('nesso.theme', 'light'));
+  const [screen, setScreen] = useState(() => LS.get('nesso.screen', 'splash'));
+  const [tab, setTab] = useState(() => LS.get('nesso.tab', 'dashboard'));
+  const [phone, setPhone] = useState('');
+  const [sheet, setSheet] = useState(false);
+  const [pushed, setPushed] = useState(() => LS.get('nesso.pushed', null));
+  const [platform, setPlatform] = useState(() => LS.get('nesso.platform', 'ios'));
+  const [toast, setToast] = useState(null);
+  const scale = useFitScale(392, 850, 184);
+
+  useEffect(() => LS.set('nesso.theme', theme), [theme]);
+  useEffect(() => LS.set('nesso.screen', screen), [screen]);
+  useEffect(() => LS.set('nesso.tab', tab), [tab]);
+  useEffect(() => LS.set('nesso.pushed', pushed), [pushed]);
+  useEffect(() => LS.set('nesso.platform', platform), [platform]);
+
+  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
+  const fire = (msg, kind = 'success') => setToast({ msg, kind, key: Date.now() });
+  const onAction = (a) => { if (a === 'toast') fire('Opening — coming in the next batch', 'sync'); else setPushed(a); };
+
+  const statusTone = (screen === 'splash' || pushed === 'addFarm' || pushed === 'grn') ? 'light' : (theme === 'dark' ? 'light' : 'dark');
+
+  let body;
+  if (screen === 'splash') body = <SplashScreen onDone={() => setScreen('login')} />;
+  else if (screen === 'login') body = <LoginScreen theme={theme} onToggleTheme={toggleTheme} onNext={(p) => { setPhone(p); setScreen('otp'); }} />;
+  else if (screen === 'otp') body = <OtpScreen phone={phone} theme={theme} onBack={() => setScreen('login')} onVerify={() => setScreen('app')} />;
+  else {
+    const tabBody = tab === 'dashboard' ? <Dashboard theme={theme} onToggleTheme={toggleTheme} onAction={onAction} />
+      : tab === 'farmers' ? <FarmersScreen theme={theme} onOpen={() => setPushed('farmerProfile')} />
+      : tab === 'verify' ? <VerifyScreen onToast={fire} onOpen={() => setPushed('farmerProfile')} />
+      : <FarmsScreen onOpen={() => setPushed('farmDetails')} />;
+    const pushClose = () => setPushed(null);
+    const goNav = (id) => setPushed(id);
+    const P = { onBack: pushClose, onNav: goNav, onToast: fire };
+    body = (
+      <>
+        {tabBody}
+        <TabBar active={tab} onChange={setTab} onFab={() => setSheet(true)} fabPulse={true} />
+        <RegisterSheet open={sheet} onClose={() => setSheet(false)} onToast={fire} onContinue={() => setPushed('register')} />
+        {pushed && (
+          <div className="push-enter" style={{ position: 'absolute', inset: 0, zIndex: 56 }}>
+            {pushed === 'register' && <RegisterFarmerScreen {...P} />}
+            {pushed === 'addFarm' && <AddFarmScreen {...P} />}
+            {pushed === 'addActivity' && <AddActivityScreen {...P} />}
+            {pushed === 'grn' && <AcceptGrnScreen {...P} />}
+            {pushed === 'settings' && <SettingsScreen {...P} onLogout={() => { setPushed(null); setSheet(false); setScreen('login'); fire('Logged out', 'sync'); }} />}
+            {pushed === 'language' && <LanguageScreen {...P} />}
+            {pushed === 'theme' && <ThemeScreen {...P} theme={theme} setTheme={setTheme} />}
+            {pushed === 'sync' && <SyncHealthScreen {...P} />}
+            {pushed === 'notifications' && <NotificationsScreen {...P} />}
+            {pushed === 'about' && <AboutScreen {...P} />}
+            {pushed === 'weather' && <WeatherScreen {...P} />}
+            {pushed === 'harvest' && <HarvestBoardScreen {...P} />}
+            {pushed === 'activities' && <ActivitiesListScreen {...P} />}
+            {pushed === 'preharvest' && <PreHarvestScreen {...P} />}
+            {pushed === 'addCrop' && <AddCropScreen {...P} />}
+            {pushed === 'farmerProfile' && <FarmerProfileScreen {...P} />}
+            {pushed === 'farmDetails' && <FarmDetailsScreen {...P} />}
+            {pushed === 'postharvest' && <PostHarvestScreen {...P} />}
+            {pushed === 'batches' && <BatchesScreen {...P} />}
+            {pushed === 'inventory' && <InventoryScreen {...P} />}
+            {pushed === 'procurement' && <ProcurementScreen {...P} />}
+            {pushed === 'samples' && <SampleBoardScreen {...P} />}
+            {pushed === 'audit' && <AuditScreen {...P} />}
+            {pushed === 'location' && <LocationScreen {...P} />}
+            {pushed === 'offlineMap' && <OfflineMapScreen {...P} />}
+          </div>
+        )}
+        {toast && <Toast msg={toast.msg} kind={toast.kind} onDone={() => setToast(null)} key={toast.key} />}
+      </>
+    );
+  }
+
+  const captions = {
+    splash: ['Splash · animated logomark', 'The clover blooms petal-by-petal, the golden essence-drop swells. Tap to skip →'],
+    login: ['Login · phone-first', '+91 prefix, 10-digit validation, sticky thumb-zone CTA. Try the 🌙 to audit dark.'],
+    otp: ['OTP · 6-digit verify', 'Segmented input, paste-friendly, 30s resend cooldown. Type any digits, then Verify.'],
+    app: ['Dashboard & tabs · 8 hero screens', 'Tap a Quick action (Register / Add farm / Activity / Scan GRN) or the green +. Switch tabs below. 🌙 toggles dark.'],
+  };
+  const cap = captions[screen === 'app' ? 'app' : screen];
+
+  return (
+    <>
+      <div style={{ height: 850 * scale, display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
+        <div style={{ transform: `scale(${scale})`, transformOrigin: 'top center' }}>
+          <PhoneShell theme={theme} statusTone={statusTone} platform={platform}>{body}</PhoneShell>
+        </div>
+      </div>
+      <div className="caption">
+        <div className="t">{cap[0]}</div>
+        <div className="s">{cap[1]}</div>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 14, flexWrap: 'wrap' }}>
+          <div style={{ display: 'inline-flex', background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(13,120,60,0.18)', borderRadius: 999, padding: 3 }}>
+            {['ios', 'android'].map(p => (
+              <button key={p} onClick={() => setPlatform(p)} style={{ border: 'none', cursor: 'pointer', borderRadius: 999, padding: '6px 14px', fontFamily: 'Inter', fontSize: 12.5, fontWeight: 600,
+                background: platform === p ? '#0D783C' : 'transparent', color: platform === p ? '#fff' : '#4a5a52' }}>{p === 'ios' ? 'iOS' : 'Android'}</button>
+            ))}
+          </div>
+          <button className="restart" style={{ marginTop: 0 }} onClick={() => { setScreen('splash'); setTab('dashboard'); setPushed(null); setSheet(false); }}>↺ Restart flow</button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

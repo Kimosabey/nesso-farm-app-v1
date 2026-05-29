@@ -1,0 +1,106 @@
+/* =========================================================
+ * @nesso/design-system · theme.css
+ * Theme CSS variables — imported once at the app root.
+ * Values are RGB triplets (R G B) so Tailwind <alpha-value>
+ * substitution works in the preset.
+ * Source of truth: ../tokens.json
+ * Audited contrast: docs/plan/13-ux-accessibility.md §3.4
+ * ========================================================= */
+
+:root,
+[data-theme='light'] {
+  /* Surfaces */
+  --bg: 244 248 245; /* #F4F8F5 — Porcelain-warm */
+  --bg-elevated: 255 255 255; /* #FFFFFF */
+  --bg-muted: 238 243 240; /* #EEF3F0 */
+
+  /* Foregrounds */
+  --fg: 15 26 20; /* #0F1A14 */
+  --fg-muted: 74 90 82; /* #4A5A52 */
+  --fg-subtle: 122 138 130; /* #7A8A82 */
+
+  /* Borders */
+  --border: 226 234 229; /* #E2EAE5 */
+  --border-strong: 201 214 206; /* #C9D6CE */
+
+  /* Focus */
+  --ring: 13 120 60; /* #0D783C */
+
+  /* Status */
+  --success: 13 120 60; /* #0D783C */
+  --warning: 154 132 7; /* #9A8407 */
+  --danger: 180 35 24; /* #B42318 */
+  --info: 14 116 144; /* #0E7490 */
+
+  /* Glass */
+  --glass-bg: 255 255 255;
+  --glass-bg-alpha: 0.72;
+  --glass-border: 13 120 60;
+  --glass-border-alpha: 0.12;
+}
+
+[data-theme='dark'] {
+  /* Surfaces */
+  --bg: 8 15 11; /* #080F0B — web default */
+  --bg-elevated: 15 26 20; /* #0F1A14 */
+  --bg-muted: 21 34 25; /* #152219 */
+
+  /* Foregrounds */
+  --fg: 250 253 250; /* #FAFDFA */
+  --fg-muted: 168 183 174; /* #A8B7AE */
+  --fg-subtle: 115 131 122; /* #73837A */
+
+  /* Borders */
+  --border: 30 44 36; /* #1E2C24 */
+  --border-strong: 50 67 58; /* #32433A */
+
+  /* Focus */
+  --ring: 93 182 131; /* #5DB683 */
+
+  /* Status */
+  --success: 93 182 131; /* #5DB683 */
+  --warning: 248 227 83; /* #F8E353 */
+  --danger: 255 107 91; /* #FF6B5B */
+  --info: 103 232 249; /* #67E8F9 */
+
+  /* Glass */
+  --glass-bg: 16 28 22;
+  --glass-bg-alpha: 0.55;
+  --glass-border: 93 182 131;
+  --glass-border-alpha: 0.22;
+}
+
+/* Honor OS preference when no explicit theme attribute set */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --bg: 8 15 11;
+    --bg-elevated: 15 26 20;
+    --bg-muted: 21 34 25;
+    --fg: 250 253 250;
+    --fg-muted: 168 183 174;
+    --fg-subtle: 115 131 122;
+    --border: 30 44 36;
+    --border-strong: 50 67 58;
+    --ring: 93 182 131;
+    --success: 93 182 131;
+    --warning: 248 227 83;
+    --danger: 255 107 91;
+    --info: 103 232 249;
+    --glass-bg: 16 28 22;
+    --glass-bg-alpha: 0.55;
+    --glass-border: 93 182 131;
+    --glass-border-alpha: 0.22;
+  }
+}
+
+/* Reduced-motion override — collapse non-essential animation */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

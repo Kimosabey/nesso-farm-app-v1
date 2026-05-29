@@ -1,0 +1,13 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# pnpm 10+ requires explicit approval of postinstall build scripts.
+# We allow the legit native-binding builds and deny telemetry.
+allowBuilds:
+  '@nestjs/core': true # NestJS bootstrap
+  '@scarf/scarf': false # telemetry — denied
+  bcrypt: true               # native crypto binding
+  esbuild: true # Next.js dev server / Vitest native binary
+  sharp: true # Next.js image optimization native binary
+  unrs-resolver: true # Turbo / Next.js resolver native binary

@@ -1,0 +1,17 @@
+{
+  "name": "@nesso/i18n",
+  "version": "0.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./resources/*": "./resources/*"
+  },
+  "files": ["src", "resources"],
+  "scripts": {
+    "lint": "echo \"i18n: lint passthrough\"",
+    "typecheck": "echo \"i18n: typecheck passthrough\"",
+    "test": "echo \"i18n: test passthrough\""
+  }
+}

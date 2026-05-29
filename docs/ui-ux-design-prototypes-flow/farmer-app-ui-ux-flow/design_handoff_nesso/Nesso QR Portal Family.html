@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nesso · Public Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root[data-theme="light"]{--primary:#0D783C;--primary-2:#207647;--primary-50:#EAF6EE;--primary-300:#5DB683;--accent:#F1D412;--secondary:#518E6D;--secondary-d:#3C6B51;--secondary-bg:#EAF3EE;--bg:#F4F8F5;--bg-elevated:#FFFFFF;--bg-muted:#EEF3F0;--fg:#0F1A14;--fg-muted:#4A5A52;--fg-subtle:#7A8A82;--border:#E2EAE5;--border-strong:#C9D6CE;--ring:#0D783C;--shadow-sm:0 1px 3px rgba(13,40,22,.05);--shadow-md:0 10px 30px -10px rgba(13,40,22,.16);--shadow-lg:0 28px 60px -16px rgba(13,40,22,.24);--stripe:rgba(13,120,60,.12)}
+:root[data-theme="dark"]{--primary:#5DB683;--primary-2:#2E8A57;--primary-50:#16271D;--primary-300:#5DB683;--accent:#F8E353;--secondary:#7FB496;--secondary-d:#9BCBAD;--secondary-bg:#18271F;--bg:#080F0B;--bg-elevated:#0F1A14;--bg-muted:#152219;--fg:#FAFDFA;--fg-muted:#A8B7AE;--fg-subtle:#73837A;--border:#1E2C24;--border-strong:#32433A;--ring:#5DB683;--shadow-sm:0 1px 3px rgba(0,0,0,.4);--shadow-md:0 10px 30px -10px rgba(0,0,0,.6);--shadow-lg:0 28px 60px -16px rgba(0,0,0,.7);--stripe:rgba(93,182,131,.14)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.6}
+#page{background:var(--bg);color:var(--fg);min-height:100vh;transition:background .4s,color .4s}
+.mono{font-family:'JetBrains Mono',monospace}
+.display{font-family:'Montserrat',sans-serif;letter-spacing:-.02em}
+h1,h2,h3{font-family:'Montserrat',sans-serif;letter-spacing:-.02em;line-height:1.12}
+a{color:inherit;text-decoration:none}
+img{display:block}
+.bar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;padding:14px clamp(16px,4vw,40px);background:color-mix(in oklab,var(--bg) 80%,transparent);backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);border-bottom:1px solid var(--border)}
+.bar .logo{width:32px;height:32px;border-radius:9px;background:#fff;display:grid;place-items:center;box-shadow:var(--shadow-sm)}
+.bar .logo img{width:22px;height:22px}
+.bar .nm{font-family:'Montserrat';font-weight:700;font-size:15px;letter-spacing:.04em}
+.bar nav{margin-left:auto;display:flex;gap:6px;align-items:center}
+.bar nav a{font-size:13.5px;font-weight:600;color:var(--fg-muted);padding:8px 13px;border-radius:9px;cursor:pointer}
+.bar nav a:hover{background:var(--bg-muted);color:var(--fg)}
+.bar nav a.on{color:var(--primary);background:var(--primary-50)}
+.icon-btn{width:38px;height:38px;border-radius:11px;background:var(--bg-elevated);border:1px solid var(--border);cursor:pointer;color:var(--fg);display:grid;place-items:center}
+.icon-btn:focus-visible,a:focus-visible,button:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
+.wrap{max-width:880px;margin:0 auto;padding:0 clamp(16px,4vw,24px) 80px}
+.shell{max-width:640px;margin:0 auto;padding:0 18px 80px}
+.reveal{opacity:1}
+.card{background:var(--bg-elevated);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow-sm);padding:20px}
+.sec-title{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--secondary-d);margin:36px 0 14px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:4px 11px;border-radius:999px;background:var(--secondary-bg);color:var(--secondary-d)}
+.btn{display:inline-flex;align-items:center;gap:9px;font-family:'Montserrat';font-weight:600;font-size:15px;border:none;padding:13px 24px;border-radius:13px;cursor:pointer;background:var(--primary);color:var(--bg-elevated);box-shadow:var(--shadow-md)}
+[data-theme=dark] .btn{color:#06140c}
+.btn.ghost{background:var(--bg-elevated);color:var(--fg);box-shadow:inset 0 0 0 1.5px var(--border-strong)}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 14px;margin-top:16px}
+.meta-grid .k{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--fg-subtle)}
+.meta-grid .v{font-size:15px;font-weight:600;color:var(--fg);margin-top:2px}
+.avatar{width:56px;height:56px;border-radius:50%;background:color-mix(in oklab,var(--primary) 16%,var(--bg-elevated));color:var(--primary);display:grid;place-items:center;font-family:'Montserrat';font-weight:700;font-size:20px;flex-shrink:0;box-shadow:inset 0 0 0 2px color-mix(in oklab,var(--primary) 26%,transparent)}
+.map{height:200px;border-radius:16px;overflow:hidden;position:relative;background:radial-gradient(120% 90% at 30% 20%,#3a5e3e,#21331f)}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+/* hero */
+.hero{position:relative;border-radius:26px;overflow:hidden;margin-top:8px;box-shadow:var(--shadow-lg);aspect-ratio:4/3.2}
+.hero-photo{position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.55) 100%),repeating-linear-gradient(125deg,var(--stripe) 0 2px,transparent 2px 13px),linear-gradient(160deg,var(--primary-300),var(--primary) 55%,#06401f)}
+.hero-content{position:absolute;left:0;right:0;bottom:0;padding:24px;color:#fff}
+.trace-chip{display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono';font-size:12px;font-weight:500;background:rgba(255,255,255,.18);padding:6px 12px;border-radius:999px;backdrop-filter:blur(6px);margin-bottom:12px}
+/* landing */
+.land-hero{text-align:center;padding:clamp(40px,8vw,90px) 0 40px;position:relative;overflow:hidden}
+.aurora{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.aurora::before,.aurora::after,.aurora i{content:'';position:absolute;border-radius:50%;filter:blur(70px)}
+.aurora::before{width:46vw;height:46vw;top:-14vw;left:-6vw;background:radial-gradient(circle,color-mix(in oklab,var(--primary) 46%,transparent),transparent 70%);opacity:.65;animation:a1 18s ease-in-out infinite alternate}
+.aurora::after{width:38vw;height:38vw;top:-8vw;right:-6vw;background:radial-gradient(circle,color-mix(in oklab,var(--accent) 34%,transparent),transparent 70%);opacity:.5;animation:a2 23s ease-in-out infinite alternate}
+.aurora i{width:40vw;height:40vw;bottom:-16vw;left:28vw;background:radial-gradient(circle,color-mix(in oklab,var(--secondary) 40%,transparent),transparent 70%);opacity:.45;animation:a3 27s ease-in-out infinite alternate}
+@keyframes a1{0%{transform:translate(0,0) scale(1)}100%{transform:translate(46px,34px) scale(1.12)}}
+@keyframes a2{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-40px,24px) scale(1.1)}}
+@keyframes a3{0%{transform:translate(0,0) scale(1)}100%{transform:translate(30px,-30px) scale(1.15)}}
+.scan-card{position:relative;z-index:1;max-width:420px;margin:36px auto 0;background:var(--bg-elevated);border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow-lg);padding:28px}
+.feat{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:50px}
+@media (max-width:680px){.feat{grid-template-columns:1fr}.meta-grid{grid-template-columns:1fr 1fr}}
+.feat .f{background:var(--bg-elevated);border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:var(--shadow-sm)}
+.feat .fi{width:46px;height:46px;border-radius:13px;background:var(--primary-50);color:var(--primary);display:grid;place-items:center;margin-bottom:14px}
+.prose{max-width:680px;margin:0 auto}
+.prose h2{font-size:clamp(24px,4vw,34px);margin:32px 0 12px}
+.prose h3{font-size:18px;margin:26px 0 8px;color:var(--fg)}
+.prose p{color:var(--fg-muted);margin-bottom:14px}
+.prose ul{color:var(--fg-muted);margin:0 0 14px 20px}
+.prose li{margin-bottom:7px}
+.codeblock{background:#0c1610;border-radius:14px;padding:20px;overflow-x:auto;border:1px solid #1e2c24}
+.codeblock pre{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7;color:#a8b7ae;white-space:pre}
+.codeblock .key{color:#5DB683}.codeblock .str{color:#F8E353}.codeblock .num{color:#67E8F9}
+.foot{border-top:1px solid var(--border);padding:32px clamp(16px,4vw,40px);text-align:center;color:var(--fg-subtle);font-size:12.5px}
+.foot a{color:var(--primary);font-weight:600}
+.tl{position:relative;padding-left:34px}
+.tl::before{content:'';position:absolute;left:11px;top:6px;bottom:6px;width:2px;background:var(--border)}
+.tl .tlfill{position:absolute;left:11px;top:6px;width:2px;background:linear-gradient(var(--primary),var(--primary-300));border-radius:2px;height:0;transition:height .15s linear;box-shadow:0 0 8px color-mix(in oklab,var(--primary) 50%,transparent)}
+.node{position:relative;padding-bottom:24px}.node:last-child{padding-bottom:0}
+.node .dot{position:absolute;left:-34px;top:0;width:24px;height:24px;border-radius:50%;background:var(--primary);display:grid;place-items:center}
+.node h4{font-size:15px;font-weight:600;color:var(--fg)}.node p{font-size:13px;color:var(--fg-muted);margin-top:2px}
+.node .when{font-family:'JetBrains Mono';font-size:11px;color:var(--fg-subtle);margin-top:3px}
+</style>
+</head>
+<body>
+<div id="page">
+<div class="bar">
+  <a class="logo" data-go="home"><img src="assets/nesso-logo.jpeg" alt="Nesso" /></a>
+  <span class="nm">NESSO</span>
+  <nav id="nav">
+    <a data-go="home">Home</a>
+    <a data-go="trace">Sample trace</a>
+    <a data-go="about">About</a>
+    <a data-go="privacy">Privacy</a>
+  </nav>
+  <button class="icon-btn" id="theme" aria-label="Toggle theme" style="margin-left:10px"></button>
+</div>
+
+<main id="app"></main>
+
+<div class="foot">
+  Nesso · NR Group — farm-to-fork traceability · <a data-go="about">About</a> · <a data-go="privacy">Privacy</a> · <a data-go="json">API</a><br/>
+  <span class="mono" style="opacity:.7">© 2026 · nesso.in</span>
+</div>
+</div>
+
+<script>
+const root=document.documentElement,app=document.getElementById('app'),tbtn=document.getElementById('theme');
+const moon='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>';
+const sun='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4V2M12 22v-2M5 5 3.6 3.6M20.4 20.4 19 19M4 12H2M22 12h-2M5 19l-1.4 1.4M20.4 3.6 19 5M12 16.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z"/></svg>';
+function setTheme(t){root.setAttribute('data-theme',t);tbtn.innerHTML=t==='dark'?sun:moon;try{localStorage.setItem('nesso-portal-theme',t)}catch(e){}}
+try{const s=localStorage.getItem('nesso-portal-theme');setTheme(s||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){setTheme('light')}
+tbtn.onclick=()=>setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark');
+
+const ic=(p)=>`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const I={shield:'<path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6l-7-3Z"/><path d="M9.5 12l1.8 1.8L15 10"/>',leaf:'<path d="M5 19c0-7 5-13 14-14 0 9-5 14-12 14a5 5 0 0 1-2-.5"/>',scan:'<path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M4 12h16"/>',pin:'<path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/>',check:'<path d="M20 6 9 17l-5-5"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',drop:'<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/>',box:'<path d="M12 3 4 7v10l8 4 8-4V7l-8-4ZM4 7l8 4 8-4M12 11v10"/>',arrow:'<path d="M5 12h14M12 5l7 7-7 7"/>',map:'<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2ZM9 4v14M15 6v14"/>'};
+
+function mapSVG(){return `<div class="map"><svg width="100%" height="100%" style="position:absolute;inset:0;opacity:.35"><defs><pattern id="fm" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(20)"><path d="M0 10H40M0 26H40" stroke="#5b8a5f" stroke-width="5" opacity=".5"/></pattern></defs><rect width="100%" height="100%" fill="url(#fm)"/></svg><svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%"><polygon points="34,26 60,18 70,44 54,62 30,52" fill="rgba(241,212,18,.18)" stroke="#F1D412" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg></div>`}
+
+const views={
+  home:()=>`
+    <div class="land-hero"><div class="aurora"><i></i></div>
+      <div style="position:relative;z-index:1" class="wrap">
+        <span class="pill reveal" style="margin-bottom:18px">${ic(I.shield)} Verified farm-to-fork</span>
+        <h1 class="reveal" style="font-size:clamp(34px,7vw,60px);font-weight:700;max-width:14ch;margin:0 auto">Know exactly where your flowers grew.</h1>
+        <p class="reveal" style="font-size:clamp(16px,2vw,19px);color:var(--fg-muted);max-width:54ch;margin:18px auto 0">Scan the QR on any Nesso-verified batch to trace it from the exact farm and farmer, through every field activity, to your hand.</p>
+        <div class="scan-card reveal">
+          <div style="width:120px;height:120px;margin:0 auto;background:#fff;border-radius:16px;padding:12px;box-shadow:var(--shadow-sm)"><svg viewBox="0 0 100 100" width="100%" height="100%" shape-rendering="crispEdges">${qr()}</svg></div>
+          <div style="font-size:14px;color:var(--fg-muted);margin:16px 0 14px">Have a Nesso label? Try a live trace:</div>
+          <button class="btn" data-go="trace" style="width:100%;justify-content:center">${ic(I.scan)} Open sample trace</button>
+        </div>
+        <div class="feat">
+          <div class="f reveal"><div class="fi">${ic(I.pin)}</div><h3 style="font-size:16px">Exact origin</h3><p style="font-size:13.5px;color:var(--fg-muted);margin-top:6px">GPS-mapped farm boundary and the farmer who grew it.</p></div>
+          <div class="f reveal"><div class="fi">${ic(I.leaf)}</div><h3 style="font-size:16px">Every activity</h3><p style="font-size:13.5px;color:var(--fg-muted);margin-top:6px">Field-logged spraying, irrigation and harvest — timestamped.</p></div>
+          <div class="f reveal"><div class="fi">${ic(I.shield)}</div><h3 style="font-size:16px">Tamper-evident</h3><p style="font-size:13.5px;color:var(--fg-muted);margin-top:6px">Recorded by field officers on the ground, not self-reported.</p></div>
+        </div>
+      </div>
+    </div>`,
+  trace:()=>`
+    <div class="shell">
+      <div class="hero reveal"><div class="hero-photo"></div><div class="hero-content"><span class="trace-chip">◇ TBR-0291 · verified</span><h1 style="font-size:clamp(32px,8vw,48px);font-weight:700">Tuberose</h1><div style="font-size:15px;opacity:.92;margin-top:6px">Grade A · harvested 28 May 2026 · Hassan</div></div></div>
+      <div class="card reveal" style="display:flex;align-items:center;gap:12px;margin-top:18px"><span style="width:44px;height:44px;border-radius:50%;background:linear-gradient(180deg,var(--primary),var(--primary-2));display:grid;place-items:center;color:#fff;flex-shrink:0">${ic(I.shield)}</span><div><b class="display" style="font-size:15px;color:var(--fg)">Verified by Nesso</b><div style="font-size:12.5px;color:var(--fg-muted)">Every stage logged from the field, timestamped.</div></div></div>
+      <div class="sec-title reveal">The journey</div>
+      <div class="card reveal"><div class="tl"><div class="tlfill" id="tlfill"></div>
+        <div class="node"><span class="dot">${ic(I.check).replace('22','13').replace('22','13')}</span><h4>Grown</h4><p>North Plot · Lakshmi Gowda</p><div class="when">12 Mar – 28 May 2026</div></div>
+        <div class="node"><span class="dot">${ic(I.check)}</span><h4>Harvested</h4><p>320 kg hand-picked at dawn</p><div class="when">28 May 2026 · 6:40 AM</div></div>
+        <div class="node"><span class="dot">${ic(I.check)}</span><h4>Quality checked</h4><p>Grade A · moisture 12%</p><div class="when">28 May 2026 · 11:10 AM</div></div>
+        <div class="node"><span class="dot">${ic(I.check)}</span><h4>Stored</h4><p>Hassan Cold Store · 4°C</p><div class="when">28 May 2026 · 2:15 PM</div></div>
+      </div></div>
+      <div class="sec-title reveal">Grown by</div>
+      <a class="card reveal" data-go="farmer" style="display:flex;align-items:center;gap:14px;cursor:pointer"><div class="avatar">LG</div><div style="flex:1"><h3 style="font-size:18px;font-weight:700">Lakshmi Gowda</h3><div style="font-size:13px;color:var(--fg-muted);margin-top:2px">Channarayapatna · Belur FPO</div><div style="margin-top:8px"><span class="pill">${ic(I.leaf).replace(/width="22" height="22"/,'width="14" height="14"')} View farmer profile →</span></div></div></a>
+      <div class="sec-title reveal">Where it grew</div>
+      <a class="card reveal" data-go="farm" style="cursor:pointer;display:block">${mapSVG()}<h3 style="font-size:18px;font-weight:700;margin-top:14px">North Plot →</h3><div class="meta-grid"><div><div class="k">Area</div><div class="v">1.2 ha</div></div><div><div class="k">Soil</div><div class="v">Red loam</div></div></div></a>
+      <div style="text-align:center;margin-top:32px"><button class="btn ghost" data-go="json">${ic(I.box).replace(/width="22" height="22"/,'width="17" height="17"')} View raw trace data</button></div>
+    </div>`,
+  farmer:()=>`
+    <div class="shell">
+      <a data-go="trace" style="display:inline-flex;align-items:center;gap:7px;color:var(--fg-muted);font-size:13.5px;font-weight:600;margin:18px 0 8px;cursor:pointer">${ic(I.arrow).replace('M5 12h14M12 5l7 7-7 7','M19 12H5M12 19l-7-7 7-7')} Back to trace</a>
+      <div class="card reveal" style="display:flex;align-items:center;gap:16px"><div class="avatar" style="width:72px;height:72px;font-size:26px">LG</div><div><h1 style="font-size:24px;font-weight:700">Lakshmi Gowda</h1><div style="font-size:14px;color:var(--fg-muted);margin-top:3px">Channarayapatna, Hassan · since 2026</div><div style="margin-top:10px"><span class="pill">${ic(I.leaf).replace(/width="22" height="22"/,'width="14" height="14"')} Belur FPO member</span></div></div></div>
+      <div class="sec-title reveal">About the farmer</div>
+      <div class="card reveal"><p style="color:var(--fg-muted);font-size:14.5px">A second-generation flower farmer practising organic-first cultivation across three plots. Personal contact details are privacy-redacted and shown only with consent.</p><div class="meta-grid"><div><div class="k">Experience</div><div class="v">14 years</div></div><div><div class="k">Practice</div><div class="v">Organic-first</div></div><div><div class="k">Farms</div><div class="v">3 plots · 4.2 ha</div></div><div><div class="k">Crops</div><div class="v">Tuberose, Jasmine</div></div></div></div>
+      <div class="sec-title reveal">Farms</div>
+      <div class="card reveal" style="display:flex;flex-direction:column;gap:12px">
+        ${['North Plot|Tuberose|1.2 ha','Roadside field|Jasmine|1.6 ha','Lower terrace|Marigold|1.4 ha'].map(f=>{const[n,c,a]=f.split('|');return `<a data-go="farm" style="display:flex;align-items:center;gap:13px;cursor:pointer"><span style="width:44px;height:44px;border-radius:12px;background:var(--primary-50);color:var(--primary);display:grid;place-items:center;flex-shrink:0">${ic(I.map).replace(/width="22" height="22"/,'width="20" height="20"')}</span><div style="flex:1"><div style="font-size:15px;font-weight:600">${n}</div><div style="font-size:12.5px;color:var(--fg-muted)">${c} · ${a}</div></div><span style="color:var(--fg-subtle)">→</span></a>`}).join('<div style="height:1px;background:var(--border)"></div>')}
+      </div>
+    </div>`,
+  farm:()=>`
+    <div class="shell">
+      <a data-go="trace" style="display:inline-flex;align-items:center;gap:7px;color:var(--fg-muted);font-size:13.5px;font-weight:600;margin:18px 0 8px;cursor:pointer">${ic(I.arrow).replace('M5 12h14M12 5l7 7-7 7','M19 12H5M12 19l-7-7 7-7')} Back to trace</a>
+      <div class="card reveal" style="padding:0;overflow:hidden">${mapSVG().replace('height:200px','height:260px')}<div style="padding:20px"><h1 style="font-size:22px;font-weight:700">North Plot</h1><div style="font-size:13px;color:var(--fg-muted);margin-top:2px">FARM-118 · Channarayapatna, Hassan</div><div class="meta-grid"><div><div class="k">Area</div><div class="v">1.2 ha</div></div><div><div class="k">Vertices</div><div class="v mono" style="font-size:14px">6</div></div><div><div class="k">Centroid</div><div class="v mono" style="font-size:13px">13.16°N, 75.86°E</div></div><div><div class="k">Irrigation</div><div class="v">Drip</div></div></div></div></div>
+      <div class="sec-title reveal">Practices on this farm</div>
+      <div class="card reveal"><div style="display:flex;gap:8px;flex-wrap:wrap">${['Neem oil','Vermicompost','Jeevamrutha','No synthetic pesticide','Drip irrigation'].map(p=>`<span class="pill">${p}</span>`).join('')}</div></div>
+      <div class="sec-title reveal">Current crops</div>
+      <div class="card reveal" style="display:flex;flex-direction:column;gap:12px">
+        ${['Tuberose|Single · sown 12 Mar|Flowering','Marigold|African · sown 02 Apr|Vegetative'].map(c=>{const[n,d,s]=c.split('|');return `<div style="display:flex;align-items:center;gap:13px"><span style="width:42px;height:42px;border-radius:12px;background:var(--primary-50);color:var(--primary);display:grid;place-items:center">${ic(I.leaf).replace(/width="22" height="22"/,'width="20" height="20"')}</span><div style="flex:1"><div style="font-size:15px;font-weight:600">${n}</div><div style="font-size:12.5px;color:var(--fg-muted)">${d}</div></div><span class="pill">${s}</span></div>`}).join('')}
+      </div>
+    </div>`,
+  about:()=>`<div class="wrap"><div class="prose" style="padding-top:40px">
+      <span class="pill reveal">About Nesso</span>
+      <h1 class="reveal" style="font-size:clamp(28px,5vw,42px);margin:16px 0 8px">Trust, grown in the open.</h1>
+      <p class="reveal" style="font-size:17px">Nesso is a farm-to-fork traceability platform for Indian horticulture, built by NR Group. Every flower batch carries a QR that opens this public record.</p>
+      <h2 class="reveal">Why it exists</h2>
+      <p class="reveal">Flower supply chains are opaque — buyers rarely know which farm produced their stock, how it was grown, or whether the farmer was paid fairly. Nesso makes the whole chain legible: from the GPS-mapped plot, through every field activity, to the warehouse and dispatch.</p>
+      <h2 class="reveal">How verification works</h2>
+      <ul class="reveal"><li>Field officers register farmers and map farm boundaries on the ground.</li><li>Activities (spraying, irrigation, harvest) are logged on-site with photos and geotags.</li><li>Quality samples are graded by partner labs.</li><li>Each batch is sealed with a tamper-evident QR linking to this record.</li></ul>
+      <p class="reveal">Nothing here is self-reported by sellers — it's recorded by trained officers and timestamped.</p>
+      <h2 class="reveal">Built for the field</h2>
+      <p class="reveal">The Nesso mobile app works offline-first, in twelve languages, designed to be read in sunlight and used through gloves. The dashboard gives FPOs and buyers a real-time view of the cluster.</p>
+      <div class="reveal" style="margin-top:28px"><button class="btn" data-go="trace">${ic(I.scan)} See a live trace</button></div>
+    </div></div>`,
+  privacy:()=>`<div class="wrap"><div class="prose" style="padding-top:40px">
+      <span class="pill reveal">Privacy</span>
+      <h1 class="reveal" style="font-size:clamp(28px,5vw,42px);margin:16px 0 8px">Privacy & data</h1>
+      <p class="reveal mono" style="font-size:12.5px;color:var(--fg-subtle)">Last updated 29 May 2026</p>
+      <h3 class="reveal">What this page shows</h3>
+      <p class="reveal">A public trace shows the crop, grade, farm location, growing practices, and the farmer's display name & association — only with the farmer's consent. Personal identifiers (full phone, Aadhaar, bank details) are never shown publicly.</p>
+      <h3 class="reveal">Farmer consent</h3>
+      <p class="reveal">Farmers opt in during registration and can withdraw consent at any time, which removes their name and profile from public traces while preserving the verification record for buyers.</p>
+      <h3 class="reveal">Data we collect</h3>
+      <ul class="reveal"><li>Farm boundaries and crop records (operational)</li><li>Activity logs with geotags and photos (verification)</li><li>Quality and procurement records (commercial)</li></ul>
+      <h3 class="reveal">Your rights</h3>
+      <p class="reveal">Under India's DPDP Act you may request access, correction, or erasure of your data. Contact <a href="#" style="color:var(--primary);font-weight:600">privacy@nesso.in</a>.</p>
+      <h3 class="reveal">Cookies</h3>
+      <p class="reveal">This portal stores only your theme preference locally. No tracking or advertising cookies are used.</p>
+    </div></div>`,
+  json:()=>`<div class="wrap" style="padding-top:32px">
+      <a data-go="trace" style="display:inline-flex;align-items:center;gap:7px;color:var(--fg-muted);font-size:13.5px;font-weight:600;margin-bottom:14px;cursor:pointer">${ic(I.arrow).replace('M5 12h14M12 5l7 7-7 7','M19 12H5M12 19l-7-7 7-7')} Back to trace</a>
+      <h1 style="font-size:24px;font-weight:700">Raw trace data</h1>
+      <p style="color:var(--fg-muted);font-size:14px;margin:8px 0 18px">Machine-readable record for <span class="mono">GET /api/v1/trace/TBR-0291</span> · for buyers & integrators.</p>
+      <div class="codeblock"><pre>{
+  <span class="key">"batch"</span>: <span class="str">"BATCH-TBR-0291"</span>,
+  <span class="key">"verified"</span>: <span class="num">true</span>,
+  <span class="key">"crop"</span>: { <span class="key">"name"</span>: <span class="str">"Tuberose"</span>, <span class="key">"grade"</span>: <span class="str">"A"</span>, <span class="key">"qty_kg"</span>: <span class="num">320</span> },
+  <span class="key">"farmer"</span>: { <span class="key">"id"</span>: <span class="str">"FRM-2841"</span>, <span class="key">"name"</span>: <span class="str">"Lakshmi Gowda"</span>, <span class="key">"association"</span>: <span class="str">"Belur FPO"</span> },
+  <span class="key">"farm"</span>: {
+    <span class="key">"id"</span>: <span class="str">"FARM-118"</span>, <span class="key">"area_ha"</span>: <span class="num">1.2</span>,
+    <span class="key">"centroid"</span>: [<span class="num">13.1623</span>, <span class="num">75.8648</span>], <span class="key">"soil"</span>: <span class="str">"red_loam"</span>
+  },
+  <span class="key">"stages"</span>: [
+    { <span class="key">"stage"</span>: <span class="str">"harvested"</span>, <span class="key">"at"</span>: <span class="str">"2026-05-28T06:40:00+05:30"</span> },
+    { <span class="key">"stage"</span>: <span class="str">"sampled"</span>, <span class="key">"grade"</span>: <span class="str">"A"</span>, <span class="key">"moisture"</span>: <span class="num">0.12</span> },
+    { <span class="key">"stage"</span>: <span class="str">"stored"</span>, <span class="key">"location"</span>: <span class="str">"Hassan Cold Store"</span>, <span class="key">"temp_c"</span>: <span class="num">4</span> }
+  ],
+  <span class="key">"certifications"</span>: [<span class="str">"india_organic"</span>, <span class="str">"gap"</span>]
+}</pre></div>
+    </div>`,
+  notfound:()=>`<div class="wrap"><div style="min-height:60vh;display:grid;place-items:center;text-align:center"><div style="max-width:400px">
+      <div style="position:relative;display:inline-block;margin-bottom:20px"><span class="display" style="font-size:110px;font-weight:700;color:var(--bg-muted);line-height:1">?</span><span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:18px;background:var(--primary-50);color:var(--primary);display:grid;place-items:center">${ic(I.scan)}</span></div>
+      <h2 style="font-size:24px;font-weight:700">Invalid trace code</h2>
+      <p style="font-size:15px;color:var(--fg-muted);margin-top:10px">This QR code isn't a valid Nesso trace, or the batch was removed. Check the label and scan again.</p>
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:24px"><button class="btn ghost" data-go="home">Go home</button><button class="btn" data-go="trace">${ic(I.scan)} Try sample trace</button></div>
+    </div></div></div>`,
+};
+
+function qr(){let r='';const s=100/14;for(let y=0;y<14;y++)for(let x=0;x<14;x++){if((x*7+y*13+x*y)%3===0||(x<3&&y<3)||(x>10&&y<3)||(x<3&&y>10))r+=`<rect x="${x*s+1}" y="${y*s+1}" width="${s-1}" height="${s-1}" fill="#0F1A14"/>`}return r}
+
+function render(){
+  const v=(location.hash.replace('#/','')||'home');
+  const fn=views[v]||views.notfound;
+  app.innerHTML=fn();
+  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.go===v||(v==='trace'&&a.dataset.go==='trace')));
+  window.scrollTo(0,0);
+  if(window.__tlScroll){window.removeEventListener('scroll',window.__tlScroll,true);window.__tlScroll=null;}
+  // scroll-linked journey fill on the trace timeline
+  const tl=app.querySelector('.tl'),fill=app.querySelector('#tlfill');
+  if(tl&&fill){
+    const onScroll=()=>{
+      const r=tl.getBoundingClientRect();const vh=innerHeight;
+      const p=Math.max(0,Math.min(1,(vh*0.7-r.top)/(r.height*0.85)));
+      fill.style.height=(p*100)+'%';
+    };
+    window.__tlScroll=onScroll;
+    window.addEventListener('scroll',onScroll,{passive:true,capture:true});
+    requestAnimationFrame(onScroll);setTimeout(onScroll,60);
+  }
+}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-go]');if(t){e.preventDefault();location.hash='#/'+t.dataset.go;}});
+window.addEventListener('hashchange',render);
+render();
+</script>
+</body>
+</html>

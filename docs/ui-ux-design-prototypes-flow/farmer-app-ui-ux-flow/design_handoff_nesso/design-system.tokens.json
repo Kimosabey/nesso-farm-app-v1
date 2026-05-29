@@ -1,0 +1,157 @@
+{
+  "$schema": "https://tr.designtokens.org/format/",
+  "$description": "Nesso Farm Traceability — design tokens (W3C Design Tokens format). Feeds Tailwind v4 @theme, NativeWind, and the Figma sync. Light + dark are first-class; every semantic pair is WCAG 2.2 AA audited.",
+  "$metadata": {
+    "name": "Nesso Design System",
+    "version": "1.0.0",
+    "owner": "NR Group · NESSO",
+    "moodPillar": "Cultivated Clarity — editorial + bento, glass as seasoning",
+    "defaultTheme": "light"
+  },
+
+  "brand": {
+    "$type": "color",
+    "turfGreen":   { "$value": "#0D783C", "$description": "Primary brand · CTAs · active · focus rings" },
+    "turfGreen2":  { "$value": "#207647", "$description": "Primary hover · gradient stop" },
+    "goldenGlow":  { "$value": "#F1D412", "$description": "Accent · harvest moments · highlights" },
+    "jungleTeal":  { "$value": "#518E6D", "$description": "Secondary · chips · chart series 2" },
+    "porcelain":   { "$value": "#FAFDFA", "$description": "Light theme background base" },
+    "white":       { "$value": "#FFFFFF" }
+  },
+
+  "color": {
+    "$type": "color",
+    "primary": {
+      "$description": "OKLCH-derived perceptual scale from Turf Green",
+      "50":  { "$value": "#EAF6EE" }, "100": { "$value": "#C9E8D3" },
+      "300": { "$value": "#5DB683" }, "500": { "$value": "#0D783C" },
+      "600": { "$value": "#0A6232" }, "700": { "$value": "#084E28" }, "900": { "$value": "#032816" }
+    },
+    "secondary": {
+      "50":  { "$value": "#EEF5F1" }, "100": { "$value": "#D3E5DB" },
+      "300": { "$value": "#7FB496" }, "500": { "$value": "#518E6D" },
+      "700": { "$value": "#345C47" }, "900": { "$value": "#1B2F24" }
+    },
+    "accent": {
+      "50":  { "$value": "#FFFCEB" }, "100": { "$value": "#FDF4B3" },
+      "300": { "$value": "#F8E353" }, "500": { "$value": "#F1D412" },
+      "700": { "$value": "#B69D08" }, "900": { "$value": "#5A4E04" }
+    },
+    "chartSeries": {
+      "$description": "Categorical cycle — never color-only; always pair with shape/icon/label",
+      "1": { "$value": "#0D783C" }, "2": { "$value": "#518E6D" }, "3": { "$value": "#F1D412" },
+      "4": { "$value": "#0E7490" }, "5": { "$value": "#B42318" }, "6": { "$value": "#9333EA" }
+    }
+  },
+
+  "theme": {
+    "light": {
+      "$type": "color",
+      "bg":           { "$value": "#FAFDFA", "$extensions": { "contrastVsFg": "16.4:1 (AAA)" } },
+      "bgElevated":   { "$value": "#FFFFFF" },
+      "bgMuted":      { "$value": "#F1F5F2" },
+      "fg":           { "$value": "#0F1A14", "$extensions": { "contrastVsBg": "16.4:1 (AAA)" } },
+      "fgMuted":      { "$value": "#4A5A52", "$extensions": { "contrastVsBg": "7.0:1 (AAA)" } },
+      "fgSubtle":     { "$value": "#7A8A82" },
+      "border":       { "$value": "#DDE6E0" },
+      "borderStrong": { "$value": "#BFCFC6" },
+      "ring":         { "$value": "#0D783C", "$extensions": { "contrastVsBg": "5.4:1 (AA non-text)" } },
+      "onPrimary":    { "$value": "#FFFFFF", "$extensions": { "contrastVsPrimary": "5.6:1 (AA)" } },
+      "success":      { "$value": "#0D783C" },
+      "warning":      { "$value": "#9A8407", "warningBg": "#FBF5D6" },
+      "danger":       { "$value": "#B42318", "$extensions": { "contrastVsBg": "5.3:1 (AA)" } },
+      "info":         { "$value": "#0E7490" },
+      "glassBg":      { "$value": "rgba(255,255,255,0.72)" },
+      "glassBorder":  { "$value": "rgba(13,120,60,0.12)" }
+    },
+    "dark": {
+      "$type": "color",
+      "bg":           { "$value": "#0A1410", "$description": "warm-tinted, never pure black", "$extensions": { "contrastVsFg": "16.7:1 (AAA)" } },
+      "bgElevated":   { "$value": "#101C16" },
+      "bgMuted":      { "$value": "#162720" },
+      "fg":           { "$value": "#FAFDFA" },
+      "fgMuted":      { "$value": "#A8B7AE", "$extensions": { "contrastVsBg": "7.6:1 (AAA)" } },
+      "fgSubtle":     { "$value": "#7A8A82" },
+      "border":       { "$value": "#1F2D26" },
+      "borderStrong": { "$value": "#2E3F37" },
+      "ring":         { "$value": "#5DB683", "$extensions": { "contrastVsBg": "6.7:1 (AAA non-text)" } },
+      "onPrimary":    { "$value": "#06140C" },
+      "success":      { "$value": "#5DB683" },
+      "warning":      { "$value": "#F8E353", "warningBg": "#2A2810" },
+      "danger":       { "$value": "#FF6B5B", "$extensions": { "contrastVsBg": "5.8:1 (AA)" } },
+      "info":         { "$value": "#67E8F9" },
+      "glassBg":      { "$value": "rgba(16,28,22,0.62)" },
+      "glassBorder":  { "$value": "rgba(93,182,131,0.18)" }
+    }
+  },
+
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "display": { "$value": ["Montserrat", "Inter", "system-ui", "sans-serif"] },
+      "body":    { "$value": ["Inter", "system-ui", "sans-serif"] },
+      "mono":    { "$value": ["JetBrains Mono", "ui-monospace", "monospace"] }
+    },
+    "weight": {
+      "$type": "fontWeight",
+      "regular": { "$value": 400 }, "medium": { "$value": 500 }, "semibold": { "$value": 600 }, "bold": { "$value": 700 }
+    },
+    "size": {
+      "$type": "dimension",
+      "xs":  { "$value": "12px", "$extensions": { "lineHeight": "18px" } },
+      "sm":  { "$value": "14px", "$extensions": { "lineHeight": "22px" } },
+      "base":{ "$value": "16px", "$extensions": { "lineHeight": "26px" } },
+      "lg":  { "$value": "18px", "$extensions": { "lineHeight": "28px" } },
+      "xl":  { "$value": "20px", "$extensions": { "lineHeight": "30px" } },
+      "2xl": { "$value": "24px", "$extensions": { "lineHeight": "34px" } },
+      "3xl": { "$value": "30px", "$extensions": { "lineHeight": "38px" } },
+      "4xl": { "$value": "36px", "$extensions": { "lineHeight": "44px" } },
+      "5xl": { "$value": "48px", "$extensions": { "lineHeight": "56px" } }
+    },
+    "tracking": { "$type": "dimension", "tight": { "$value": "-0.01em" }, "normal": { "$value": "0" } },
+    "feature":  { "$value": "\"tnum\"", "$description": "Tabular numerics for KPIs" }
+  },
+
+  "space": {
+    "$type": "dimension", "$description": "4px grid",
+    "1": { "$value": "4px" }, "2": { "$value": "8px" }, "3": { "$value": "12px" },
+    "4": { "$value": "16px" }, "5": { "$value": "20px" }, "6": { "$value": "24px" },
+    "8": { "$value": "32px" }, "10": { "$value": "40px" }, "12": { "$value": "48px" }
+  },
+
+  "radius": {
+    "$type": "dimension",
+    "sm": { "$value": "4px" }, "md": { "$value": "8px" }, "lg": { "$value": "12px" },
+    "xl": { "$value": "16px" }, "2xl": { "$value": "20px" }, "3xl": { "$value": "28px" }, "full": { "$value": "9999px" }
+  },
+
+  "shadow": {
+    "$type": "shadow",
+    "xs": { "$value": { "offsetX": "0", "offsetY": "1px", "blur": "2px", "spread": "0", "color": "rgba(13,40,22,0.04)" } },
+    "sm": { "$value": { "offsetX": "0", "offsetY": "2px", "blur": "6px", "spread": "0", "color": "rgba(13,40,22,0.06)" } },
+    "md": { "$value": { "offsetX": "0", "offsetY": "6px", "blur": "16px", "spread": "0", "color": "rgba(13,40,22,0.08)" } },
+    "lg": { "$value": { "offsetX": "0", "offsetY": "16px", "blur": "32px", "spread": "0", "color": "rgba(13,40,22,0.10)" } },
+    "glow": { "$value": { "offsetX": "0", "offsetY": "0", "blur": "0", "spread": "4px", "color": "rgba(13,120,60,0.18)" }, "$description": "Focus / CTA halo. Dark: rgba(93,182,131,0.28)" }
+  },
+
+  "size": {
+    "$type": "dimension",
+    "touchTarget": { "$value": "44px", "$description": "WCAG 2.2 SC 2.5.8 — team standard" },
+    "sidebarExpanded": { "$value": "248px" }, "sidebarCollapsed": { "$value": "74px" },
+    "topbar": { "$value": "64px" }, "fab": { "$value": "62px" }
+  },
+
+  "motion": {
+    "duration": {
+      "$type": "duration",
+      "fast": { "$value": "120ms" }, "base": { "$value": "200ms" }, "slow": { "$value": "320ms" }, "stagger": { "$value": "40ms" }
+    },
+    "easing": {
+      "$type": "cubicBezier",
+      "standard": { "$value": [0.4, 0, 0.2, 1] },
+      "emphasized": { "$value": [0.32, 0.72, 0, 1], "$description": "Sheets, modals, layout" }
+    },
+    "spring": { "$value": { "stiffness": 320, "damping": 30 }, "$description": "FAB press, drag, sortable (Reanimated/Framer)" },
+    "reducedMotion": { "$value": "durations→0; transforms→opacity-only; ambient animation pauses", "$type": "string" }
+  }
+}

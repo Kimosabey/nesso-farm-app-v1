@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nesso · Design Language Thesis — Step 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+/* ============ THEME TOKENS ============ */
+:root {
+  --primary:#0D783C; --primary-2:#207647; --primary-300:#5DB683;
+  --accent:#F1D412; --secondary:#518E6D;
+  --bg:#FAFDFA; --bg-elevated:#FFFFFF; --bg-muted:#F1F5F2;
+  --fg:#0F1A14; --fg-muted:#4A5A52; --fg-subtle:#7A8A82;
+  --border:#DDE6E0; --border-strong:#BFCFC6; --ring:#0D783C;
+  --glass-bg:rgba(255,255,255,0.62); --glass-border:rgba(13,120,60,0.18);
+  --accent-soft:#FFFCEB;
+  --shadow-sm:0 2px 6px rgba(13,40,22,0.06);
+  --shadow-md:0 6px 16px rgba(13,40,22,0.08);
+  --shadow-lg:0 16px 40px rgba(13,40,22,0.12);
+  --aurora-1:rgba(13,120,60,0.22); --aurora-2:rgba(241,212,18,0.16); --aurora-3:rgba(81,142,109,0.18);
+}
+[data-theme="dark"] {
+  --primary:#5DB683; --primary-2:#207647; --primary-300:#5DB683;
+  --accent:#F8E353; --secondary:#7FB496;
+  --bg:#0A1410; --bg-elevated:#101C16; --bg-muted:#162720;
+  --fg:#FAFDFA; --fg-muted:#A8B7AE; --fg-subtle:#7A8A82;
+  --border:#1F2D26; --border-strong:#2E3F37; --ring:#5DB683;
+  --glass-bg:rgba(16,28,22,0.55); --glass-border:rgba(93,182,131,0.22);
+  --accent-soft:#1d2410;
+  --shadow-sm:0 2px 6px rgba(0,0,0,0.55);
+  --shadow-md:0 6px 16px rgba(0,0,0,0.6);
+  --shadow-lg:0 16px 40px rgba(0,0,0,0.66);
+  --aurora-1:rgba(93,182,131,0.20); --aurora-2:rgba(248,227,83,0.10); --aurora-3:rgba(81,142,109,0.16);
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+body {
+  font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--fg);
+  line-height:1.6; -webkit-font-smoothing:antialiased; transition:background .5s ease,color .5s ease;
+  overflow-x:hidden;
+}
+.mono { font-family:'JetBrains Mono',ui-monospace,monospace; }
+.display { font-family:'Montserrat',sans-serif; letter-spacing:-0.015em; }
+h1,h2,h3 { font-family:'Montserrat',sans-serif; letter-spacing:-0.015em; line-height:1.1; font-weight:700; }
+::selection { background:var(--accent); color:#0F1A14; }
+
+/* ============ TOPBAR ============ */
+.topbar {
+  position:sticky; top:0; z-index:50; height:64px; display:flex; align-items:center;
+  justify-content:space-between; padding:0 clamp(20px,5vw,48px);
+  background:var(--glass-bg); backdrop-filter:blur(16px) saturate(1.4);
+  -webkit-backdrop-filter:blur(16px) saturate(1.4);
+  border-bottom:1px solid var(--glass-border);
+}
+.brand { display:flex; align-items:center; gap:12px; }
+.brand img { width:34px; height:34px; border-radius:9px; box-shadow:var(--shadow-sm); }
+.brand .name { font-family:'Montserrat',sans-serif; font-weight:700; font-size:18px; letter-spacing:0.02em; }
+.brand .sub { font-size:12px; color:var(--fg-muted); font-weight:500; letter-spacing:0.04em; text-transform:uppercase; }
+.topbar-right { display:flex; align-items:center; gap:14px; }
+.tag { font-size:12px; color:var(--fg-muted); font-weight:500; }
+.theme-toggle {
+  display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 14px; border-radius:999px;
+  border:1px solid var(--border-strong); background:var(--bg-elevated); color:var(--fg);
+  font-family:'Inter',sans-serif; font-size:13px; font-weight:500; cursor:pointer;
+  transition:border-color .2s,transform .12s,box-shadow .2s; min-height:40px;
+}
+.theme-toggle:hover { border-color:var(--primary); box-shadow:0 0 0 4px var(--glass-border); }
+.theme-toggle:active { transform:scale(0.97); }
+.theme-toggle:focus-visible { outline:2px solid var(--ring); outline-offset:2px; }
+.theme-toggle .dot { width:14px; height:14px; border-radius:50%; background:var(--accent); box-shadow:inset 0 0 0 2px rgba(0,0,0,0.12); }
+[data-theme="dark"] .theme-toggle .dot { background:var(--primary-300); }
+
+/* ============ LAYOUT ============ */
+.wrap { max-width:1080px; margin:0 auto; padding:0 clamp(20px,5vw,48px); }
+section { position:relative; }
+
+/* ============ HERO ============ */
+.hero { position:relative; padding:clamp(56px,9vw,120px) 0 clamp(40px,6vw,72px); overflow:hidden; }
+.aurora { position:absolute; inset:-20% -10% auto -10%; height:120%; z-index:0; pointer-events:none; filter:blur(60px); opacity:.9; }
+.aurora::before, .aurora::after {
+  content:''; position:absolute; border-radius:50%;
+}
+.aurora::before {
+  width:520px; height:520px; top:-120px; left:-40px;
+  background:radial-gradient(circle at 30% 30%, var(--aurora-1), transparent 70%);
+  animation:drift1 18s ease-in-out infinite alternate;
+}
+.aurora::after {
+  width:480px; height:480px; top:-80px; right:-60px; left:auto;
+  background:radial-gradient(circle at 60% 40%, var(--aurora-2), transparent 70%);
+  animation:drift2 22s ease-in-out infinite alternate;
+}
+.aurora .blob3 {
+  position:absolute; width:420px; height:420px; top:40px; left:42%;
+  background:radial-gradient(circle, var(--aurora-3), transparent 70%); border-radius:50%;
+  animation:drift1 26s ease-in-out infinite alternate-reverse;
+}
+@keyframes drift1 { from{transform:translate(0,0)} to{transform:translate(40px,30px)} }
+@keyframes drift2 { from{transform:translate(0,0)} to{transform:translate(-50px,20px)} }
+.hero-inner { position:relative; z-index:1; }
+.eyebrow { display:inline-flex; align-items:center; gap:10px; font-size:12.5px; font-weight:600; letter-spacing:0.16em; text-transform:uppercase; color:var(--primary); }
+.eyebrow .pip { width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 4px var(--glass-border); }
+[data-theme="dark"] .eyebrow .pip { background:var(--primary-300); }
+.hero h1 { font-size:clamp(38px,6.6vw,76px); margin:22px 0 0; max-width:16ch; }
+.hero h1 .grad {
+  background:linear-gradient(100deg,var(--primary),var(--secondary) 60%,var(--primary-2));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.hero-lede { font-size:clamp(17px,2.1vw,21px); color:var(--fg-muted); max-width:62ch; margin-top:26px; line-height:1.55; }
+.read-chips { display:flex; flex-wrap:wrap; gap:10px; margin-top:34px; }
+.chip {
+  display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border-radius:999px;
+  background:var(--bg-elevated); border:1px solid var(--border); font-size:13px; color:var(--fg-muted);
+  box-shadow:var(--shadow-sm); font-weight:500;
+}
+.chip .check { color:var(--primary); display:inline-flex; }
+.chip .check svg { display:block; }
+
+/* ============ THESIS CARD ============ */
+.thesis {
+  margin-top:54px; position:relative; z-index:1;
+  background:var(--glass-bg); border:1px solid var(--glass-border);
+  backdrop-filter:blur(20px) saturate(1.3); -webkit-backdrop-filter:blur(20px) saturate(1.3);
+  border-radius:24px; padding:clamp(28px,4vw,46px); box-shadow:var(--shadow-lg);
+}
+.thesis .label { font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:var(--secondary); }
+.thesis .name {
+  font-family:'Montserrat',sans-serif; font-weight:700; font-size:clamp(26px,4vw,40px);
+  margin:14px 0 6px; letter-spacing:-0.02em;
+}
+.thesis .name em { font-style:normal; color:var(--primary); }
+.thesis p { color:var(--fg-muted); font-size:clamp(15px,1.7vw,17.5px); max-width:74ch; }
+.pillars { display:flex; flex-wrap:wrap; gap:10px; margin-top:24px; }
+.pillar { font-family:'JetBrains Mono',monospace; font-size:12.5px; padding:7px 12px; border-radius:8px;
+  background:var(--bg-muted); border:1px solid var(--border); color:var(--fg); }
+.pillar b { color:var(--primary); font-weight:500; }
+
+/* ============ SECTION HEADERS ============ */
+.section-head { margin:clamp(60px,9vw,108px) 0 8px; }
+.section-head .kicker { font-size:13px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:var(--secondary); }
+.section-head h2 { font-size:clamp(28px,4vw,44px); margin-top:12px; }
+.section-head p { color:var(--fg-muted); margin-top:14px; max-width:64ch; font-size:16.5px; }
+
+/* ============ DECISION CARDS ============ */
+.decisions { display:flex; flex-direction:column; gap:22px; margin-top:42px; }
+.decision {
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:22px;
+  box-shadow:var(--shadow-sm); overflow:hidden; transition:box-shadow .3s,transform .3s,border-color .3s;
+  opacity:0; transform:translateY(18px);
+}
+.decision.in { opacity:1; transform:none; }
+.decision:hover { box-shadow:var(--shadow-md); border-color:var(--border-strong); }
+.decision-grid { display:grid; grid-template-columns:1fr; }
+@media (min-width:860px){ .decision-grid { grid-template-columns:1.15fr 0.85fr; } }
+.decision-body { padding:clamp(24px,3vw,38px); }
+.decision-num { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--fg-subtle); font-weight:500; }
+.decision-q { font-family:'Montserrat',sans-serif; font-weight:600; font-size:clamp(20px,2.6vw,27px); margin:10px 0 16px; letter-spacing:-0.01em; line-height:1.2; }
+.rec {
+  display:inline-flex; align-items:center; gap:9px; padding:7px 14px; border-radius:999px;
+  background:linear-gradient(180deg,var(--primary),var(--primary-2)); color:#fff;
+  font-size:13px; font-weight:600; margin-bottom:18px; box-shadow:0 4px 14px var(--glass-border);
+}
+[data-theme="dark"] .rec { color:#06140c; }
+.rec .arrow { font-family:'JetBrains Mono',monospace; opacity:.8; }
+.decision-body p { color:var(--fg-muted); font-size:15.5px; line-height:1.62; }
+.decision-body p + p { margin-top:12px; }
+.decision-body strong { color:var(--fg); font-weight:600; }
+.decision-visual {
+  background:var(--bg-muted); border-left:1px solid var(--border);
+  padding:clamp(22px,3vw,32px); display:flex; align-items:center; justify-content:center; min-height:240px;
+}
+@media (max-width:859px){ .decision-visual { border-left:none; border-top:1px solid var(--border); } }
+
+/* ---- visual: mood pillars ---- */
+.mood-stack { display:flex; flex-direction:column; gap:10px; width:100%; }
+.mood-row { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:12px; background:var(--bg-elevated); border:1px solid var(--border); box-shadow:var(--shadow-sm); }
+.mood-row .ico { width:34px; height:34px; border-radius:9px; flex-shrink:0; display:grid; place-items:center; font-family:'Montserrat'; font-weight:700; font-size:15px; color:#fff; }
+.mood-row .t { font-weight:600; font-size:14px; }
+.mood-row .d { font-size:12px; color:var(--fg-muted); }
+
+/* ---- visual: theme split ---- */
+.theme-split { display:grid; grid-template-columns:1fr 1fr; gap:12px; width:100%; }
+.mini-screen { border-radius:16px; overflow:hidden; border:1px solid var(--border); box-shadow:var(--shadow-md); aspect-ratio:9/16; max-height:230px; display:flex; flex-direction:column; }
+.mini-light { background:#FAFDFA; color:#0F1A14; }
+.mini-dark { background:#0A1410; color:#FAFDFA; }
+.mini-screen .bar { height:26px; display:flex; align-items:center; padding:0 10px; font-size:9px; font-weight:600; }
+.mini-light .bar { background:#fff; border-bottom:1px solid #DDE6E0; color:#0D783C; }
+.mini-dark .bar { background:#101C16; border-bottom:1px solid #1F2D26; color:#5DB683; }
+.mini-body { padding:10px; display:flex; flex-direction:column; gap:7px; flex:1; }
+.mini-kpi { border-radius:8px; padding:8px; }
+.mini-light .mini-kpi { background:#F1F5F2; }
+.mini-dark .mini-kpi { background:#162720; }
+.mini-kpi .v { font-family:'Montserrat'; font-weight:700; font-size:16px; }
+.mini-light .mini-kpi .v { color:#0D783C; }
+.mini-dark .mini-kpi .v { color:#5DB683; }
+.mini-kpi .l { font-size:8px; opacity:.7; }
+.mini-cta { margin-top:auto; height:24px; border-radius:7px; display:grid; place-items:center; font-size:9px; font-weight:600; }
+.mini-light .mini-cta { background:#0D783C; color:#fff; }
+.mini-dark .mini-cta { background:#5DB683; color:#06140c; box-shadow:0 0 16px rgba(93,182,131,0.5); }
+.theme-cap { grid-column:1/-1; text-align:center; font-size:11px; color:var(--fg-muted); margin-top:2px; }
+
+/* ---- visual: splash mascot ---- */
+.splash-demo { display:flex; flex-direction:column; align-items:center; gap:16px; }
+.splash-stage {
+  width:200px; height:200px; border-radius:28px; display:grid; place-items:center; position:relative;
+  background:radial-gradient(120% 120% at 50% 20%, var(--primary-2), var(--primary) 70%);
+  box-shadow:var(--shadow-lg); overflow:hidden;
+}
+.splash-stage::after { content:''; position:absolute; inset:0; background:radial-gradient(60% 50% at 50% 38%, rgba(241,212,18,0.28), transparent 70%); }
+.splash-coin {
+  width:108px; height:108px; border-radius:50%; background:#fff; display:grid; place-items:center;
+  box-shadow:0 10px 30px rgba(0,0,0,0.25); position:relative; z-index:1;
+}
+.splash-coin img { width:78px; height:78px; }
+.splash-coin.animate { animation:coinPop .7s cubic-bezier(0.32,0.72,0,1) both; }
+.splash-coin.animate img { animation:markReveal 1s cubic-bezier(0.32,0.72,0,1) .15s both; }
+@keyframes coinPop { from{ transform:scale(0.6); opacity:0 } to{ transform:scale(1); opacity:1 } }
+@keyframes markReveal { from{ transform:scale(0.7); opacity:0; filter:blur(6px) } to{ transform:scale(1); opacity:1; filter:blur(0) } }
+.ghost-btn {
+  height:40px; padding:0 18px; border-radius:999px; border:1px solid var(--border-strong);
+  background:var(--bg-elevated); color:var(--fg); font-family:'Inter'; font-weight:500; font-size:13px; cursor:pointer;
+  transition:border-color .2s,transform .12s; display:inline-flex; align-items:center; gap:8px; min-height:40px;
+}
+.ghost-btn:hover { border-color:var(--primary); }
+.ghost-btn:active { transform:scale(0.97); }
+.ghost-btn:focus-visible { outline:2px solid var(--ring); outline-offset:2px; }
+
+/* ---- visual: logo treatment ---- */
+.logo-treat { display:flex; gap:14px; align-items:center; justify-content:center; flex-wrap:wrap; }
+.logo-swatch { width:84px; height:84px; border-radius:18px; display:grid; place-items:center; box-shadow:var(--shadow-md); position:relative; }
+.logo-swatch span { position:absolute; bottom:-22px; font-size:10.5px; color:var(--fg-muted); font-family:'JetBrains Mono'; white-space:nowrap; }
+.ls-white { background:#fff; } .ls-white img { width:58px; height:58px; }
+.ls-green { background:var(--primary); }
+.ls-green .mark-mono { width:50px; height:50px; }
+.ls-mono { background:var(--bg-elevated); border:1px solid var(--border); }
+.ls-mono .mark-mono { width:50px; height:50px; }
+.mark-mono path, .mark-mono circle { }
+
+/* ---- visual: illustration style ---- */
+.illo-card { width:100%; max-width:230px; aspect-ratio:4/3; border-radius:16px; background:var(--bg-elevated); border:1px solid var(--border); box-shadow:var(--shadow-sm); display:grid; place-items:center; padding:18px; }
+
+/* ---- visual: charts ---- */
+.chart-demo { display:flex; gap:18px; align-items:center; justify-content:center; flex-wrap:wrap; width:100%; }
+
+/* ---- visual: magnetic CTA ---- */
+.mag-stage { width:100%; height:200px; border-radius:16px; background:radial-gradient(120% 120% at 50% 30%, var(--bg-elevated), var(--bg-muted)); display:grid; place-items:center; border:1px solid var(--border); position:relative; overflow:hidden; }
+.mag-btn {
+  position:relative; height:54px; padding:0 30px; border-radius:999px; border:none; cursor:pointer;
+  background:linear-gradient(180deg,var(--primary),var(--primary-2)); color:#fff;
+  font-family:'Montserrat'; font-weight:600; font-size:15px; letter-spacing:0.01em;
+  transition:transform .18s cubic-bezier(0.32,0.72,0,1), box-shadow .25s; will-change:transform;
+  box-shadow:0 8px 24px var(--glass-border);
+}
+[data-theme="dark"] .mag-btn { color:#06140c; }
+.mag-btn::before {
+  content:''; position:absolute; inset:-3px; border-radius:999px; z-index:-1; opacity:0; transition:opacity .3s;
+  background:radial-gradient(circle, rgba(241,212,18,0.55), transparent 70%); filter:blur(10px);
+}
+.mag-btn:hover::before { opacity:1; }
+.mag-btn:focus-visible { outline:2px solid var(--ring); outline-offset:3px; }
+.mag-hint { position:absolute; bottom:12px; font-size:11px; color:var(--fg-subtle); font-family:'JetBrains Mono'; }
+
+/* ============ TYPE / COLOR mini specimens in roadmap ============ */
+.roadmap { display:grid; grid-template-columns:1fr; gap:16px; margin-top:42px; }
+@media (min-width:760px){ .roadmap { grid-template-columns:repeat(3,1fr); } }
+.step-card { background:var(--bg-elevated); border:1px solid var(--border); border-radius:18px; padding:26px; box-shadow:var(--shadow-sm); position:relative; overflow:hidden; }
+.step-card .n { font-family:'JetBrains Mono'; font-size:12px; color:var(--primary); font-weight:500; letter-spacing:0.1em; }
+.step-card h3 { font-size:18px; margin:10px 0 8px; font-weight:600; }
+.step-card p { font-size:13.5px; color:var(--fg-muted); }
+.step-card .strip { position:absolute; top:0; left:0; right:0; height:4px; background:linear-gradient(90deg,var(--primary),var(--accent)); }
+
+/* ============ FORKS / CALL TO ACTION ============ */
+.forks { margin-top:clamp(50px,8vw,90px); background:var(--bg-elevated); border:1px solid var(--border); border-radius:24px; padding:clamp(28px,4vw,48px); box-shadow:var(--shadow-md); position:relative; overflow:hidden; }
+.forks::before { content:''; position:absolute; top:-60px; right:-60px; width:240px; height:240px; border-radius:50%; background:radial-gradient(circle, var(--aurora-1), transparent 70%); filter:blur(40px); }
+.forks h2 { font-size:clamp(24px,3.4vw,34px); position:relative; }
+.forks > p { color:var(--fg-muted); margin-top:12px; max-width:60ch; position:relative; }
+.fork-list { margin-top:26px; display:flex; flex-direction:column; gap:14px; position:relative; }
+.fork-item { display:flex; gap:14px; align-items:flex-start; padding:16px 18px; background:var(--bg-muted); border:1px solid var(--border); border-radius:14px; }
+.fork-item .qn { font-family:'JetBrains Mono'; font-size:12px; color:var(--primary); font-weight:500; flex-shrink:0; padding-top:2px; }
+.fork-item .qt { font-size:14.5px; }
+.fork-item .qt b { color:var(--fg); font-weight:600; }
+.fork-item .qt .pick { color:var(--secondary); font-weight:600; }
+
+/* ============ FOOTER ============ */
+footer { margin-top:clamp(60px,9vw,110px); padding:48px 0 64px; border-top:1px solid var(--border); text-align:center; }
+footer img { width:44px; height:44px; border-radius:11px; box-shadow:var(--shadow-sm); }
+footer .ft { font-size:13px; color:var(--fg-subtle); margin-top:16px; }
+footer .ft b { color:var(--fg-muted); font-weight:600; }
+
+/* reveal */
+.reveal { opacity:0; transform:translateY(18px); transition:opacity .7s cubic-bezier(0.32,0.72,0,1), transform .7s cubic-bezier(0.32,0.72,0,1); }
+.reveal.in { opacity:1; transform:none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; }
+  .reveal, .decision { opacity:1 !important; transform:none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <img src="assets/nesso-logo.jpeg" alt="Nesso logo" />
+    <div>
+      <div class="name">NESSO</div>
+      <div class="sub">Design Language</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span class="tag">Step 1 of 5 · Direction</span>
+    <button class="theme-toggle" id="themeBtn" aria-label="Toggle light and dark theme">
+      <span class="dot"></span><span id="themeLabel">Light</span>
+    </button>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="aurora"><div class="blob3"></div></div>
+  <div class="wrap hero-inner">
+    <span class="eyebrow"><span class="pip"></span>Step 1 — Design Language Thesis</span>
+    <h1>From <span class="grad">farm to fork</span>, designed to be screenshot-worthy.</h1>
+    <p class="hero-lede">I've read <strong>DESIGN_BRIEF.md</strong> end-to-end and the core plan. Before we draw 99 screens, here's the direction — a thesis and a confident proposal for each of the seven open questions in §13. Steer me, then I'll lock the system and build the hero screens.</p>
+    <div class="read-chips">
+      <span class="chip"><span class="check">✓</span> DESIGN_BRIEF.md</span>
+      <span class="chip"><span class="check">✓</span> palette.txt</span>
+      <span class="chip"><span class="check">✓</span> 13 · ux-accessibility</span>
+      <span class="chip"><span class="check">✓</span> 09 · design-system</span>
+      <span class="chip"><span class="check">✓</span> 14 · screen-inventory</span>
+      <span class="chip"><span class="check">✓</span> 00 · overview</span>
+      <span class="chip"><span class="check">✓</span> logomark</span>
+    </div>
+
+    <div class="thesis">
+      <div class="label">The thesis · one synthesis, not one pillar</div>
+      <div class="name">&ldquo;<em>Cultivated Clarity</em>&rdquo;</div>
+      <p>Editorial confidence with field-grade legibility. Big, quiet type and a bento rhythm carry the data; glass appears only on hero cards, the topbar, and modals — never on tables. Warmth comes from the brand's botanical palette and considered motion, not decoration. The test for every pixel: would it read at arm's length, in sunlight, through gloves — <em>and</em> would a designer in Berlin screenshot it?</p>
+      <div class="pillars">
+        <span class="pillar"><b>Linear</b> clarity</span>
+        <span class="pillar"><b>Stripe</b> restraint</span>
+        <span class="pillar"><b>Vercel</b> bento</span>
+        <span class="pillar"><b>Apple HIG</b> hierarchy</span>
+        <span class="pillar"><b>M3</b> expressive moments</span>
+        <span class="pillar">+ <b>Indian</b> agri warmth</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DECISIONS ============ -->
+<div class="wrap">
+  <div class="section-head reveal">
+    <div class="kicker">§13 · The seven open questions</div>
+    <h2>Seven decisions, proposed.</h2>
+    <p>Each is a recommendation with reasoning — not a menu. Disagree with any and I'll pivot before the system hardens. The visuals are live: toggle the theme up top to see both at once.</p>
+  </div>
+
+  <div class="decisions">
+
+    <!-- 01 mood pillar -->
+    <article class="decision">
+      <div class="decision-grid">
+        <div class="decision-body">
+          <div class="decision-num">01 / Mood pillar</div>
+          <h3 class="decision-q">Editorial, glass, bento, or soft-skeuo?</h3>
+          <div class="rec"><span class="arrow">→</span> A synthesis: editorial + bento, glass as seasoning</div>
+          <p>None of the four alone clears the bar. I propose <strong>&ldquo;Cultivated Clarity&rdquo;</strong>: <strong>editorial typography</strong> and a <strong>bento dashboard rhythm</strong> as the backbone, with <strong>glass used surgically</strong> — topbar, hero/login cards, modals — and never on data surfaces where it kills contrast outdoors.</p>
+          <p>Soft-skeuo and neumorphism are out: they fail contrast and the sunlight-glove test. The result reads as premium and calm, but every KPI stays glanceable.</p>
+        </div>
+        <div class="decision-visual">
+          <div class="mood-stack">
+            <div class="mood-row"><div class="ico" style="background:var(--primary)">Aa</div><div><div class="t">Editorial type</div><div class="d">clamp KPIs to 64px · tnum · -0.01em</div></div></div>
+            <div class="mood-row"><div class="ico" style="background:var(--secondary)">▦</div><div><div class="t">Bento layout</div><div class="d">varied tiles · intentional rhythm</div></div></div>
+            <div class="mood-row"><div class="ico" style="background:linear-gradient(135deg,var(--primary),var(--secondary))">◇</div><div><div class="t">Glass — seasoning</div><div class="d">hero · topbar · modals only</div></div></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 02 dark vs light -->
+    <article class="decision">
+      <div class="decision-grid">
+        <div class="decision-body">
+          <div class="decision-num">02 / Default theme</div>
+          <h3 class="decision-q">Dark-default marketing, or open in light?</h3>
+          <div class="rec"><span class="arrow">→</span> Light by default in-app · dark is the showpiece</div>
+          <p>The primary audience is <strong>field officers in direct sunlight</strong> — light themes with high-contrast porcelain backgrounds simply win outdoors, and the original PRD's dark-glass instinct fights glare. So the app <strong>opens in light</strong>, follows <code class="mono">prefers-color-scheme</code>, and remembers the choice.</p>
+          <p>Dark stays genuinely <strong>first-class</strong> — audited on every screen — and is where the glass glow and the marketing/QR-portal hero shine. Both designed twice, never &ldquo;dark later.&rdquo;</p>
+        </div>
+        <div class="decision-visual">
+          <div class="theme-split">
+            <div class="mini-screen mini-light">
+              <div class="bar">9:41 · NESSO</div>
+              <div class="mini-body"><div class="mini-kpi"><div class="v">1,284</div><div class="l">Farmers</div></div><div class="mini-kpi"><div class="v">96%</div><div class="l">Synced</div></div><div class="mini-cta">Add farmer</div></div>
+            </div>
+            <div class="mini-screen mini-dark">
+              <div class="bar">9:41 · NESSO</div>
+              <div class="mini-body"><div class="mini-kpi"><div class="v">1,284</div><div class="l">Farmers</div></div><div class="mini-kpi"><div class="v">96%</div><div class="l">Synced</div></div><div class="mini-cta">Add farmer</div></div>
+            </div>
+            <div class="theme-cap">Same screen · both audited AA · light default outdoors</div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 03 splash mascot -->
+    <article class="decision">
+      <div class="decision-grid">
+        <div class="decision-body">
+          <div class="decision-num">03 / Splash mascot</div>
+          <h3 class="decision-q">Abstract logomark, or an agri illustration?</h3>
+          <div class="rec"><span class="arrow">→</span> Abstract logomark paint-in (no character)</div>
+          <p>I recommend the <strong>logomark animating in</strong> — the clover-of-leaves blooms petal-by-petal and the golden essence-drop swells at center — rather than a sprout mascot. It's faster (<strong>≤ 80 KB Lottie / Skia</strong>), brand-true, and ages better than a cartoon character.</p>
+          <p>It also doubles as the <strong>offline→online &ldquo;synced&rdquo; flourish</strong> and pull-to-refresh spinner, so one motion idea earns its keep across the app. Press play →</p>
+        </div>
+        <div class="decision-visual">
+          <div class="splash-demo">
+            <div class="splash-stage"><div class="splash-coin" id="splashCoin"><img src="assets/nesso-logo.jpeg" alt="Nesso logomark" /></div></div>
+            <button class="ghost-btn" id="splashBtn">▶ Replay paint-in</button>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 04 logo treatment -->
+    <article class="decision">
+      <div class="decision-grid">
+        <div class="decision-body">
+          <div class="decision-num">04 / Logo treatment</div>
+          <h3 class="decision-q">Keep the JPEG, or evolve to vector?</h3>
+          <div class="rec"><span class="arrow">→</span> Vectorize · knock out the white · build a set</div>
+          <p>The supplied JPEG is a raster on a white box — fine on a porcelain login card, but it can't sit on the green splash without an ugly square. I propose we <strong>trace it to clean SVG</strong>, knock out the background, and ship a small <strong>logo set</strong>: full lockup, standalone mark (the clover+drop) for app icons & topbars, a <strong>monochrome</strong> for stamps, and a <strong>reverse/white</strong> for green surfaces.</p>
+          <p>Same identity — just production-grade and theme-safe. The wordmark stays as drawn.</p>
+        </div>
+        <div class="decision-visual">
+          <div class="logo-treat">
+            <div class="logo-swatch ls-white"><img src="assets/nesso-logo.jpeg" alt="Logo on white"><span>on porcelain</span></div>
+            <div class="logo-swatch ls-green">
+              <svg class="mark-mono" viewBox="0 0 100 100" fill="none" aria-label="reverse mark">
+                <g fill="#ffffff"><circle cx="50" cy="28" r="15"/><circle cx="30" cy="48" r="15"/><circle cx="70" cy="48" r="15"/><circle cx="50" cy="55" r="15"/></g>
+                <path d="M50 46 C58 58 58 70 50 78 C42 70 42 58 50 46 Z" fill="#F1D412"/>
+              </svg><span>reverse</span>
+            </div>
+            <div class="logo-swatch ls-mono">
+              <svg class="mark-mono" viewBox="0 0 100 100" fill="none" aria-label="mono mark">
+                <g fill="var(--fg)"><circle cx="50" cy="28" r="15"/><circle cx="30" cy="48" r="15"/><circle cx="70" cy="48" r="15"/><circle cx="50" cy="55" r="15"/></g>
+                <path d="M50 46 C58 58 58 70 50 78 C42 70 42 58 50 46 Z" fill="var(--fg)" opacity="0.4"/>
+              </svg><span>mono</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 05 illustration style -->
+    <article class="decision">
+      <div class="decision-grid">
+        <div class="decision-body">
+          <div class="decision-num">05 / Illustration style</div>
+          <h3 class="decision-q">Flat-geometric, isometric, or hand-drawn?</h3>
+          <div class="rec"><span class="arrow">→</span> Flat-geometric · soft brand gradients · no outlines</div>
+          <p>Per §11.8 I'll commit to <strong>flat-geometric</strong> empty-state illustrations: simple shapes, soft brand-color gradients, subtle highlights, <strong>no outlines</strong>, one accent pop. They're tiny (inline SVG, 160×120), recolor instantly across both themes, and never compete with text.</p>
+          <p>Isometric reads dated fast and bloats; hand-drawn fights the system's precision. Geometry keeps it calm, on-brand, and cheap to ship in volume.</p>
+        </div>
+        <div class="decision-visual">
+          <div class="illo-card">
+            <svg viewBox="0 0 160 120" width="100%" aria-label="flat-geometric empty state sample">
+              <defs>
+                <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--primary-300)"/><stop offset="1" stop-color="var(--primary)"/></linearGradient>
+                <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--secondary)"/><stop offset="1" stop-color="var(--primary)"/></linearGradient>
+              </defs>
+              <circle cx="118" cy="34" r="20" fill="var(--accent)" opacity="0.9"/>
+              <rect x="20" y="64" width="120" height="14" rx="7" fill="url(#g2)"/>
+              <rect x="20" y="84" width="86" height="14" rx="7" fill="url(#g1)" opacity="0.85"/>
+              <path d="M44 64 C44 44 60 40 60 40 C60 40 60 60 44 64 Z" fill="var(--primary)"/>
+              <path d="M60 40 C60 40 80 42 80 62 C64 62 60 40 60 40 Z" fill="var(--primary-300)"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 06 charts -->
+    <article class="decision">
+      <div class="decision-grid">
+        <div class="decision-body">
+          <div class="decision-num">06 / Chart aesthetic</div>
+          <h3 class="decision-q">A signature chart look, or convention-safe?</h3>
+          <div class="rec"><span class="arrow">→</span> A restrained signature: rounded caps, soft fills, no chartjunk</div>
+          <p>I propose a <strong>quiet signature</strong>: <strong>rounded bar caps</strong>, <strong>soft gradient area fills</strong>, <strong>no axis lines</strong> (a faint dotted baseline instead), generous gaps, and the brand series order. It looks bespoke without sacrificing readability.</p>
+          <p>Crucially it stays <strong>color-blind safe</strong> — every series carries a shape/label, never color alone — and degrades to flat fills under reduced-data or print. Bespoke, but legible at a glance.</p>
+        </div>
+        <div class="decision-visual">
+          <div class="chart-demo">
+            <svg width="150" height="120" viewBox="0 0 150 120" aria-label="bar chart sample">
+              <defs><linearGradient id="bar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--primary-300)"/><stop offset="1" stop-color="var(--primary)"/></linearGradient></defs>
+              <line x1="12" y1="104" x2="138" y2="104" stroke="var(--border-strong)" stroke-width="2" stroke-dasharray="2 4"/>
+              <rect x="18" y="58" width="22" height="46" rx="11" fill="url(#bar)"/>
+              <rect x="48" y="34" width="22" height="70" rx="11" fill="url(#bar)"/>
+              <rect x="78" y="70" width="22" height="34" rx="11" fill="var(--secondary)"/>
+              <rect x="108" y="20" width="22" height="84" rx="11" fill="var(--accent)"/>
+            </svg>
+            <svg width="110" height="110" viewBox="0 0 110 110" aria-label="donut chart sample">
+              <circle cx="55" cy="55" r="38" fill="none" stroke="var(--bg-muted)" stroke-width="14"/>
+              <circle cx="55" cy="55" r="38" fill="none" stroke="var(--primary)" stroke-width="14" stroke-linecap="round" stroke-dasharray="150 239" transform="rotate(-90 55 55)"/>
+              <circle cx="55" cy="55" r="38" fill="none" stroke="var(--accent)" stroke-width="14" stroke-linecap="round" stroke-dasharray="52 239" stroke-dashoffset="-158" transform="rotate(-90 55 55)"/>
+              <text x="55" y="60" text-anchor="middle" class="display" font-size="18" font-weight="700" fill="var(--fg)">68%</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 07 cursor / focus motion -->
+    <article class="decision">
+      <div class="decision-grid">
+        <div class="decision-body">
+          <div class="decision-num">07 / Signature interaction</div>
+          <h3 class="decision-q">A cursor / focus signature on web?</h3>
+          <div class="rec"><span class="arrow">→</span> Magnetic primary CTAs + a golden hover halo</div>
+          <p>The web signature is a <strong>magnetic primary CTA</strong>: the button gently leans toward the cursor (≤ 6px) with a <strong>soft golden halo</strong> on hover. It's memorable, not gimmicky — gated to <code class="mono">hover:hover</code> devices and disabled under <code class="mono">prefers-reduced-motion</code>.</p>
+          <p>Everywhere else the signature is discipline: a crisp <strong>2px focus ring</strong> in brand green with 2px offset, never removed. Delight on pointer, rock-solid for keyboard. Hover the button →</p>
+        </div>
+        <div class="decision-visual">
+          <div class="mag-stage">
+            <button class="mag-btn" id="magBtn">Register farmer</button>
+            <span class="mag-hint">move your cursor near me</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+  </div>
+
+  <!-- ============ ROADMAP ============ -->
+  <div class="section-head reveal">
+    <div class="kicker">After you confirm</div>
+    <h2>What comes next.</h2>
+    <p>The brief's stepwise process, so we never build 99 screens in the wrong direction.</p>
+  </div>
+  <div class="roadmap">
+    <div class="step-card reveal"><div class="strip"></div><div class="n">STEP 2</div><h3>Mood-board thesis</h3><p>One-page design-language reel with cited references and the locked direction.</p></div>
+    <div class="step-card reveal"><div class="strip"></div><div class="n">STEP 3</div><h3>Tokens + primitives</h3><p>Both themes, full token set, and a <code class="mono">design-system.tokens.json</code> for engineering — plus the motion reel.</p></div>
+    <div class="step-card reveal"><div class="strip"></div><div class="n">STEP 4</div><h3>Hero screens</h3><p>8 mobile · 7 web · 1 portal, both themes, annotated. Then the remaining ~80 by module.</p></div>
+  </div>
+
+  <!-- ============ FORKS ============ -->
+  <div class="forks reveal">
+    <h2>What I need from you</h2>
+    <p>Confirm or redirect these and I'll move to Step 2. Defaults in <span style="color:var(--secondary);font-weight:600">teal</span> are my recommendation if you'd rather I decide.</p>
+    <div class="fork-list">
+      <div class="fork-item"><span class="qn">01</span><span class="qt"><b>Mood pillar</b> — lock the &ldquo;Cultivated Clarity&rdquo; synthesis, or lean harder into one pillar? <span class="pick">→ synthesis</span></span></div>
+      <div class="fork-item"><span class="qn">02</span><span class="qt"><b>Default theme</b> — light in-app with first-class dark? <span class="pick">→ light default</span></span></div>
+      <div class="fork-item"><span class="qn">03</span><span class="qt"><b>Splash</b> — abstract logomark paint-in vs an agri illustration? <span class="pick">→ logomark</span></span></div>
+      <div class="fork-item"><span class="qn">04</span><span class="qt"><b>Logo</b> — OK to vectorize &amp; build the set? <span class="pick">→ yes, vectorize</span></span></div>
+      <div class="fork-item"><span class="qn">05</span><span class="qt"><b>Illustrations</b> — flat-geometric system? <span class="pick">→ flat-geometric</span></span></div>
+      <div class="fork-item"><span class="qn">06</span><span class="qt"><b>Charts</b> — restrained signature look? <span class="pick">→ signature</span></span></div>
+      <div class="fork-item"><span class="qn">07</span><span class="qt"><b>Signature interaction</b> — magnetic CTAs + halo on web? <span class="pick">→ yes, gated</span></span></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <img src="assets/nesso-logo.jpeg" alt="Nesso" />
+  <div class="ft"><b>NESSO · NR Group</b> — farm-to-fork traceability · Step 1 of 5 · Design Language Thesis · © 2026</div>
+</footer>
+
+<script>
+// ---- theme toggle ----
+const themeBtn = document.getElementById('themeBtn');
+const themeLabel = document.getElementById('themeLabel');
+const root = document.documentElement;
+function setTheme(t){ root.setAttribute('data-theme', t); themeLabel.textContent = t==='dark'?'Dark':'Light'; try{localStorage.setItem('nesso-thesis-theme',t);}catch(e){} }
+themeBtn.addEventListener('click', ()=> setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark'));
+try{ const saved=localStorage.getItem('nesso-thesis-theme'); if(saved) setTheme(saved); else if(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches) setTheme('dark'); }catch(e){}
+
+// ---- splash replay ----
+const coin = document.getElementById('splashCoin');
+const splashBtn = document.getElementById('splashBtn');
+function playSplash(){ coin.classList.remove('animate'); void coin.offsetWidth; coin.classList.add('animate'); }
+splashBtn.addEventListener('click', playSplash);
+setTimeout(playSplash, 600);
+
+// ---- magnetic CTA ----
+const mag = document.getElementById('magBtn');
+const stage = mag.closest('.mag-stage');
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+if(fine && !reduce){
+  stage.addEventListener('mousemove', (e)=>{
+    const r = mag.getBoundingClientRect();
+    const cx = r.left + r.width/2, cy = r.top + r.height/2;
+    const dx = (e.clientX - cx)/r.width, dy = (e.clientY - cy)/r.height;
+    const dist = Math.hypot(e.clientX-cx, e.clientY-cy);
+    const pull = Math.max(0, 1 - dist/240);
+    mag.style.transform = `translate(${dx*14*pull}px, ${dy*14*pull}px) scale(${1+0.03*pull})`;
+  });
+  stage.addEventListener('mouseleave', ()=>{ mag.style.transform=''; });
+}
+
+// ---- reveal on scroll ----
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+}, { threshold:0.14 });
+document.querySelectorAll('.reveal, .decision').forEach(el=> io.observe(el));
+</script>
+</body>
+</html>

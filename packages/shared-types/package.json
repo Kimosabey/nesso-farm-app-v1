@@ -1,0 +1,19 @@
+{
+  "name": "@nesso/shared-types",
+  "version": "0.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": ["src"],
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "scripts": {
+    "lint": "echo \"shared-types: lint passthrough\"",
+    "typecheck": "tsc --noEmit -p .",
+    "test": "echo \"shared-types: test passthrough\""
+  }
+}

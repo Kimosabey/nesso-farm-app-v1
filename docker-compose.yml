@@ -1,0 +1,65 @@
+name: nesso-dev
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: nesso-mongo
+    restart: unless-stopped
+    ports: ['27017:27017']
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-nesso}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS:-nesso}
+      MONGO_INITDB_DATABASE: nesso
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: nesso-redis
+    restart: unless-stopped
+    ports: ['6379:6379']
+    command: ['redis-server', '--save', '60', '1', '--loglevel', 'warning']
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: nesso-minio
+    restart: unless-stopped
+    ports:
+      - '9000:9000' # S3 API
+      - '9001:9001' # Console
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-nesso}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-nessoadmin}
+    command: ['server', '/data', '--console-address', ':9001']
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: nesso-mailhog
+    restart: unless-stopped
+    ports:
+      - '1025:1025' # SMTP
+      - '8025:8025' # Web UI
+
+volumes:
+  mongo-data:
+  redis-data:
+  minio-data:

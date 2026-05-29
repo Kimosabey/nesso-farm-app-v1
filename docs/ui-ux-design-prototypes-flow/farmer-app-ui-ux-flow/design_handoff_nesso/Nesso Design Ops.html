@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nesso · Design Ops</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root[data-theme="light"]{--primary:#0D783C;--primary-2:#207647;--primary-50:#EAF6EE;--primary-300:#5DB683;--accent:#F1D412;--secondary:#518E6D;--secondary-d:#3C6B51;--secondary-bg:#EAF3EE;--bg:#F4F8F5;--bg-elevated:#FFFFFF;--bg-muted:#EEF3F0;--fg:#0F1A14;--fg-muted:#4A5A52;--fg-subtle:#7A8A82;--border:#E2EAE5;--border-strong:#C9D6CE;--ring:#0D783C;--warning:#9A8407;--danger:#B42318;--shadow-sm:0 1px 3px rgba(13,40,22,.05);--shadow-md:0 10px 30px -10px rgba(13,40,22,.16)}
+:root[data-theme="dark"]{--primary:#5DB683;--primary-2:#2E8A57;--primary-50:#16271D;--primary-300:#5DB683;--accent:#F8E353;--secondary:#7FB496;--secondary-d:#9BCBAD;--secondary-bg:#18271F;--bg:#080F0B;--bg-elevated:#0F1A14;--bg-muted:#152219;--fg:#FAFDFA;--fg-muted:#A8B7AE;--fg-subtle:#73837A;--border:#1E2C24;--border-strong:#32433A;--ring:#5DB683;--warning:#F8E353;--danger:#FF6B5B;--shadow-sm:0 1px 3px rgba(0,0,0,.4);--shadow-md:0 10px 30px -10px rgba(0,0,0,.6)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.6}
+#page{background:var(--bg);color:var(--fg);min-height:100vh;transition:background .4s,color .4s}
+.mono{font-family:'JetBrains Mono',monospace}
+.display{font-family:'Montserrat',sans-serif;letter-spacing:-.02em}
+h1,h2,h3,h4{font-family:'Montserrat',sans-serif;letter-spacing:-.02em;line-height:1.14}
+.bar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;padding:14px clamp(16px,4vw,40px);background:color-mix(in oklab,var(--bg) 82%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+.bar .logo{width:32px;height:32px;border-radius:9px;background:#fff;display:grid;place-items:center;box-shadow:var(--shadow-sm)}
+.bar .logo img{width:22px;height:22px}
+.bar .nm{font-family:'Montserrat';font-weight:700;font-size:15px;letter-spacing:.04em}
+.bar .tag{font-size:12px;color:var(--fg-muted);font-weight:500}
+.icon-btn{margin-left:auto;width:38px;height:38px;border-radius:11px;background:var(--bg-elevated);border:1px solid var(--border);cursor:pointer;color:var(--fg);display:grid;place-items:center}
+.icon-btn:focus-visible,button:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
+.wrap{max-width:1000px;margin:0 auto;padding:0 clamp(16px,4vw,32px) 90px}
+.hero{padding:clamp(40px,7vw,72px) 0 20px}
+.hero .eyebrow{font-family:'JetBrains Mono';font-size:12px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--primary)}
+.hero h1{font-size:clamp(30px,5vw,46px);font-weight:700;margin:14px 0 14px;max-width:18ch}
+.hero p{font-size:clamp(15px,1.9vw,18px);color:var(--fg-muted);max-width:64ch}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+.toc a{font-size:13px;font-weight:600;color:var(--fg-muted);background:var(--bg-elevated);border:1px solid var(--border);padding:8px 14px;border-radius:999px;text-decoration:none}
+.toc a:hover{border-color:var(--primary);color:var(--primary)}
+.sec{margin-top:clamp(48px,7vw,80px);scroll-margin-top:80px}
+.sec-head{display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:26px}
+.sec-head .n{font-family:'JetBrains Mono';font-size:13px;color:var(--primary);font-weight:500}
+.sec-head h2{font-size:clamp(22px,3.4vw,30px);font-weight:700}
+.sec-head p{margin-left:auto;font-size:13.5px;color:var(--fg-subtle);max-width:34ch;text-align:right}
+.grid{display:grid;gap:16px}
+.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:780px){.g3,.g4{grid-template-columns:repeat(2,1fr)}.sec-head p{display:none}}
+@media(max-width:520px){.g2,.g3,.g4{grid-template-columns:1fr}}
+.card{background:var(--bg-elevated);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow-sm);padding:20px}
+.card .lbl{font-size:13px;font-weight:600;color:var(--fg);margin-top:14px}
+.card .sub{font-size:12px;color:var(--fg-subtle);margin-top:2px}
+.swatch-illo{height:150px;border-radius:14px;background:var(--bg-muted);display:grid;place-items:center;overflow:hidden}
+.logo-cell{height:130px;border-radius:14px;display:grid;place-items:center}
+.lc-white{background:#fff}.lc-green{background:var(--primary)}.lc-muted{background:var(--bg-muted);border:1px solid var(--border)}
+.tok-table{width:100%;border-collapse:collapse;font-size:13.5px}
+.tok-table th{text-align:left;padding:10px 14px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--fg-subtle);border-bottom:1px solid var(--border)}
+.tok-table td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--fg-muted)}
+.tok-table td b{color:var(--fg);font-weight:600}
+.tok-table .mono{font-size:12.5px}
+.curve-card{background:var(--bg-elevated);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow-sm);padding:18px}
+.curve-card svg{width:100%;height:auto;display:block}
+.motion-demo{height:120px;border-radius:14px;background:var(--bg-muted);position:relative;overflow:hidden;display:grid;place-items:center;cursor:pointer}
+.motion-demo .hint{position:absolute;bottom:8px;right:10px;font-size:10.5px;color:var(--fg-subtle);font-family:'JetBrains Mono'}
+.dot{width:42px;height:42px;border-radius:13px;background:linear-gradient(180deg,var(--primary-300),var(--primary))}
+.motion-demo:hover .m-fade{animation:mFade 1.2s var(--ease) infinite}
+.motion-demo:hover .m-slide{animation:mSlide 1.2s var(--ease) infinite}
+.motion-demo:hover .m-pop{animation:mPop 1.2s var(--ease) infinite}
+.motion-demo:hover .m-spin{animation:mSpin 1.2s linear infinite}
+@keyframes mFade{0%,100%{opacity:.15}50%{opacity:1}}
+@keyframes mSlide{0%,100%{transform:translateX(-40px)}50%{transform:translateX(40px)}}
+@keyframes mPop{0%,100%{transform:scale(.7)}50%{transform:scale(1.12)}}
+@keyframes mSpin{to{transform:rotate(360deg)}}
+:root{--ease:cubic-bezier(.32,.72,0,1)}
+.a11y-pair{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:13px;border:1px solid var(--border)}
+.a11y-pair .ratio{margin-left:auto;font-family:'JetBrains Mono';font-size:13px;font-weight:600}
+.badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px}
+.badge.aaa{background:var(--primary-50);color:var(--primary)}
+.badge.aa{background:var(--secondary-bg);color:var(--secondary-d)}
+.check-row{display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-bottom:1px solid var(--border)}
+.check-row .ck{width:22px;height:22px;border-radius:7px;background:var(--primary);display:grid;place-items:center;flex-shrink:0;margin-top:1px}
+.check-row .t{font-size:14px;color:var(--fg)}.check-row .t b{font-weight:600}
+.check-row .t span{color:var(--fg-muted)}
+.focus-demo{display:inline-flex;align-items:center;justify-content:center;height:46px;padding:0 22px;border-radius:12px;background:var(--primary);color:var(--bg-elevated);font-family:'Montserrat';font-weight:600;font-size:14px;border:none;cursor:pointer;box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--ring)}
+[data-theme=dark] .focus-demo{color:#06140c}
+.foot{border-top:1px solid var(--border);padding:32px clamp(16px,4vw,40px);text-align:center;color:var(--fg-subtle);font-size:12.5px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div id="page">
+<div class="bar">
+  <span class="logo"><img src="assets/nesso-logo.jpeg" alt="Nesso" /></span>
+  <span class="nm">NESSO</span>
+  <span class="tag">Design Ops · supporting kit</span>
+  <button class="icon-btn" id="theme" aria-label="Toggle theme"></button>
+</div>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Supporting deliverables</div>
+    <h1>Design Ops kit</h1>
+    <p>The reference layer behind the product: the logo system, the flat-geometric illustration set, the motion spec, and the WCAG 2.2 AA accessibility annotations — everything engineering and design need to apply the system consistently.</p>
+    <div class="toc">
+      <a href="#logo">01 · Logo system</a>
+      <a href="#illos">02 · Illustrations</a>
+      <a href="#motion">03 · Motion spec</a>
+      <a href="#a11y">04 · Accessibility</a>
+    </div>
+  </div>
+
+  <!-- 01 LOGO -->
+  <section class="sec" id="logo">
+    <div class="sec-head"><span class="n">01</span><h2>Logo system</h2><p>Vectorized from the supplied mark. Identical geometry, production-grade.</p></div>
+    <div class="grid g4">
+      <div class="card">
+        <div class="logo-cell lc-white"><svg width="74" height="74" viewBox="0 0 100 100">${'<g fill="#0D783C"><circle cx="50" cy="26" r="15"/><circle cx="28" cy="46" r="15"/><circle cx="72" cy="46" r="15"/><circle cx="40" cy="58" r="14"/><circle cx="60" cy="58" r="14"/></g><path d="M50 48 C59 60 59 74 50 82 C41 74 41 60 50 48 Z" fill="#F1D412"/>'}</svg></div>
+        <div class="lbl">Primary mark</div><div class="sub">Full color · on light / white</div>
+      </div>
+      <div class="card">
+        <div class="logo-cell lc-green"><svg width="74" height="74" viewBox="0 0 100 100"><g fill="#fff"><circle cx="50" cy="26" r="15"/><circle cx="28" cy="46" r="15"/><circle cx="72" cy="46" r="15"/><circle cx="40" cy="58" r="14"/><circle cx="60" cy="58" r="14"/></g><path d="M50 48 C59 60 59 74 50 82 C41 74 41 60 50 48 Z" fill="#F1D412"/></svg></div>
+        <div class="lbl">Reverse / knockout</div><div class="sub">On brand green · splash</div>
+      </div>
+      <div class="card">
+        <div class="logo-cell lc-muted"><svg width="74" height="74" viewBox="0 0 100 100"><g fill="var(--fg)"><circle cx="50" cy="26" r="15"/><circle cx="28" cy="46" r="15"/><circle cx="72" cy="46" r="15"/><circle cx="40" cy="58" r="14"/><circle cx="60" cy="58" r="14"/></g><path d="M50 48 C59 60 59 74 50 82 C41 74 41 60 50 48 Z" fill="var(--fg)" opacity="0.42"/></svg></div>
+        <div class="lbl">Monochrome</div><div class="sub">Stamps · single-color print</div>
+      </div>
+      <div class="card">
+        <div class="logo-cell lc-muted"><svg width="62" height="62" viewBox="0 0 100 100"><rect x="6" y="6" width="88" height="88" rx="22" fill="#0D783C"/><g fill="#fff"><circle cx="50" cy="30" r="12"/><circle cx="32" cy="46" r="12"/><circle cx="68" cy="46" r="12"/><circle cx="42" cy="56" r="11"/><circle cx="58" cy="56" r="11"/></g><path d="M50 47 C57 57 57 69 50 75 C43 69 43 57 50 47 Z" fill="#F1D412"/></svg></div>
+        <div class="lbl">App icon</div><div class="sub">Rounded squircle · 16–1024px</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px;display:flex;gap:24px;flex-wrap:wrap;align-items:center">
+      <div><div class="lbl" style="margin:0">Construction</div><div class="sub">5 leaf-petals (clover) around a golden essence-drop. Minimum clear space = petal radius. Min size 16px (icon), 88px (splash).</div></div>
+      <div style="display:flex;gap:8px;margin-left:auto;flex-wrap:wrap"><span class="badge aaa">SVG</span><span class="badge aa">Lottie splash</span><span class="badge aa">favicon</span><span class="badge aa">OG image</span></div>
+    </div>
+  </section>
+
+  <!-- 02 ILLUSTRATIONS -->
+  <section class="sec" id="illos">
+    <div class="sec-head"><span class="n">02</span><h2>Empty-state illustrations</h2><p>Flat-geometric · soft brand gradients · no outlines · one accent pop.</p></div>
+    <div class="grid g3">
+      <div class="card"><div class="swatch-illo"><svg viewBox="0 0 160 120" width="180"><defs><linearGradient id="i1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--primary-300)"/><stop offset="1" stop-color="var(--primary)"/></linearGradient></defs><circle cx="120" cy="34" r="18" fill="var(--accent)" opacity=".9"/><rect x="26" y="62" width="108" height="13" rx="6.5" fill="url(#i1)"/><rect x="26" y="82" width="74" height="13" rx="6.5" fill="var(--secondary)" opacity=".6"/><path d="M46 62 C46 44 62 40 62 40 C62 40 62 58 46 62 Z" fill="var(--primary)"/></svg></div><div class="lbl">No records yet</div><div class="sub">Generic empty list</div></div>
+      <div class="card"><div class="swatch-illo"><svg viewBox="0 0 160 120" width="180"><defs><linearGradient id="i2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--secondary)"/><stop offset="1" stop-color="var(--primary)"/></linearGradient></defs><circle cx="80" cy="58" r="34" fill="url(#i2)" opacity=".22"/><path d="M62 58 a18 18 0 1 0 36 0 a18 18 0 1 0 -36 0" fill="none" stroke="var(--primary)" stroke-width="5"/><line x1="92" y1="72" x2="108" y2="88" stroke="var(--primary)" stroke-width="6" stroke-linecap="round"/><circle cx="120" cy="34" r="9" fill="var(--accent)"/></svg></div><div class="lbl">No results</div><div class="sub">Search / filter empty</div></div>
+      <div class="card"><div class="swatch-illo"><svg viewBox="0 0 160 120" width="180"><defs><linearGradient id="i3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--primary-300)"/><stop offset="1" stop-color="var(--primary)"/></linearGradient></defs><path d="M40 70 Q40 40 64 38 Q70 60 40 70Z" fill="url(#i3)"/><path d="M64 38 Q92 42 92 70 Q66 68 64 38Z" fill="var(--primary)" opacity=".55"/><rect x="60" y="68" width="8" height="26" rx="4" fill="var(--secondary-d)"/><circle cx="118" cy="40" r="14" fill="var(--accent)" opacity=".9"/></svg></div><div class="lbl">All synced</div><div class="sub">Sync / success</div></div>
+      <div class="card"><div class="swatch-illo"><svg viewBox="0 0 160 120" width="180"><circle cx="80" cy="60" r="30" fill="var(--warning)" opacity=".18"/><path d="M80 44 v20 M80 72 v.5" stroke="var(--warning)" stroke-width="6" stroke-linecap="round"/><circle cx="80" cy="60" r="30" fill="none" stroke="var(--warning)" stroke-width="4"/></svg></div><div class="lbl">Offline</div><div class="sub">No connection</div></div>
+      <div class="card"><div class="swatch-illo"><svg viewBox="0 0 160 120" width="180"><defs><linearGradient id="i5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--primary-300)"/><stop offset="1" stop-color="var(--primary)"/></linearGradient></defs><rect x="46" y="40" width="68" height="50" rx="9" fill="url(#i5)" opacity=".22"/><path d="M46 49 L114 49" stroke="var(--primary)" stroke-width="4"/><circle cx="55" cy="44.5" r="2.4" fill="var(--primary)"/><rect x="58" y="60" width="44" height="7" rx="3.5" fill="var(--primary)" opacity=".5"/><circle cx="118" cy="36" r="10" fill="var(--accent)"/></svg></div><div class="lbl">Nothing scheduled</div><div class="sub">Calendar / tasks</div></div>
+      <div class="card"><div class="swatch-illo"><svg viewBox="0 0 160 120" width="180"><path d="M52 84 L52 50 L80 38 L108 50 L108 84 Z" fill="var(--primary)" opacity=".22"/><path d="M52 50 L80 62 L108 50 M80 62 L80 84" fill="none" stroke="var(--primary)" stroke-width="4" stroke-linejoin="round"/><circle cx="116" cy="40" r="11" fill="var(--accent)" opacity=".9"/></svg></div><div class="lbl">Empty inventory</div><div class="sub">No batches</div></div>
+    </div>
+  </section>
+
+  <!-- 03 MOTION -->
+  <section class="sec" id="motion">
+    <div class="sec-head"><span class="n">03</span><h2>Motion spec</h2><p>Hover any tile to play. Reduced-motion collapses all to instant.</p></div>
+    <div class="grid g2" style="margin-bottom:16px">
+      <div class="curve-card">
+        <svg viewBox="0 0 220 130"><rect x="0" y="0" width="220" height="130" fill="none"/><line x1="20" y1="110" x2="200" y2="110" stroke="var(--border-strong)" stroke-width="1.5"/><line x1="20" y1="110" x2="20" y2="20" stroke="var(--border-strong)" stroke-width="1.5"/><path d="M20 110 C77 110 60 20 200 20" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round"/><circle cx="20" cy="110" r="3.5" fill="var(--primary)"/><circle cx="200" cy="20" r="3.5" fill="var(--primary)"/></svg>
+        <div class="lbl">Emphasized · cubic-bezier(.32,.72,0,1)</div><div class="sub">Sheets, modals, push-nav, FAB. The signature curve.</div>
+      </div>
+      <div class="curve-card">
+        <svg viewBox="0 0 220 130"><line x1="20" y1="110" x2="200" y2="110" stroke="var(--border-strong)" stroke-width="1.5"/><line x1="20" y1="110" x2="20" y2="20" stroke="var(--border-strong)" stroke-width="1.5"/><path d="M20 110 C92 110 128 20 200 20" fill="none" stroke="var(--secondary-d)" stroke-width="3" stroke-linecap="round"/><circle cx="20" cy="110" r="3.5" fill="var(--secondary-d)"/><circle cx="200" cy="20" r="3.5" fill="var(--secondary-d)"/></svg>
+        <div class="lbl">Standard · cubic-bezier(.4,0,.2,1)</div><div class="sub">Hovers, color, opacity, small state changes.</div>
+      </div>
+    </div>
+    <div class="grid g4">
+      <div class="card"><div class="motion-demo"><span class="dot m-fade"></span><span class="hint">hover ▸ fade</span></div><div class="lbl">Fade · 200ms</div><div class="sub">Toasts, tooltips</div></div>
+      <div class="card"><div class="motion-demo"><span class="dot m-slide"></span><span class="hint">hover ▸ slide</span></div><div class="lbl">Push · 320ms</div><div class="sub">Screen transitions</div></div>
+      <div class="card"><div class="motion-demo"><span class="dot m-pop"></span><span class="hint">hover ▸ pop</span></div><div class="lbl">Pop · 120ms</div><div class="sub">Button press, FAB</div></div>
+      <div class="card"><div class="motion-demo"><span class="dot m-spin" style="border-radius:50%"></span><span class="hint">hover ▸ spin</span></div><div class="lbl">Spin · 900ms</div><div class="sub">Loaders, sync</div></div>
+    </div>
+    <div class="card" style="margin-top:16px;padding:0;overflow:hidden">
+      <table class="tok-table"><thead><tr><th>Token</th><th>Value</th><th>Used for</th></tr></thead><tbody>
+        <tr><td><b>duration.fast</b></td><td class="mono">120ms</td><td>press, hover-in</td></tr>
+        <tr><td><b>duration.base</b></td><td class="mono">200ms</td><td>fades, color, most transitions</td></tr>
+        <tr><td><b>duration.slow</b></td><td class="mono">320ms</td><td>sheets, modals, push-nav</td></tr>
+        <tr><td><b>stagger</b></td><td class="mono">40ms</td><td>list items, petal bloom</td></tr>
+        <tr><td><b>spring</b></td><td class="mono">stiffness 320 · damping 30</td><td>drag, FAB, sortable</td></tr>
+      </tbody></table>
+    </div>
+  </section>
+
+  <!-- 04 A11Y -->
+  <section class="sec" id="a11y">
+    <div class="sec-head"><span class="n">04</span><h2>Accessibility · WCAG 2.2 AA</h2><p>The rulebook every screen ships against.</p></div>
+    <h4 style="font-size:15px;margin-bottom:12px">Contrast — audited pairs</h4>
+    <div class="grid g2" style="margin-bottom:24px">
+      <div class="a11y-pair" style="background:#FAFDFA"><span style="color:#0F1A14;font-weight:600">Body on porcelain</span><span class="ratio" style="color:#0F1A14">16.4:1 <span class="badge aaa">AAA</span></span></div>
+      <div class="a11y-pair" style="background:#0D783C"><span style="color:#fff;font-weight:600">White on green CTA</span><span class="ratio" style="color:#fff">5.6:1 <span class="badge aa" style="background:rgba(255,255,255,.2);color:#fff">AA</span></span></div>
+      <div class="a11y-pair" style="background:#0A1410"><span style="color:#FAFDFA;font-weight:600">Body on dark</span><span class="ratio" style="color:#FAFDFA">16.7:1 <span class="badge aaa" style="background:rgba(93,182,131,.2);color:#5DB683">AAA</span></span></div>
+      <div class="a11y-pair" style="background:#FAFDFA"><span style="color:#4A5A52;font-weight:600">Muted on porcelain</span><span class="ratio" style="color:#4A5A52">7.0:1 <span class="badge aaa">AAA</span></span></div>
+    </div>
+    <h4 style="font-size:15px;margin-bottom:12px">Focus & touch</h4>
+    <div class="grid g2" style="margin-bottom:24px">
+      <div class="card" style="display:grid;place-items:center;gap:14px;min-height:130px"><button class="focus-demo">Register farmer</button><div class="sub" style="text-align:center">2px ring · 2px offset · brand green · never removed</div></div>
+      <div class="card" style="display:flex;align-items:center;gap:16px;min-height:130px"><div style="width:44px;height:44px;border-radius:12px;border:2px dashed var(--primary);display:grid;place-items:center;color:var(--primary);font-size:10px;font-weight:700;flex-shrink:0">44px</div><div><div class="lbl" style="margin:0">Minimum touch target</div><div class="sub">44×44px (SC 2.5.8). FAB 62px, nav items full-height.</div></div></div>
+    </div>
+    <h4 style="font-size:15px;margin-bottom:6px">Ship checklist</h4>
+    <div class="card" style="padding:6px 20px">
+      ${[
+        ['Color never the only signal','status carries icon + label, charts carry shape/label'],
+        ['Every control keyboard-reachable','logical tab order, visible focus, Esc closes overlays'],
+        ['Labels on all inputs & icon buttons','aria-label on icon-only controls'],
+        ['Text scales to 1.4× without clipping','rem-based type, no fixed-height text boxes'],
+        ['Respects prefers-reduced-motion','animations collapse to instant / opacity-only'],
+        ['Sunlight & glove test','light default, 44px targets, high-contrast tokens'],
+        ['Touch + screen-reader parity','semantic roles, live-region toasts'],
+      ].map(r=>`<div class="check-row"><span class="ck"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="t"><b>${r[0]}.</b> <span>${r[1]}</span></span></div>`).join('')}
+    </div>
+  </section>
+</div>
+
+<div class="foot">Nesso Design Ops · NR Group — supporting kit for the design system · © 2026</div>
+</div>
+
+<script>
+const root=document.documentElement,tbtn=document.getElementById('theme');
+const moon='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>';
+const sun='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4V2M12 22v-2M5 5 3.6 3.6M20.4 20.4 19 19M4 12H2M22 12h-2M5 19l-1.4 1.4M20.4 3.6 19 5M12 16.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z"/></svg>';
+function setTheme(t){root.setAttribute('data-theme',t);tbtn.innerHTML=t==='dark'?sun:moon;try{localStorage.setItem('nesso-ops-theme',t)}catch(e){}}
+try{const s=localStorage.getItem('nesso-ops-theme');setTheme(s||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){setTheme('light')}
+tbtn.onclick=()=>setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark');
+</script>
+</body>
+</html>
