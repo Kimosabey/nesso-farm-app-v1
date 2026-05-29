@@ -132,6 +132,74 @@ password: <env BOOTSTRAP_ADMIN_PASSWORD>
 
 The hardcoded fallback that FoodSign shipped (`Admin@2026` / `12345678`) is **removed**. Bootstrapping is one-time via env, and the admin must change the password on first login.
 
+## UI experience mapping — roles to surfaces
+
+17 roles do **not** mean 17 UIs. They collapse into **~5 distinct UI experiences** (+ 1 anonymous public surface). Same screen sets, different data scope, role-gated buttons.
+
+This section is the contract between roles and what design must draw.
+
+### The 5 + 2 UX experiences
+
+| # | Experience | Roles | Login | Surface | What they see |
+|---|---|---|---|---|---|
+| 1 | **Admin / Operations** | `admin`, `orgMD`, `orgNESSO`, `orgTechSupport` | password (phone/email) | Web Dashboard | Everything cross-org; full sidebar; all CRUD + exports + audit log |
+| 2 | **Field Officer** | `orgFieldOfficer`, `fieldOfficer`, `orgFieldAssistant`, `orgAgent` | phone + OTP | Mobile (primary) | Farmers where `managedBy = self`; full registration / mapping / activity flows; own approvals queue |
+| 3 | **Cluster Manager** | `flowerAgent`, `fpo`, `orgFPO`, `orgFPO1`, `orgSouhardha` | phone + OTP (mobile) · password (web) | Mobile + Web | Farmers in their cluster (`flowerAgentId / fpoId = self`); cluster-wide reports; cluster approvals |
+| 4 | **Supply Chain** | `procurementManager`, `processor` | phone + OTP (mobile) · password (web) | Mobile + Web | Procurement + Inventory (read all, write own); GRN scanner; batch transitions; QR generation |
+| 5 | **Quality Auditor** | `qualityAuditor` | password | Web only | Samples + audits (read all, transition); reports (read-only) |
+| 6 | **Farmer (self)** *(Phase 5+)* | `farmer`, `orgFarmer` | phone + OTP | Mobile (simplified variant) | Only themselves — harvest alerts, weather, own activities, own QR codes. Image-led, large icons, vernacular-first |
+| 7 | **Consumer / Public** | anonymous | none | QR Portal | Public trace timeline (privacy-redacted per farmer consent) |
+
+### What this means for design
+
+- **Mobile** ships **one screen set** (~39 screens). Tabs / FABs / actions hide based on role.
+- **Web Dashboard** ships **one screen set** (~51 pages). Sidebar items / buttons hide based on role.
+- **QR Portal** ships **one screen set** (~9 pages). Anonymous; no role logic.
+- The **Farmer (self)** UI is a Phase 5+ *variant* of the mobile app — fewer tabs, vernacular-first, image-led. Not a separate app.
+
+### What this means for engineering
+
+- **Server is the source of truth.** Backend always re-checks via `@Roles()` + `@Permission()` + scope filters (see "Backend enforcement" above).
+- **Frontend is defense in depth.** `<RequireRole roles={[...]}>` on web, role-aware navigation on mobile — these *hide* affordances, they don't *protect* data.
+- Designers draw only the "shown" state; engineering wires the role gates.
+
+### Screen visibility by role (web sidebar example)
+
+| Sidebar item | admin / orgMD | orgFieldOfficer | flowerAgent / fpo | procurementManager / processor | qualityAuditor |
+|---|---|---|---|---|---|
+| Dashboard | ✅ | ✅ (own scope) | ✅ (cluster) | ✅ | ✅ |
+| Farmers | ✅ | ✅ | ✅ | read | read |
+| Pending Approvals | ✅ | ✅ (own) | ✅ (cluster) | – | – |
+| Flower Agents tree | ✅ | – | ✅ | – | – |
+| Farms | ✅ | ✅ | ✅ | read | read |
+| Crops / Activities / Pre-Harvest | ✅ | ✅ | ✅ | read | read |
+| Samples | ✅ | create | create | – | ✅ full |
+| Audits | ✅ | – | – | – | ✅ full |
+| Procurement | ✅ | – | – | ✅ full | read |
+| Warehouses | ✅ | read | – | read | read |
+| Inventory (Batches / GRN / Movements) | ✅ | – | – | ✅ full | read |
+| QR generation | ✅ | – | – | ✅ | – |
+| Reports | ✅ | own scope | cluster | ✅ | ✅ |
+| Settings → Users | ✅ | – | – | – | – |
+| Settings → Catalogs | ✅ | read | read | read | read |
+| Settings → Audit log | ✅ | – | – | – | – |
+
+### Bottom tab visibility (mobile)
+
+| Tab | Field Officer | Cluster Manager | Procurement / Processor | Farmer (self, Phase 5+) |
+|---|---|---|---|---|
+| Dashboard | ✅ | ✅ | ✅ | ✅ |
+| Farmers list | ✅ | ✅ | – | – |
+| **+ FAB** (Register Farmer) | ✅ | ✅ | – | – |
+| Verify (approvals) | ✅ | ✅ | – | – |
+| Farms | ✅ | ✅ | – | ✅ (own) |
+| Inventory hub | – | – | ✅ | – |
+| GRN Scanner FAB | – | – | ✅ | – |
+
+The center FAB on mobile is **role-aware**: Field Officer sees "Register Farmer"; Procurement sees "Scan QR / GRN"; Farmer sees "Log Activity".
+
+---
+
 ## Future: SCIM / SSO
 
 Out of scope for v1 but the JWT claim shape leaves room for `idp: 'azuread'` and `groups: [...]` so we can wire SAML/OIDC later without rewriting the guard.
