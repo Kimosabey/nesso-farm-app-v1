@@ -194,7 +194,214 @@ export const api = {
   deleteFarmer(token: string, id: string) {
     return apiFetch<{ ok: true }>(`/farmers/${id}`, { token, method: 'DELETE' });
   },
+
+  // --- Farms ---
+  listFarms(token: string, params: { farmerId?: string; page?: number; pageSize?: number } = {}) {
+    const qs = new URLSearchParams();
+    if (params.farmerId) qs.set('farmerId', params.farmerId);
+    if (params.page) qs.set('page', String(params.page));
+    if (params.pageSize) qs.set('pageSize', String(params.pageSize));
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return apiFetch<FarmPage>(`/farms${suffix}`, { token });
+  },
+  createFarm(token: string, input: CreateFarmInput) {
+    return apiFetch<Farm>('/farms', { token, method: 'POST', body: input });
+  },
+
+  // --- Crops ---
+  listCrops(token: string, params: { farmerId?: string; farmId?: string; year?: number } = {}) {
+    const qs = new URLSearchParams();
+    if (params.farmerId) qs.set('farmerId', params.farmerId);
+    if (params.farmId) qs.set('farmId', params.farmId);
+    if (params.year) qs.set('year', String(params.year));
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return apiFetch<CropPage>(`/crops${suffix}`, { token });
+  },
+  createCrop(token: string, input: CreateCropInput) {
+    return apiFetch<Crop>('/crops', { token, method: 'POST', body: input });
+  },
+
+  // --- Activities ---
+  listActivities(
+    token: string,
+    params: {
+      farmerId?: string;
+      farmId?: string;
+      cropId?: string;
+      status?: string;
+      page?: number;
+      pageSize?: number;
+    } = {},
+  ) {
+    const qs = new URLSearchParams();
+    if (params.farmerId) qs.set('farmerId', params.farmerId);
+    if (params.farmId) qs.set('farmId', params.farmId);
+    if (params.cropId) qs.set('cropId', params.cropId);
+    if (params.status) qs.set('status', params.status);
+    if (params.page) qs.set('page', String(params.page));
+    if (params.pageSize) qs.set('pageSize', String(params.pageSize));
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return apiFetch<ActivityPage>(`/activities${suffix}`, { token });
+  },
+  getActivityStats(token: string) {
+    return apiFetch<Record<string, number>>('/activities/stats', { token });
+  },
+  createActivity(token: string, input: CreateActivityInput) {
+    return apiFetch<Activity>('/activities', { token, method: 'POST', body: input });
+  },
+
+  // --- Catalog ---
+  listInputs(token: string, params: { kind?: string; q?: string; limit?: number } = {}) {
+    const qs = new URLSearchParams();
+    if (params.kind) qs.set('kind', params.kind);
+    if (params.q) qs.set('q', params.q);
+    if (params.limit) qs.set('limit', String(params.limit));
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return apiFetch<InputCatalogItem[]>(`/catalog/inputs${suffix}`, { token });
+  },
 };
+
+// --- Farm types ---
+
+export interface Farm {
+  _id: string;
+  farmId: string;
+  farmerId: string;
+  farmName: string;
+  surveyNumber?: string;
+  farmArea: number;
+  growingArea: number;
+  organicStage: string;
+  location: { type: 'Point'; coordinates: [number, number] };
+  address?: { state?: string; district?: string; village?: string; pincode?: string };
+  status: 'active' | 'archived';
+  approvalStatus: 'pending' | 'approved' | 'rejected';
+  createdAt: string;
+}
+
+export interface FarmPage {
+  data: Farm[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface CreateFarmInput {
+  farmerId: string;
+  farmName: string;
+  surveyNumber?: string;
+  farmArea: number;
+  growingArea?: number;
+  organicStage?: 'Certified' | 'InTransition' | 'Conventional';
+  latitude: number;
+  longitude: number;
+  address?: { state?: string; district?: string; village?: string; pincode?: string };
+}
+
+// --- Crop types ---
+
+export interface Crop {
+  _id: string;
+  cropId: string;
+  farmId: string;
+  farmerId: string;
+  cropName: string;
+  cropVariety?: string;
+  cropType: 'Main' | 'Inter' | 'Border';
+  unit: string;
+  acre: number;
+  estHarvest: number;
+  practice: string;
+  season: string;
+  sowingDate?: string;
+  harvestDate?: string;
+  year?: number;
+  createdAt: string;
+}
+
+export interface CropPage {
+  data: Crop[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface CreateCropInput {
+  farmId: string;
+  farmerId: string;
+  cropName: string;
+  cropVariety?: string;
+  cropType?: 'Main' | 'Inter' | 'Border';
+  unit?: 'kg' | 'quintal' | 'tonne' | 'nos';
+  acre?: number;
+  estHarvest?: number;
+  practice?: 'CONVENTIONAL' | 'ORGANIC';
+  season?: 'Kharif' | 'Rabi' | 'Summer' | 'Perennial' | 'Anytime' | 'All';
+  sowingDate?: string;
+  harvestDate?: string;
+}
+
+// --- Activity types ---
+
+export interface ActivityInput {
+  kind: 'Chemical' | 'Organic' | 'Inventory' | 'Other';
+  itemId?: string;
+  name: string;
+  quantity: number;
+  unit?: string;
+  cost?: number;
+}
+
+export interface Activity {
+  _id: string;
+  farmId: string;
+  farmerId: string;
+  cropId?: string;
+  activity: string;
+  scheduledOn?: string;
+  completedDate?: string;
+  enteredDate: string;
+  status: 'Pending' | 'Completed' | 'Overdue' | 'Cancelled';
+  inputs: ActivityInput[];
+  totalCost: number;
+  notes?: string;
+  photos?: string[];
+  createdAt: string;
+}
+
+export interface ActivityPage {
+  data: Activity[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface CreateActivityInput {
+  farmId: string;
+  farmerId: string;
+  cropId?: string;
+  activity: string;
+  scheduledOn?: string;
+  completedDate?: string;
+  status?: 'Pending' | 'Completed' | 'Overdue' | 'Cancelled';
+  inputs?: ActivityInput[];
+  notes?: string;
+  clientRequestId?: string;
+}
+
+// --- Catalog types ---
+
+export interface InputCatalogItem {
+  _id: string;
+  code: string;
+  name: string;
+  kind: 'Chemical' | 'Organic' | 'Inventory' | 'Other';
+  unit: string;
+  defaultCost: number;
+}
 
 // --- Token from cookie ---
 
