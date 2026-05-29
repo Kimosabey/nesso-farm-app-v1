@@ -11,6 +11,9 @@ import { AuthModule } from './auth/auth.module';
 import { FilesModule } from './files/files.module';
 import { FarmersModule } from './farmers/farmers.module';
 import { FarmsModule } from './farms/farms.module';
+import { CropsModule } from './crops/crops.module';
+import { ActivitiesModule } from './activities/activities.module';
+import { CatalogModule } from './catalog/catalog.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
@@ -49,6 +52,9 @@ import { HealthModule } from './health/health.module';
     FilesModule,
     FarmersModule,
     FarmsModule,
+    CropsModule,
+    ActivitiesModule,
+    CatalogModule,
     HealthModule,
   ],
   providers: [

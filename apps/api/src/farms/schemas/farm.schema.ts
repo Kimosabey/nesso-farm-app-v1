@@ -27,6 +27,7 @@ export class FarmAddress {
   @Prop() taluka?: string;
   @Prop() hobli?: string;
   @Prop() city?: string;
+  @Prop() village?: string;
   @Prop() pincode?: string;
 }
 export const FarmAddressSchema = SchemaFactory.createForClass(FarmAddress);

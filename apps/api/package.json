@@ -9,6 +9,8 @@
     "build": "nest build",
     "start": "node dist/main.js",
     "seed:admin": "node dist/scripts/seed-admin.js",
+    "seed:catalog": "node dist/scripts/seed-catalog.js",
+    "seed": "pnpm seed:admin && pnpm seed:catalog",
     "lint": "eslint \"src/**/*.ts\"",
     "typecheck": "tsc --noEmit -p .",
     "test": "jest --passWithNoTests",

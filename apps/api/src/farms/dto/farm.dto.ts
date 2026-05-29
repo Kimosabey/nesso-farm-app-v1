@@ -24,6 +24,7 @@ class FarmAddressDto {
   @IsOptional() @IsString() @MaxLength(60) taluka?: string;
   @IsOptional() @IsString() @MaxLength(60) hobli?: string;
   @IsOptional() @IsString() @MaxLength(60) city?: string;
+  @IsOptional() @IsString() @MaxLength(60) village?: string;
   @IsOptional() @IsString() @MaxLength(10) pincode?: string;
 }
 
