@@ -1,0 +1,59 @@
+import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
+import { AuthService, AuthSuccess } from './auth.service';
+import { PasswordLoginDto, RefreshDto } from './dto/login.dto';
+import { Public } from '../common/decorators/public.decorator';
+import { CurrentUser, CurrentUserPayload } from '../common/decorators/current-user.decorator';
+import { UsersService } from '../users/users.service';
+
+@ApiTags('auth')
+@Controller('auth')
+export class AuthController {
+  constructor(
+    private readonly auth: AuthService,
+    private readonly users: UsersService,
+  ) {}
+
+  @Public()
+  @Post('password')
+  @HttpCode(200)
+  @Throttle({ short: { ttl: 60_000, limit: 5 } })
+  passwordLogin(@Body() dto: PasswordLoginDto): Promise<AuthSuccess> {
+    return this.auth.passwordLogin(dto.username, dto.password);
+  }
+
+  @Public()
+  @Post('refresh')
+  @HttpCode(200)
+  @Throttle({ short: { ttl: 60_000, limit: 20 } })
+  refresh(@Body() dto: RefreshDto): Promise<AuthSuccess> {
+    return this.auth.refresh(dto.refreshToken);
+  }
+
+  @ApiBearerAuth()
+  @Get('me')
+  async me(@CurrentUser() current: CurrentUserPayload) {
+    const user = await this.users.findById(current.userId);
+    if (!user) return null;
+    return {
+      id: user.id,
+      phone: user.phone,
+      role: user.role,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      preferredLanguage: user.preferredLanguage,
+      lastLoginAt: user.lastLoginAt,
+      mustChangePassword: user.mustChangePassword,
+    };
+  }
+
+  @ApiBearerAuth()
+  @Post('logout')
+  @HttpCode(204)
+  logout(): void {
+    // Phase 1.5 will blacklist the refresh token's jti in Redis.
+    // For now the client discards the tokens; access expiry handles the rest.
+  }
+}

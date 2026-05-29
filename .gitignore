@@ -72,3 +72,9 @@ coverage
 .parcel-cache
 .eslintcache
 *.tsbuildinfo
+
+# Stale TS emission inside src/ (NestJS sometimes mis-emits when tsconfig changes)
+apps/api/src/**/*.d.ts
+apps/api/src/**/*.d.ts.map
+apps/api/src/**/*.js
+apps/api/src/**/*.js.map

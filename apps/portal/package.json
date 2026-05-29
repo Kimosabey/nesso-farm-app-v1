@@ -1,0 +1,39 @@
+{
+  "name": "@nesso/portal",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Nesso public QR traceability portal (Next.js 15)",
+  "scripts": {
+    "dev": "next dev -p 3002",
+    "build": "next build",
+    "start": "next start -p 3002",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run --passWithNoTests",
+    "clean": "rimraf .next"
+  },
+  "dependencies": {
+    "@nesso/design-system": "workspace:*",
+    "@nesso/i18n": "workspace:*",
+    "framer-motion": "^11.11.17",
+    "lucide-react": "^0.460.0",
+    "next": "^15.0.3",
+    "next-themes": "^0.4.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@nesso/config": "workspace:*",
+    "@types/node": "^20.17.6",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.14.0",
+    "eslint-config-next": "^15.0.3",
+    "postcss": "^8.4.49",
+    "rimraf": "^6.0.1",
+    "tailwindcss": "^3.4.15",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.4"
+  }
+}

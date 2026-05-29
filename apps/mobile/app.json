@@ -1,0 +1,63 @@
+{
+  "expo": {
+    "name": "Nesso",
+    "slug": "nesso",
+    "scheme": "nesso",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0D783C"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ai.graylinx.nesso.farmer",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Nesso uses your location to map farms accurately and tag field activities.",
+        "NSCameraUsageDescription": "Nesso uses the camera to capture ID proofs, farm photos, and scan batch QR codes.",
+        "NSPhotoLibraryUsageDescription": "Nesso may save and read photos for KYC and farm documentation.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "ai.graylinx.nesso.farmer",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0D783C"
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "POST_NOTIFICATIONS"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-splash-screen",
+      "expo-localization",
+      "expo-camera",
+      "expo-location",
+      "expo-font",
+      "expo-notifications"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "REPLACE_AFTER_EAS_INIT"
+      }
+    }
+  }
+}

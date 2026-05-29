@@ -1,0 +1,29 @@
+@import '@nesso/design-system/theme.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-bg text-fg font-sans antialiased;
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-bg;
+  }
+}
+
+@layer components {
+  .brand-aurora {
+    background:
+      radial-gradient(80% 60% at 20% 10%, rgba(13, 120, 60, 0.18), transparent 60%),
+      radial-gradient(60% 40% at 80% 20%, rgba(241, 212, 18, 0.16), transparent 60%),
+      radial-gradient(60% 60% at 50% 100%, rgba(81, 142, 109, 0.20), transparent 60%);
+  }
+  .glass {
+    background: rgb(var(--glass-bg) / var(--glass-bg-alpha));
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid rgb(var(--glass-border) / var(--glass-border-alpha));
+  }
+}
