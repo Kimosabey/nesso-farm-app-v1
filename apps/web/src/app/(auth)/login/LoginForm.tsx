@@ -19,6 +19,7 @@ export function LoginForm() {
           autoComplete="username"
           required
           inputMode="tel"
+          defaultValue={process.env.NODE_ENV === 'production' ? '' : '9066666481'}
           className="h-11 w-full rounded-md border border-border-strong bg-bg-elevated px-3 text-base text-fg outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
           placeholder="9066666481"
         />
@@ -30,6 +31,7 @@ export function LoginForm() {
           type="password"
           autoComplete="current-password"
           required
+          defaultValue={process.env.NODE_ENV === 'production' ? '' : 'Nesso!Admin!2026'}
           className="h-11 w-full rounded-md border border-border-strong bg-bg-elevated px-3 text-base text-fg outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
         />
       </label>
