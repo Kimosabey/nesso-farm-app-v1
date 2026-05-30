@@ -1,10 +1,18 @@
 {
   "cli": {
     "version": ">= 14.0.0",
-    "appVersionSource": "remote"
+    "appVersionSource": "remote",
+    "requireCommit": false
   },
   "build": {
+    "base": {
+      "node": "20.19.4",
+      "env": {
+        "EAS_NO_VCS": "0"
+      }
+    },
     "development": {
+      "extends": "base",
       "developmentClient": true,
       "distribution": "internal",
       "channel": "development",
@@ -16,6 +24,7 @@
       }
     },
     "preview": {
+      "extends": "base",
       "distribution": "internal",
       "channel": "preview",
       "android": {
@@ -23,6 +32,7 @@
       }
     },
     "production": {
+      "extends": "base",
       "channel": "production",
       "autoIncrement": true,
       "android": {
