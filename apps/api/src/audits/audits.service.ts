@@ -3,13 +3,17 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, FilterQuery } from 'mongoose';
 import { Audit, AuditDocument } from './schemas/audit.schema';
 import { CreateAuditDto, ListAuditsQueryDto, ReviewAuditDto } from './dto/audit.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 const DEFAULT_PAGE_SIZE = 25;
 const MAX_PAGE_SIZE = 200;
 
 @Injectable()
 export class AuditsService {
-  constructor(@InjectModel(Audit.name) private readonly model: Model<AuditDocument>) {}
+  constructor(
+    @InjectModel(Audit.name) private readonly model: Model<AuditDocument>,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   async create(dto: CreateAuditDto, actorId: string): Promise<AuditDocument> {
     if (new Date(dto.auditDate) > new Date()) {
@@ -84,6 +88,25 @@ export class AuditsService {
       .findOneAndUpdate({ _id: id, isDeleted: false }, { $set: patch }, { new: true })
       .exec();
     if (!updated) throw new NotFoundException('Audit not found');
+
+    // Notify the auditor's creator
+    if (updated.createdBy && updated.createdBy !== reviewerId) {
+      void this.notifications
+        .create({
+          userId: updated.createdBy,
+          kind: 'approval',
+          title: dto.approved ? 'Audit approved' : 'Audit rejected',
+          body: dto.approved
+            ? `Your ${updated.auditType.toLowerCase()} audit was approved.`
+            : `Your ${updated.auditType.toLowerCase()} audit was rejected: ${dto.reason}`,
+          data: { auditId: updated._id?.toString(), approved: dto.approved },
+        })
+        .catch((e) => {
+          // eslint-disable-next-line no-console
+          console.warn('[audit-notify] failed:', e);
+        });
+    }
+
     return updated;
   }
 

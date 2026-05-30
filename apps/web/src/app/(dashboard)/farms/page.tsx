@@ -56,8 +56,16 @@ export default async function FarmsPage() {
                 const farmer = farmerById.get(f.farmerId);
                 return (
                   <tr key={f._id} className="transition hover:bg-bg-muted/40">
-                    <td className="px-4 py-3 font-mono text-xs text-fg-subtle">{f.farmId}</td>
-                    <td className="px-4 py-3 font-medium text-fg">{f.farmName}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-fg-subtle">
+                      <Link href={`/farms/${f._id}`} className="hover:text-primary">
+                        {f.farmId}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3 font-medium text-fg">
+                      <Link href={`/farms/${f._id}`} className="hover:text-primary">
+                        {f.farmName}
+                      </Link>
+                    </td>
                     <td className="hidden px-4 py-3 md:table-cell">
                       {farmer ? (
                         <Link

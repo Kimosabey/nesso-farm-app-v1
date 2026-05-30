@@ -181,10 +181,10 @@ export class QrService {
             village: farmer.address?.village,
             district: farmer.address?.district,
             state: farmer.address?.state,
-            enrolledYear:
-              (farmer as { createdAt?: Date }).createdAt
-                ? new Date((farmer as { createdAt: Date }).createdAt).getFullYear()
-                : undefined,
+            enrolledYear: (() => {
+              const ts = (farmer as unknown as { createdAt?: Date | string }).createdAt;
+              return ts ? new Date(ts).getFullYear() : undefined;
+            })(),
           }
         : undefined,
       farm: farm

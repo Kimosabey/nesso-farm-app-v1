@@ -8,6 +8,7 @@ import {
   TransitionSampleDto,
 } from './dto/sample.dto';
 import { CounterService } from '../common/counter/counter.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 const DEFAULT_PAGE_SIZE = 25;
 const MAX_PAGE_SIZE = 200;
@@ -27,13 +28,14 @@ export class SamplesService {
   constructor(
     @InjectModel(Sample.name) private readonly model: Model<SampleDocument>,
     private readonly counter: CounterService,
+    private readonly notifications: NotificationsService,
   ) {}
 
-  async create(dto: CreateSampleDto): Promise<SampleDocument> {
+  async create(dto: CreateSampleDto, actorId?: string): Promise<SampleDocument> {
     const year = new Date().getFullYear();
     const n = await this.counter.next(`sample:${year}`);
     const sampleCode = `NES-S-${year}-${String(n).padStart(5, '0')}`;
-    return this.model.create({ ...dto, sampleCode, status: 'Queue' });
+    return this.model.create({ ...dto, sampleCode, status: 'Queue', createdBy: actorId });
   }
 
   async list(query: ListSamplesQueryDto) {
@@ -105,6 +107,23 @@ export class SamplesService {
       .findOneAndUpdate({ _id: id, isDeleted: false }, { $set: patch }, { new: true })
       .exec();
     if (!updated) throw new NotFoundException('Sample not found');
+
+    // Notify the sample creator that their sample changed state
+    if (updated.createdBy) {
+      void this.notifications
+        .create({
+          userId: updated.createdBy,
+          kind: 'system',
+          title: `Sample ${updated.sampleCode} → ${dto.status}`,
+          body: `${updated.crop} (${updated.variety}) is now ${dto.status}.`,
+          data: { sampleId: updated._id?.toString(), status: dto.status },
+        })
+        .catch((e) => {
+          // eslint-disable-next-line no-console
+          console.warn('[sample-notify] failed:', e);
+        });
+    }
+
     return updated;
   }
 

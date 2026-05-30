@@ -51,6 +51,9 @@ export class Sample {
   @Prop()
   notes?: string;
 
+  @Prop({ index: true })
+  createdBy?: string;
+
   @Prop({ default: false, index: true })
   isDeleted!: boolean;
 }

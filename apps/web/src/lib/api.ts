@@ -363,6 +363,16 @@ export const api = {
     });
   },
 
+  // --- Farms (detail + weather) ---
+  getFarm(token: string, id: string) {
+    return apiFetch<Farm>(`/farms/${id}`, { token });
+  },
+
+  // --- Weather ---
+  weatherForFarm(token: string, farmId: string) {
+    return apiFetch<WeatherSnapshot>(`/weather/farm/${farmId}`, { token });
+  },
+
   // --- Inventory ---
   listInventory(
     token: string,
@@ -650,6 +660,31 @@ export interface InputCatalogItem {
   kind: 'Chemical' | 'Organic' | 'Inventory' | 'Other';
   unit: string;
   defaultCost: number;
+}
+
+// --- Weather types ---
+
+export interface WeatherSnapshot {
+  fetchedAt: string;
+  location: { latitude: number; longitude: number; sourceFarmId?: string };
+  current: {
+    tempC: number;
+    feelsLikeC?: number;
+    humidity?: number;
+    windKmh?: number;
+    code?: number;
+    description?: string;
+  };
+  daily: Array<{
+    date: string;
+    minC: number;
+    maxC: number;
+    precipMm?: number;
+    precipProbability?: number;
+    code?: number;
+    description?: string;
+  }>;
+  advisories: string[];
 }
 
 // --- Reports types ---

@@ -22,6 +22,7 @@ import { QrModule } from './qr/qr.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReportsModule } from './reports/reports.module';
+import { WeatherModule } from './weather/weather.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
@@ -71,6 +72,7 @@ import { HealthModule } from './health/health.module';
     InventoryModule,
     NotificationsModule,
     ReportsModule,
+    WeatherModule,
     HealthModule,
   ],
   providers: [

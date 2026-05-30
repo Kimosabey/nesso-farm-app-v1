@@ -9,6 +9,7 @@ import {
   ApproveFarmerDto,
 } from './dto/farmer.dto';
 import { CounterService } from '../common/counter/counter.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 const DEFAULT_PAGE_SIZE = 25;
 const MAX_PAGE_SIZE = 200;
@@ -26,6 +27,7 @@ export class FarmersService {
   constructor(
     @InjectModel(Farmer.name) private readonly model: Model<FarmerDocument>,
     private readonly counter: CounterService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async create(dto: CreateFarmerDto, actorId: string): Promise<FarmerDocument> {
@@ -116,6 +118,27 @@ export class FarmersService {
       .findOneAndUpdate({ _id: id, isDeleted: false }, { $set: update }, { new: true })
       .exec();
     if (!doc) throw new NotFoundException('Farmer not found');
+
+    // Best-effort: notify the user who onboarded this farmer
+    if (doc.managedBy && doc.managedBy !== actorId) {
+      void this.notifications
+        .create({
+          userId: doc.managedBy,
+          kind: 'approval',
+          title: dto.approved ? 'Farmer approved' : 'Farmer rejected',
+          body: dto.approved
+            ? `${doc.firstName} ${doc.lastName ?? ''} (${doc.farmerId}) has been approved.`
+            : `${doc.firstName} ${doc.lastName ?? ''} (${doc.farmerId}) was rejected${
+                dto.reason ? `: ${dto.reason}` : '.'
+              }`,
+          data: { farmerId: doc._id?.toString(), approved: dto.approved },
+        })
+        .catch((e) => {
+          // eslint-disable-next-line no-console
+          console.warn('[approval-notify] failed:', e);
+        });
+    }
+
     return doc;
   }
 

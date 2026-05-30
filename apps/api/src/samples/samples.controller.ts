@@ -6,6 +6,7 @@ import {
   ListSamplesQueryDto,
   TransitionSampleDto,
 } from './dto/sample.dto';
+import { CurrentUser, CurrentUserPayload } from '../common/decorators/current-user.decorator';
 
 @ApiTags('samples')
 @ApiBearerAuth()
@@ -29,8 +30,8 @@ export class SamplesController {
   }
 
   @Post()
-  create(@Body() dto: CreateSampleDto) {
-    return this.samples.create(dto);
+  create(@Body() dto: CreateSampleDto, @CurrentUser() user: CurrentUserPayload) {
+    return this.samples.create(dto, user.userId);
   }
 
   @Post(':id/transition')
