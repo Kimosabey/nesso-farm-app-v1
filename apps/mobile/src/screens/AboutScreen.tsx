@@ -1,116 +1,216 @@
-import { View, Text, Pressable, ScrollView, Alert } from 'react-native';
+/**
+ * About — 100% spec parity with design handoff (AboutScreen).
+ *
+ * Spec source: docs/.../design_handoff_nesso/app/screens_settings.jsx — AboutScreen
+ *   - PushHeader "About"
+ *   - Centered logo tile, "NESSO", tagline "Farm to fork, verified"
+ *   - Mono version line: v1.0.0 · build · NR Group
+ *   - Links card: Privacy policy, Terms of service, Contact support (·email),
+ *     Open-source licenses
+ *   - Footer: © NR Group
+ */
+import { View, Text, Pressable, ScrollView, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ChevronLeft, Code2, ExternalLink } from 'lucide-react-native';
+import { ChevronLeft, Shield, FileText, Phone, ScrollText, ChevronRight } from 'lucide-react-native';
 import type { RootStackParamList } from '../../App';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'About'>;
 
+const C = {
+  primary: '#0D783C',
+  secondaryD: '#3C6B51',
+  info: '#0E7490',
+  warning: '#9A8407',
+  bg: '#FAFDFA',
+  bgElevated: '#FFFFFF',
+  fg: '#0F1A14',
+  fgMuted: '#4A5A52',
+  fgSubtle: '#7A8A82',
+  border: '#DDE6E0',
+};
+
+function tint(hex: string): string {
+  if (hex === C.primary) return 'rgba(13,120,60,0.14)';
+  if (hex === C.secondaryD) return 'rgba(60,107,81,0.14)';
+  if (hex === C.info) return 'rgba(14,116,144,0.14)';
+  if (hex === C.warning) return 'rgba(154,132,7,0.14)';
+  return 'rgba(13,120,60,0.14)';
+}
+
 export function AboutScreen({ navigation }: Props) {
-  const showComingSoon = () => {
-    Alert.alert('Coming soon', 'This page is not available yet.', [{ text: 'OK' }]);
-  };
+  const comingSoon = (what: string) => Alert.alert(what, 'Coming soon.');
 
   return (
-    <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }} edges={['top']}>
       {/* Header */}
-      <View className="flex-row items-center border-b border-border bg-bg-elevated px-4 py-4">
-        <Pressable onPress={() => navigation.goBack()} className="mr-3 p-1">
-          <ChevronLeft size={24} color="#0D783C" />
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 8,
+          paddingHorizontal: 12,
+          paddingVertical: 10,
+          backgroundColor: C.bgElevated,
+          borderBottomWidth: 1,
+          borderBottomColor: C.border,
+        }}
+      >
+        <Pressable
+          onPress={() => navigation.goBack()}
+          hitSlop={8}
+          style={{
+            width: 42,
+            height: 42,
+            borderRadius: 21,
+            backgroundColor: C.bgElevated,
+            borderWidth: 1.5,
+            borderColor: C.border,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <ChevronLeft size={22} color={C.fg} />
         </Pressable>
-        <Text className="font-display text-xl text-fg">About</Text>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: C.fg, letterSpacing: -0.2 }}>
+          About
+        </Text>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 48 }}>
-        {/* ---------------------------------------------------------------- */}
-        {/* Hero                                                               */}
-        {/* ---------------------------------------------------------------- */}
-        <View className="items-center px-6 py-12">
-          {/* Logo text */}
-          <Text
-            className="font-display text-primary"
-            style={{ fontSize: 48, fontWeight: '800', letterSpacing: -1 }}
-          >
-            Nesso
-          </Text>
-          <Text className="mt-1 text-base text-fg-subtle">Farm-to-fork traceability platform</Text>
-
-          {/* Version badge */}
-          <View className="mt-4 rounded-full border border-border bg-bg-elevated px-4 py-1.5">
-            <Text className="text-sm text-fg-subtle">
-              Version 0.0.1 · Built with ❤ for NR Group
-            </Text>
-          </View>
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: 30,
+          paddingBottom: 28,
+          alignItems: 'center',
+        }}
+      >
+        {/* Logo tile */}
+        <View
+          style={{
+            width: 84,
+            height: 84,
+            borderRadius: 24,
+            backgroundColor: '#fff',
+            alignItems: 'center',
+            justifyContent: 'center',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.12,
+            shadowRadius: 16,
+            elevation: 4,
+          }}
+        >
+          <Image
+            source={require('../../assets/nesso-logo.jpeg')}
+            style={{ width: 60, height: 60, borderRadius: 12 }}
+            resizeMode="contain"
+          />
         </View>
 
-        {/* ---------------------------------------------------------------- */}
-        {/* Mission                                                            */}
-        {/* ---------------------------------------------------------------- */}
-        <View className="mx-4 rounded-2xl border border-border bg-bg-elevated p-5">
-          <Text className="mb-2 text-xs font-semibold uppercase tracking-wider text-fg-subtle">
-            Our Mission
-          </Text>
-          <Text className="leading-6 text-fg">
-            Nesso exists to bring verified, transparent traceability to every step of the farming
-            journey. We empower field agents to register and manage farmers digitally, ensuring that
-            every harvest can be traced from soil to shelf.
-          </Text>
-          <Text className="mt-3 leading-6 text-fg">
-            By connecting farmers, agents, and buyers on a single platform, Nesso creates trust,
-            reduces fraud, and helps smallholder farmers access fair markets with confidence.
-          </Text>
+        <Text
+          style={{ fontSize: 24, fontWeight: '700', color: C.fg, marginTop: 18, letterSpacing: 1 }}
+        >
+          NESSO
+        </Text>
+        <Text style={{ fontSize: 14, color: C.fgMuted, marginTop: 4 }}>Farm to fork, verified</Text>
+        <Text
+          style={{ fontSize: 12.5, color: C.fgSubtle, marginTop: 12, fontFamily: 'monospace' }}
+        >
+          v1.0.0 · build 2026.05.29 · NR Group
+        </Text>
+
+        {/* Links */}
+        <View
+          style={{
+            width: '100%',
+            marginTop: 28,
+            backgroundColor: C.bgElevated,
+            borderRadius: 18,
+            borderWidth: 1,
+            borderColor: C.border,
+            overflow: 'hidden',
+          }}
+        >
+          <LinkRow
+            icon={<Shield size={18} color={C.primary} />}
+            tintColor={C.primary}
+            label="Privacy policy"
+            onPress={() => comingSoon('Privacy policy')}
+          />
+          <LinkRow
+            icon={<FileText size={18} color={C.info} />}
+            tintColor={C.info}
+            label="Terms of service"
+            onPress={() => comingSoon('Terms of service')}
+          />
+          <LinkRow
+            icon={<Phone size={18} color={C.secondaryD} />}
+            tintColor={C.secondaryD}
+            label="Contact support"
+            value="help@nesso.in"
+            onPress={() => comingSoon('Contact support')}
+          />
+          <LinkRow
+            icon={<ScrollText size={18} color={C.warning} />}
+            tintColor={C.warning}
+            label="Open-source licenses"
+            onPress={() => comingSoon('Open-source licenses')}
+            last
+          />
         </View>
 
-        {/* ---------------------------------------------------------------- */}
-        {/* Links                                                              */}
-        {/* ---------------------------------------------------------------- */}
-        <View className="mx-4 mt-4 rounded-2xl border border-border bg-bg-elevated">
-          <Text className="border-b border-border px-5 pb-3 pt-4 text-xs font-semibold uppercase tracking-wider text-fg-subtle">
-            Legal
-          </Text>
-          <Pressable
-            onPress={showComingSoon}
-            className="flex-row items-center border-b border-border px-5 py-4"
-          >
-            <Text className="flex-1 text-base text-fg">Privacy Policy</Text>
-            <ExternalLink size={16} color="#7A8A82" />
-          </Pressable>
-          <Pressable
-            onPress={showComingSoon}
-            className="flex-row items-center px-5 py-4"
-          >
-            <Text className="flex-1 text-base text-fg">Terms of Service</Text>
-            <ExternalLink size={16} color="#7A8A82" />
-          </Pressable>
-        </View>
-
-        {/* ---------------------------------------------------------------- */}
-        {/* Developer credit                                                   */}
-        {/* ---------------------------------------------------------------- */}
-        <View className="mx-4 mt-4 rounded-2xl border border-border bg-bg-elevated p-5">
-          <Text className="mb-3 text-xs font-semibold uppercase tracking-wider text-fg-subtle">
-            Developed by
-          </Text>
-          <View className="flex-row items-center gap-3">
-            <View
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 20,
-                backgroundColor: 'rgba(13,120,60,0.1)',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Code2 size={20} color="#0D783C" />
-            </View>
-            <View>
-              <Text className="font-medium text-fg">Harshan Aiyappa</Text>
-              <Text className="mt-0.5 text-sm text-fg-subtle">github.com/harshanaiyappa</Text>
-            </View>
-          </View>
-        </View>
+        <Text style={{ fontSize: 12, color: C.fgSubtle, marginTop: 24, textAlign: 'center' }}>
+          © 2026 NR Group · Made for Indian horticulture
+        </Text>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function LinkRow({
+  icon,
+  tintColor,
+  label,
+  value,
+  onPress,
+  last,
+}: {
+  icon: React.ReactNode;
+  tintColor: string;
+  label: string;
+  value?: string;
+  onPress: () => void;
+  last?: boolean;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 13,
+        paddingHorizontal: 16,
+        paddingVertical: 14,
+        borderBottomWidth: last ? 0 : 1,
+        borderBottomColor: C.border,
+      }}
+    >
+      <View
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 10,
+          backgroundColor: tint(tintColor),
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {icon}
+      </View>
+      <Text style={{ flex: 1, fontSize: 15, fontWeight: '600', color: C.fg }}>{label}</Text>
+      {value ? <Text style={{ fontSize: 14, color: C.fgMuted }}>{value}</Text> : null}
+      <ChevronRight size={18} color={C.fgSubtle} />
+    </Pressable>
   );
 }

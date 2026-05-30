@@ -28,6 +28,9 @@ import { InventoryScreen } from '@/screens/InventoryScreen';
 import { ProcurementScreen } from '@/screens/ProcurementScreen';
 import { SamplesScreen } from '@/screens/SamplesScreen';
 import { AuditScreen } from '@/screens/AuditScreen';
+import { LocationPickerScreen } from '@/screens/LocationPickerScreen';
+import { OfflineMapsScreen } from '@/screens/OfflineMapsScreen';
+import { SyncScreen } from '@/screens/SyncScreen';
 import { OtpScreen } from '@/screens/OtpScreen';
 import type { OtpConfirmation } from '@/firebase/auth';
 import { sync } from '@/sync/SyncManager';
@@ -60,6 +63,9 @@ export type RootStackParamList = {
   Procurement: undefined;
   Samples: undefined;
   Audit: undefined;
+  LocationPicker: { lat?: number; lng?: number };
+  OfflineMaps: undefined;
+  Sync: undefined;
   Otp: { phone: string; confirmation: OtpConfirmation };
 };
 
@@ -104,6 +110,9 @@ function App() {
           <Stack.Screen name="Procurement" component={ProcurementScreen} />
           <Stack.Screen name="Samples" component={SamplesScreen} />
           <Stack.Screen name="Audit" component={AuditScreen} />
+          <Stack.Screen name="LocationPicker" component={LocationPickerScreen} />
+          <Stack.Screen name="OfflineMaps" component={OfflineMapsScreen} />
+          <Stack.Screen name="Sync" component={SyncScreen} />
           <Stack.Screen name="Otp" component={OtpScreen} />
         </Stack.Navigator>
       </NavigationContainer>

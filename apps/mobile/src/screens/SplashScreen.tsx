@@ -208,6 +208,8 @@ export function SplashScreen({ navigation }: Props) {
       ]).start();
     }, 900);
 
+    let navigating = false;
+
     const doNavigate = async (): Promise<void> => {
       const me = await loadSessionFromStorage();
       if (!mounted) return;
@@ -215,8 +217,8 @@ export function SplashScreen({ navigation }: Props) {
     };
 
     navigateAway.current = (): void => {
-      if (!mounted) return;
-      mounted = false;
+      if (!mounted || navigating) return;
+      navigating = true;
       void doNavigate();
     };
 

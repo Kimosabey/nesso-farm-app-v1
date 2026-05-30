@@ -12,7 +12,7 @@ export default function PortalHomePage() {
           Scan a Nesso QR
         </h1>
         <p className="mx-auto mt-4 max-w-md text-base text-fg-muted">
-          Open the camera on your phone and scan any Nesso batch QR. You'll see the farmer, the
+          Open the camera on your phone and scan any Nesso batch QR. You&apos;ll see the farmer, the
           farm, the crop, and every stage of the journey.
         </p>
         <div className="mt-8 flex justify-center">

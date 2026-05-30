@@ -10,6 +10,9 @@ const nextConfig = {
   // Sign-in submit silently fail). Add more origins here if you test from
   // other devices/IPs.
   allowedDevOrigins: ['192.168.1.4', '*.local'],
+  // Lint runs as a dedicated CI job; don't fail the production build on
+  // ESLint content rules. Types are still enforced by the typecheck job.
+  eslint: { ignoreDuringBuilds: true },
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion'],
   },
