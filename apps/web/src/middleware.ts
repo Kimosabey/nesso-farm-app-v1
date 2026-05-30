@@ -14,6 +14,7 @@ const PROTECTED_PREFIXES = [
   '/warehouses',
   '/inventory',
   '/reports',
+  '/notifications',
   '/settings',
 ];
 

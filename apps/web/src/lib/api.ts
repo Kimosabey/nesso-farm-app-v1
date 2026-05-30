@@ -322,6 +322,47 @@ export const api = {
     return apiFetch<WarehousePage>(`/warehouses${suffix}`, { token });
   },
 
+  // --- Reports ---
+  preHarvestReport(
+    token: string,
+    params: {
+      approvalStatus?: string;
+      includeFlowerAgents?: boolean;
+      includeMissingFarm?: boolean;
+    } = {},
+  ) {
+    const qs = new URLSearchParams();
+    if (params.approvalStatus) qs.set('approvalStatus', params.approvalStatus);
+    if (params.includeFlowerAgents === false) qs.set('includeFlowerAgents', 'false');
+    if (params.includeMissingFarm) qs.set('includeMissingFarm', 'true');
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return apiFetch<PreHarvestReport>(`/reports/pre-harvest${suffix}`, { token });
+  },
+  farmerSummary(token: string, params: { farmerId: string; from?: string; to?: string }) {
+    const qs = new URLSearchParams({ farmerId: params.farmerId });
+    if (params.from) qs.set('from', params.from);
+    if (params.to) qs.set('to', params.to);
+    return apiFetch<FarmerSummary>(`/reports/farmer-summary?${qs.toString()}`, { token });
+  },
+
+  // --- Notifications ---
+  listNotifications(token: string, params: { page?: number; pageSize?: number } = {}) {
+    const qs = new URLSearchParams();
+    if (params.page) qs.set('page', String(params.page));
+    if (params.pageSize) qs.set('pageSize', String(params.pageSize));
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return apiFetch<NotificationInbox>(`/notifications${suffix}`, { token });
+  },
+  markNotificationRead(token: string, id: string) {
+    return apiFetch<void>(`/notifications/${id}/read`, { token, method: 'PATCH' });
+  },
+  markAllNotificationsRead(token: string) {
+    return apiFetch<{ updated: number }>('/notifications/read-all', {
+      token,
+      method: 'PATCH',
+    });
+  },
+
   // --- Inventory ---
   listInventory(
     token: string,
@@ -609,6 +650,96 @@ export interface InputCatalogItem {
   kind: 'Chemical' | 'Organic' | 'Inventory' | 'Other';
   unit: string;
   defaultCost: number;
+}
+
+// --- Reports types ---
+
+export interface PreHarvestReport {
+  generatedAt: string;
+  ms: number;
+  filters: Record<string, unknown>;
+  totals: {
+    farmersAll: number;
+    farmersInScope: number;
+    farmersMissingFarm: number;
+    farms: number;
+    crops: number;
+  };
+  rows: Array<{
+    farmer: {
+      id: string;
+      farmerId: string;
+      name: string;
+      association?: string;
+      district?: string;
+    };
+    farm: { id: string; farmId: string; name: string; areaAcres: number } | null;
+    crop: { id: string; cropId: string; name: string; variety?: string } | null;
+    activityRollup: {
+      pending: number;
+      completed: number;
+      overdue: number;
+      cancelled?: number;
+      total: number;
+      lastDate: string | null;
+    };
+  }>;
+}
+
+export interface FarmerSummary {
+  farmer: {
+    id: string;
+    farmerId: string;
+    name: string;
+    mobileNumber: string;
+    association: string;
+    approvalStatus: string;
+    productionPractice?: string;
+    address?: Farmer['address'];
+  };
+  counts: { farms: number; crops: number; activities: number; procurements: number };
+  activityStatus: {
+    pending: number;
+    completed: number;
+    overdue: number;
+    cancelled: number;
+    total: number;
+    lastDate: string | null;
+  };
+  financials: { totalProcurementValue: number; totalActivityCost: number; net: number };
+  crops: Array<{
+    cropId: string;
+    name: string;
+    variety?: string;
+    season?: string;
+    sowingDate?: string;
+    harvestDate?: string;
+  }>;
+  generatedAt: string;
+}
+
+// --- Notifications types ---
+
+export interface NotificationItem {
+  _id: string;
+  userId: string;
+  kind: 'weather' | 'activityReminder' | 'approval' | 'sync' | 'system';
+  title: string;
+  body: string;
+  data?: Record<string, unknown>;
+  status: 'queued' | 'sent' | 'delivered' | 'read' | 'failed';
+  channel: 'push' | 'inApp' | 'sms';
+  createdAt: string;
+  readAt?: string;
+}
+
+export interface NotificationInbox {
+  data: NotificationItem[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+  unread: number;
 }
 
 // --- Token from cookie ---
