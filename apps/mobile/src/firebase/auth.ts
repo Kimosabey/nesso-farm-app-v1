@@ -1,11 +1,22 @@
 /**
  * Firebase phone auth wrapper.
  *
- * This module requires the native @react-native-firebase modules and therefore
- * only works inside an EAS dev build or production build — NOT in Expo Go.
- * The app must still boot in Expo Go, so we lazy-require the modules.
+ * @react-native-firebase ships native code that is only present inside an
+ * EAS dev build or a production build. Stock Expo Go does NOT bundle it,
+ * so even `require('@react-native-firebase/auth')` triggers the
+ * "Native module RNFBAppModule not found" runtime error.
+ *
+ * We guard the `require` two ways:
+ *   1. Skip it entirely when running in Expo Go (Constants.appOwnership === 'expo')
+ *   2. Wrap the require in try/catch as a belt-and-braces fallback for
+ *      other environments where the native module might be missing
+ *      (web, Snack, future Expo runtimes).
+ *
+ * Password login remains the only auth path that works in Expo Go;
+ * the OTP UI surfaces a clear "needs a dev build" notice instead.
  */
 import { Platform } from 'react-native';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 
 export interface OtpConfirmation {
   /** Confirm the 6-digit SMS code and return a Firebase ID token. */
@@ -22,8 +33,11 @@ interface RNFirebaseAuthModule {
   };
 }
 
+const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+
 let cached: RNFirebaseAuthModule | null = null;
 function loadAuth(): RNFirebaseAuthModule | null {
+  if (isExpoGo || Platform.OS === 'web') return null;
   if (cached) return cached;
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -35,7 +49,7 @@ function loadAuth(): RNFirebaseAuthModule | null {
 }
 
 export function isPhoneOtpAvailable(): boolean {
-  return loadAuth() !== null && Platform.OS !== 'web';
+  return loadAuth() !== null;
 }
 
 /**
