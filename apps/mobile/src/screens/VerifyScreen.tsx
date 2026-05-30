@@ -26,22 +26,7 @@ import { Check, X, ShieldCheck } from 'lucide-react-native';
 import { api, type Farmer } from '@/api/client';
 import { sync, type SyncStatus } from '@/sync/SyncManager';
 import { OfflineBanner } from '@/components/OfflineBanner';
-
-const C = {
-  primary: '#0D783C',
-  secondaryD: '#3C6B51',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  bgMuted: '#F1F5F2',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-  warning: '#9A8407',
-  danger: '#B42318',
-  accent: '#F1D412',
-  onPrimary: '#FFFFFF',
-};
+import { useTheme } from '@/theme';
 
 const TABS = ['Pending', 'Approved', 'Rejected'] as const;
 type Tab = (typeof TABS)[number];
@@ -58,6 +43,7 @@ function initials(first: string, last?: string): string {
 }
 
 function Avatar({ first, last, size = 48 }: { first: string; last?: string; size?: number }) {
+  const C = useTheme().c;
   return (
     <View
       style={{
@@ -77,6 +63,7 @@ function Avatar({ first, last, size = 48 }: { first: string; last?: string; size
 }
 
 function StatusChip({ status }: { status: Farmer['approvalStatus'] }) {
+  const C = useTheme().c;
   const tone =
     status === 'approved'
       ? { bg: 'rgba(13,120,60,0.12)', fg: C.primary }
@@ -95,6 +82,7 @@ function StatusChip({ status }: { status: Farmer['approvalStatus'] }) {
 
 /** A single labelled pill in the doc strip (Aadhaar / Bank / Docs). */
 function DocPill({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  const C = useTheme().c;
   return (
     <View style={{ flex: 1 }}>
       <Text style={{ fontSize: 10.5, color: C.fgSubtle, fontWeight: '600' }}>{label}</Text>
@@ -122,6 +110,7 @@ function village_crop_area(f: Farmer): string {
 }
 
 export function VerifyScreen() {
+  const C = useTheme().c;
   const [tab, setTab] = useState<Tab>('Pending');
   const [farmers, setFarmers] = useState<Farmer[]>([]);
   const [refreshing, setRefreshing] = useState(false);

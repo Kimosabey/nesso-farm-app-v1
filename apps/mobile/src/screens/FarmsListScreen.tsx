@@ -23,6 +23,7 @@ import Svg, { Rect, Path, Circle, Defs, Pattern } from 'react-native-svg';
 import { api, type Farm, type Crop } from '@/api/client';
 import { sync, type SyncStatus } from '@/sync/SyncManager';
 import { OfflineBanner } from '@/components/OfflineBanner';
+import { useTheme } from '@/theme';
 
 // Local nav param list — FarmDetails is registered by the parent navigator.
 // Declared here so navigation typechecks without editing App.tsx / MainTabs.tsx.
@@ -30,20 +31,6 @@ type FarmsNavParamList = {
   FarmDetails: { farmId: string };
 };
 type Nav = NativeStackNavigationProp<FarmsNavParamList>;
-
-const C = {
-  primary: '#0D783C',
-  secondaryD: '#3C6B51',
-  accent: '#F1D412',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  bgMuted: '#EEF3EF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-  secondaryBg: 'rgba(81,142,109,0.14)',
-};
 
 // Default stylized polygons (matching screens_main.jsx PolyThumb sets).
 const DEFAULT_POLYS = [
@@ -66,6 +53,7 @@ export function PolyThumb({
   seed?: number;
   size?: number;
 }) {
+  const C = useTheme().c;
   let d = DEFAULT_POLYS[seed % DEFAULT_POLYS.length]!;
   if (polygonPoints && polygonPoints.length >= 3) {
     const lats = polygonPoints.map((p) => p.lat);
@@ -128,6 +116,7 @@ export function PolyThumb({
 }
 
 export function FarmsListScreen() {
+  const C = useTheme().c;
   const navigation = useNavigation<Nav>();
   const [farms, setFarms] = useState<Farm[]>([]);
   const [cropsByFarm, setCropsByFarm] = useState<Record<string, string>>({});

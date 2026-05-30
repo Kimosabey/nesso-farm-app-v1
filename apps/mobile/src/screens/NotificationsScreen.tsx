@@ -22,20 +22,7 @@ import {
   type LucideIcon,
 } from 'lucide-react-native';
 import { api, type NotificationRow } from '@/api/client';
-
-const C = {
-  primary: '#0D783C',
-  secondaryD: '#3C6B51',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-  info: '#0E7490',
-  warning: '#9A8407',
-  danger: '#B42318',
-};
+import { useTheme, type ThemeTokens } from '@/theme';
 
 type Nav = { goBack: () => void };
 
@@ -45,7 +32,7 @@ const UNREAD_STATUSES: ReadonlyArray<NotificationRow['status']> = [
   'delivered',
 ];
 
-function metaFor(kind: NotificationRow['kind']): { Icon: LucideIcon; color: string } {
+function metaFor(kind: NotificationRow['kind'], C: ThemeTokens): { Icon: LucideIcon; color: string } {
   switch (kind) {
     case 'approval':
       return { Icon: CheckCircle2, color: C.primary };
@@ -84,6 +71,7 @@ function isToday(iso: string): boolean {
 }
 
 export function NotificationsScreen() {
+  const C = useTheme().c;
   const navigation = useNavigation<Nav>();
   const [items, setItems] = useState<NotificationRow[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -198,7 +186,7 @@ export function NotificationsScreen() {
             </Text>
             <View style={{ gap: 9 }}>
               {g.items.map((n) => {
-                const { Icon, color } = metaFor(n.kind);
+                const { Icon, color } = metaFor(n.kind, C);
                 const unread = UNREAD_STATUSES.includes(n.status);
                 return (
                   <View

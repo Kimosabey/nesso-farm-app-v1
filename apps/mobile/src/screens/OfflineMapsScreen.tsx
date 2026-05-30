@@ -15,24 +15,10 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Defs, Pattern, Path, Rect, Polygon, Circle } from 'react-native-svg';
 import { ChevronLeft, Download, Map as MapIcon, X } from 'lucide-react-native';
+import { useTheme } from '@/theme';
 
 type OfflineMapsParamList = { OfflineMaps: undefined };
 type Nav = NativeStackNavigationProp<OfflineMapsParamList, 'OfflineMaps'>;
-
-const C = {
-  primary: '#0D783C',
-  secondaryD: '#3C6B51',
-  accent: '#F1D412',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  bgMuted: '#EEF3EF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-  onPrimary: '#FFFFFF',
-  danger: '#B42318',
-};
 
 interface Region {
   id: string;
@@ -81,6 +67,7 @@ const todayLabel = () =>
   new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
 
 export function OfflineMapsScreen() {
+  const C = useTheme().c;
   const navigation = useNavigation<Nav>();
   const [regions, setRegions] = useState<Region[]>([
     { id: 'r1', name: 'Hassan Central', size: '120 MB', date: '12 May 2026' },

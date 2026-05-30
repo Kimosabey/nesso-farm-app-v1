@@ -14,39 +14,32 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft, Box, ScanLine } from 'lucide-react-native';
 import { api, type InventoryBatch } from '@/api/client';
-
-const C = {
-  primary: '#0D783C',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-  warning: '#9A8407',
-  onPrimary: '#FFFFFF',
-};
+import { useTheme, type ThemeTokens } from '@/theme';
 
 const VIEWS = ['Order', 'Batch'] as const;
 type ViewKind = (typeof VIEWS)[number];
 
 type Nav = { goBack: () => void; navigate: (route: 'AcceptGRN') => void };
 
-function statusTone(status: InventoryBatch['status']): { bg: string; fg: string; label: string } {
+function statusTone(
+  status: InventoryBatch['status'],
+  c: ThemeTokens,
+): { bg: string; fg: string; label: string } {
   switch (status) {
     case 'PROCESSING':
-      return { bg: 'rgba(154,132,7,0.14)', fg: C.warning, label: 'Processing' };
+      return { bg: 'rgba(154,132,7,0.14)', fg: c.warning, label: 'Processing' };
     case 'SOLD':
-      return { bg: 'rgba(13,120,60,0.12)', fg: C.primary, label: 'Sold' };
+      return { bg: 'rgba(13,120,60,0.12)', fg: c.primary, label: 'Sold' };
     case 'TRANSFERRED':
-      return { bg: 'rgba(13,120,60,0.12)', fg: C.primary, label: 'Transferred' };
+      return { bg: 'rgba(13,120,60,0.12)', fg: c.primary, label: 'Transferred' };
     default:
-      return { bg: 'rgba(13,120,60,0.12)', fg: C.primary, label: 'In storage' };
+      return { bg: 'rgba(13,120,60,0.12)', fg: c.primary, label: 'In storage' };
   }
 }
 
 function StatusChip({ status }: { status: InventoryBatch['status'] }) {
-  const tone = statusTone(status);
+  const C = useTheme().c;
+  const tone = statusTone(status, C);
   return (
     <View
       style={{ backgroundColor: tone.bg, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 }}
@@ -62,6 +55,7 @@ function subtitleFor(b: InventoryBatch): string {
 }
 
 export function BatchesScreen() {
+  const C = useTheme().c;
   const navigation = useNavigation<Nav>();
   const [batches, setBatches] = useState<InventoryBatch[]>([]);
   const [view, setView] = useState<ViewKind>('Batch');

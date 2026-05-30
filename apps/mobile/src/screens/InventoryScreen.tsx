@@ -26,19 +26,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft, Box, ChevronRight, X, Check } from 'lucide-react-native';
 import { api, ApiError, type InventoryBatch } from '@/api/client';
-
-const C = {
-  primary: '#0D783C',
-  secondaryD: '#3C6B51',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-  danger: '#B42318',
-  onPrimary: '#FFFFFF',
-};
+import { useTheme } from '@/theme';
 
 const STAGES = ['Sell', 'Transfer', 'Process'] as const;
 type Stage = (typeof STAGES)[number];
@@ -51,6 +39,7 @@ function subtitleFor(b: InventoryBatch): string {
 }
 
 export function InventoryScreen() {
+  const C = useTheme().c;
   const navigation = useNavigation<Nav>();
   const [batches, setBatches] = useState<InventoryBatch[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -371,6 +360,7 @@ function Field({
   keyboardType?: 'default' | 'numeric';
   mono?: boolean;
 }) {
+  const C = useTheme().c;
   return (
     <View>
       <Text style={{ fontSize: 12.5, fontWeight: '600', color: C.fgMuted, marginBottom: 6 }}>

@@ -12,48 +12,39 @@ import { View, Text, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft, Box, ScanLine, FileText, type LucideIcon } from 'lucide-react-native';
-
-const C = {
-  primary: '#0D783C',
-  secondaryD: '#3C6B51',
-  accentD: '#B6850A',
-  info: '#0E7490',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  border: '#DDE6E0',
-};
+import { useTheme, type ThemeTokens } from '@/theme';
 
 type Route = 'Batches' | 'Inventory' | 'AcceptGRN' | 'Procurement';
 type Nav = { goBack: () => void; navigate: (route: Route) => void };
 
-const TILES: Array<{
+const makeTiles = (
+  c: ThemeTokens,
+): Array<{
   route: Route;
   icon: LucideIcon;
   color: string;
   title: string;
   subtitle: string;
-}> = [
-  { route: 'Batches', icon: Box, color: C.primary, title: 'Batches', subtitle: '34 active · 3 grades' },
+}> => [
+  { route: 'Batches', icon: Box, color: c.primary, title: 'Batches', subtitle: '34 active · 3 grades' },
   {
     route: 'Inventory',
     icon: Box,
-    color: C.secondaryD,
+    color: c.secondaryD,
     title: 'Inventory',
     subtitle: 'Sell · transfer · process',
   },
   {
     route: 'AcceptGRN',
     icon: ScanLine,
-    color: C.accentD,
+    color: c.accentD,
     title: 'Accept GRN',
     subtitle: 'Scan incoming goods',
   },
   {
     route: 'Procurement',
     icon: FileText,
-    color: C.info,
+    color: c.info,
     title: 'Procurement',
     subtitle: '12 pending payments',
   },
@@ -68,7 +59,9 @@ function tint(hex: string): string {
 }
 
 export function PostHarvestScreen() {
+  const C = useTheme().c;
   const navigation = useNavigation<Nav>();
+  const TILES = makeTiles(C);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }} edges={['top']}>

@@ -18,23 +18,7 @@ import { ChevronLeft, RefreshCw, Clock, AlertTriangle, CheckCircle2 } from 'luci
 import { sync, peekOutbox, type SyncStatus } from '@/sync/SyncManager';
 import type { OutboxRow } from '@/db/outbox';
 import { OfflineBanner } from '@/components/OfflineBanner';
-
-const C = {
-  primary: '#0D783C',
-  primary50: '#EAF6EE',
-  secondaryD: '#3C6B51',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-  warning: '#9A8407',
-  warningBg: 'rgba(154,132,7,0.14)',
-  danger: '#B42318',
-  dangerBg: 'rgba(180,35,24,0.12)',
-  onPrimary: '#FFFFFF',
-};
+import { useTheme } from '@/theme';
 
 /** Human-readable label for an outbox mutation row. */
 function rowLabel(r: OutboxRow): { title: string; sub: string } {
@@ -64,6 +48,7 @@ function lastSyncedLabel(status: SyncStatus | null): string {
 }
 
 export function SyncScreen() {
+  const C = useTheme().c;
   const navigation = useNavigation();
   const [status, setStatus] = useState<SyncStatus | null>(null);
   const [rows, setRows] = useState<OutboxRow[]>([]);

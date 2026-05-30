@@ -35,6 +35,7 @@ import { OtpScreen } from '@/screens/OtpScreen';
 import type { OtpConfirmation } from '@/firebase/auth';
 import { sync } from '@/sync/SyncManager';
 import { initSentry, sentry } from '@/sentry';
+import { ThemeProvider } from '@/theme';
 
 initSentry();
 
@@ -79,8 +80,9 @@ function App() {
   }, []);
 
   return (
-    <SafeAreaProvider>
-      <NavigationContainer>
+    <ThemeProvider>
+      <SafeAreaProvider>
+        <NavigationContainer>
         <StatusBar style="auto" />
         <Stack.Navigator
           initialRouteName="Splash"
@@ -115,8 +117,9 @@ function App() {
           <Stack.Screen name="Sync" component={SyncScreen} />
           <Stack.Screen name="Otp" component={OtpScreen} />
         </Stack.Navigator>
-      </NavigationContainer>
-    </SafeAreaProvider>
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </ThemeProvider>
   );
 }
 

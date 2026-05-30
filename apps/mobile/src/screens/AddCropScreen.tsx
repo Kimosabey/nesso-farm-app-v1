@@ -30,6 +30,7 @@ import { useNavigation, useRoute, type RouteProp } from '@react-navigation/nativ
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ChevronLeft, Check, Plus } from 'lucide-react-native';
 import { api, ApiError, type CreateCropInput } from '@/api/client';
+import { useTheme, type ThemeTokens } from '@/theme';
 
 // Local nav/route param lists — AddCrop is registered by the parent navigator.
 // Declared here so navigation typechecks without editing App.tsx / MainTabs.tsx.
@@ -39,22 +40,6 @@ type AddCropParamList = {
 type Nav = NativeStackNavigationProp<AddCropParamList, 'AddCrop'>;
 type AddCropRoute = RouteProp<AddCropParamList, 'AddCrop'>;
 
-const C = {
-  primary: '#0D783C',
-  primary50: '#EAF6EE',
-  accent: '#F1D412',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  bgMuted: '#EEF3EF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-  borderStrong: '#C4D2C9',
-  onPrimary: '#FFFFFF',
-  danger: '#B42318',
-};
-
 const CROPS = ['Tuberose', 'Jasmine', 'Rose', 'Marigold', 'Chrysanthemum'] as const;
 const TYPES = ['Annual', 'Perennial'] as const;
 type CropType = (typeof TYPES)[number];
@@ -62,6 +47,8 @@ const UNITS = ['kg', 'quintal', 'tonne', 'nos'] as const;
 type Unit = (typeof UNITS)[number];
 
 export function AddCropScreen() {
+  const C = useTheme().c;
+  const inputStyle = makeInputStyle(C);
   const navigation = useNavigation<Nav>();
   const route = useRoute<AddCropRoute>();
   const farmId = route.params?.farmId;
@@ -321,18 +308,20 @@ export function AddCropScreen() {
   );
 }
 
-const inputStyle = {
-  height: 50,
-  borderRadius: 13,
-  borderWidth: 1.5,
-  borderColor: C.borderStrong,
-  backgroundColor: C.bgElevated,
-  paddingHorizontal: 14,
-  fontSize: 15,
-  color: C.fg,
-} as const;
+const makeInputStyle = (C: ThemeTokens) =>
+  ({
+    height: 50,
+    borderRadius: 13,
+    borderWidth: 1.5,
+    borderColor: C.borderStrong,
+    backgroundColor: C.bgElevated,
+    paddingHorizontal: 14,
+    fontSize: 15,
+    color: C.fg,
+  }) as const;
 
 function Label({ children }: { children: React.ReactNode }) {
+  const C = useTheme().c;
   return (
     <Text style={{ fontSize: 13.5, fontWeight: '600', color: C.fgMuted, marginBottom: 8 }}>
       {children}
@@ -349,6 +338,7 @@ function Segmented<T extends string>({
   value: T;
   onChange: (v: T) => void;
 }) {
+  const C = useTheme().c;
   return (
     <View
       style={{
@@ -392,6 +382,7 @@ function Toggle({
   value: boolean;
   onChange: (v: boolean) => void;
 }) {
+  const C = useTheme().c;
   return (
     <Pressable
       onPress={() => onChange(!value)}

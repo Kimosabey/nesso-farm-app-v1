@@ -15,19 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft, Droplet } from 'lucide-react-native';
 import { api, type SampleRow } from '@/api/client';
-
-const C = {
-  primary: '#0D783C',
-  bg: '#FAFDFA',
-  bgMuted: '#EEF3EF',
-  bgElevated: '#FFFFFF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-  warning: '#9A8407',
-  onPrimary: '#FFFFFF',
-};
+import { useTheme } from '@/theme';
 
 const TABS = ['Queue', 'Sent'] as const;
 type Tab = (typeof TABS)[number];
@@ -45,6 +33,7 @@ function formatDate(iso?: string): string {
 }
 
 function StageChip({ status }: { status: SampleRow['status'] }) {
+  const C = useTheme().c;
   const tone =
     status === 'Queue'
       ? { bg: 'rgba(154,132,7,0.14)', fg: C.warning }
@@ -62,6 +51,7 @@ function StageChip({ status }: { status: SampleRow['status'] }) {
 }
 
 export function SamplesScreen() {
+  const C = useTheme().c;
   const navigation = useNavigation<Nav>();
   const [samples, setSamples] = useState<SampleRow[]>([]);
   const [tab, setTab] = useState<Tab>('Queue');

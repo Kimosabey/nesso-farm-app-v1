@@ -38,23 +38,7 @@ import { api, ApiError, type CreateFarmerInput } from '@/api/client';
 import { sync, type SyncStatus } from '@/sync/SyncManager';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import type { MainTabParamList } from '@/navigation/MainTabs';
-
-const C = {
-  primary: '#0D783C',
-  primary50: 'rgba(13,120,60,0.08)',
-  secondaryD: '#3C6B51',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  bgMuted: '#F1F5F2',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-  borderStrong: '#C4D2C9',
-  warning: '#9A8407',
-  danger: '#B42318',
-  onPrimary: '#FFFFFF',
-};
+import { useTheme } from '@/theme';
 
 type Nav = BottomTabNavigationProp<MainTabParamList, 'Register'>;
 
@@ -80,6 +64,7 @@ function Segmented<T extends string>({
   value: T;
   onChange: (v: T) => void;
 }) {
+  const C = useTheme().c;
   return (
     <View
       style={{
@@ -128,6 +113,7 @@ function Field({
   hint?: string;
   required?: boolean;
 } & React.ComponentProps<typeof TextInput>) {
+  const C = useTheme().c;
   return (
     <View>
       <Text style={{ fontSize: 13.5, fontWeight: '600', color: C.fgMuted, marginBottom: 8 }}>
@@ -163,6 +149,7 @@ function Field({
 }
 
 function PhotoTile({ label }: { label: string }) {
+  const C = useTheme().c;
   return (
     <Pressable
       onPress={() =>
@@ -198,6 +185,7 @@ function FormSection({
   desc?: string;
   children: React.ReactNode;
 }) {
+  const C = useTheme().c;
   return (
     <View
       style={{
@@ -235,6 +223,7 @@ function FormSection({
 }
 
 export function RegisterFarmerScreen() {
+  const C = useTheme().c;
   const navigation = useNavigation<Nav>();
 
   const [step, setStep] = useState(0); // 0..3

@@ -11,18 +11,7 @@ import { View, Text, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft, Wheat, MapPin, Navigation } from 'lucide-react-native';
-
-const C = {
-  primary: '#0D783C',
-  secondaryD: '#3C6B51',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-  onPrimary: '#FFFFFF',
-};
+import { useTheme } from '@/theme';
 
 type Nav = { goBack: () => void };
 
@@ -57,6 +46,7 @@ const GROUPS: Array<{ g: string; items: HarvestItem[] }> = [
 ];
 
 export function HarvestBoardScreen() {
+  const C = useTheme().c;
   const navigation = useNavigation<Nav>();
 
   return (

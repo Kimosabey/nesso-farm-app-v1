@@ -20,20 +20,7 @@ import {
   Wheat,
   type LucideIcon,
 } from 'lucide-react-native';
-
-const C = {
-  primary: '#0D783C',
-  secondaryD: '#3C6B51',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-  warning: '#9A8407',
-  danger: '#B42318',
-  onPrimary: '#FFFFFF',
-};
+import { useTheme } from '@/theme';
 
 const TABS = ['Report', 'Activities', 'Crop history'] as const;
 type Tab = (typeof TABS)[number];
@@ -66,6 +53,7 @@ const HISTORY_ROWS: Array<{ crop: string; season: string; yield: string; status:
 ];
 
 function Chip({ due }: { due: boolean }) {
+  const C = useTheme().c;
   const tone = due
     ? { bg: 'rgba(154,132,7,0.14)', fg: C.warning, label: 'Due soon' }
     : { bg: 'rgba(13,120,60,0.12)', fg: C.primary, label: 'On track' };
@@ -79,6 +67,7 @@ function Chip({ due }: { due: boolean }) {
 }
 
 export function PreHarvestScreen() {
+  const C = useTheme().c;
   const navigation = useNavigation<Nav>();
   const [tab, setTab] = useState<Tab>('Report');
 

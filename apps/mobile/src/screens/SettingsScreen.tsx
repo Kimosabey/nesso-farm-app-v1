@@ -31,6 +31,7 @@ import {
 } from 'lucide-react-native';
 import { api, clearSession, type MeResponse } from '@/api/client';
 import { sync, type SyncStatus } from '@/sync/SyncManager';
+import { useTheme, type ThemeTokens } from '@/theme';
 
 // Local nav param list — these routes are registered by the parent navigator
 // (some, e.g. Sync / OfflineMaps / LocationPicker, may be wired later). Declared
@@ -46,28 +47,12 @@ type SettingsParamList = {
 };
 type Nav = NativeStackNavigationProp<SettingsParamList>;
 
-const C = {
-  primary: '#0D783C',
-  primary50: '#EAF6EE',
-  secondaryD: '#3C6B51',
-  info: '#0E7490',
-  warning: '#9A8407',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-  danger: '#B42318',
-  dangerBg: 'rgba(180,35,24,0.10)',
-};
-
-function tint(hex: string): string {
+function tint(c: ThemeTokens, hex: string): string {
   // Light fill behind an icon (approximation of color-mix 14%).
-  if (hex === C.primary) return 'rgba(13,120,60,0.14)';
-  if (hex === C.secondaryD) return 'rgba(60,107,81,0.14)';
-  if (hex === C.info) return 'rgba(14,116,144,0.14)';
-  if (hex === C.warning) return 'rgba(154,132,7,0.14)';
+  if (hex === c.primary) return 'rgba(13,120,60,0.14)';
+  if (hex === c.secondaryD) return 'rgba(60,107,81,0.14)';
+  if (hex === c.info) return 'rgba(14,116,144,0.14)';
+  if (hex === c.warning) return 'rgba(154,132,7,0.14)';
   return 'rgba(13,120,60,0.14)';
 }
 
@@ -80,6 +65,7 @@ function roleLabel(role?: string): string {
 }
 
 export function SettingsScreen() {
+  const C = useTheme().c;
   const navigation = useNavigation<Nav>();
   const [me, setMe] = useState<MeResponse | null>(null);
   const [status, setStatus] = useState<SyncStatus | null>(null);
@@ -276,6 +262,7 @@ export function SettingsScreen() {
 }
 
 function Group({ title, children }: { title?: string; children: React.ReactNode }) {
+  const C = useTheme().c;
   return (
     <View style={{ marginBottom: 18 }}>
       {title ? (
@@ -325,6 +312,7 @@ function Row({
   last?: boolean;
   danger?: boolean;
 }) {
+  const C = useTheme().c;
   return (
     <Pressable
       onPress={onPress}
@@ -343,7 +331,7 @@ function Row({
           width: 36,
           height: 36,
           borderRadius: 10,
-          backgroundColor: danger ? C.dangerBg : tint(tintColor),
+          backgroundColor: danger ? C.dangerBg : tint(C, tintColor),
           alignItems: 'center',
           justifyContent: 'center',
         }}

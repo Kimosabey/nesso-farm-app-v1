@@ -14,18 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft, Plus } from 'lucide-react-native';
 import { api, type ProcurementRow } from '@/api/client';
-
-const C = {
-  primary: '#0D783C',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-  warning: '#9A8407',
-  onPrimary: '#FFFFFF',
-};
+import { useTheme } from '@/theme';
 
 const TABS = ['All', 'Pending', 'Paid'] as const;
 type Tab = (typeof TABS)[number];
@@ -41,6 +30,7 @@ function initials(name?: string): string {
 }
 
 function Avatar({ name, size = 44 }: { name?: string; size?: number }) {
+  const C = useTheme().c;
   return (
     <View
       style={{
@@ -60,6 +50,7 @@ function Avatar({ name, size = 44 }: { name?: string; size?: number }) {
 }
 
 function PaymentChip({ status }: { status: ProcurementRow['paymentStatus'] }) {
+  const C = useTheme().c;
   const tone =
     status === 'Paid'
       ? { bg: 'rgba(13,120,60,0.12)', fg: C.primary, label: 'Paid' }
@@ -76,6 +67,7 @@ function PaymentChip({ status }: { status: ProcurementRow['paymentStatus'] }) {
 }
 
 export function ProcurementScreen() {
+  const C = useTheme().c;
   const navigation = useNavigation<Nav>();
   const [rows, setRows] = useState<ProcurementRow[]>([]);
   const [tab, setTab] = useState<Tab>('All');

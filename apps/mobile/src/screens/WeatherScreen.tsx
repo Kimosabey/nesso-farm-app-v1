@@ -12,20 +12,7 @@ import { View, Text, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft, CheckCircle2 } from 'lucide-react-native';
-
-const C = {
-  primary: '#0D783C',
-  secondary: '#518E6D',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-  info: '#0E7490',
-  warning: '#9A8407',
-  onPrimary: '#FFFFFF',
-};
+import { useTheme } from '@/theme';
 
 type Nav = { goBack: () => void };
 
@@ -54,6 +41,7 @@ const DAYS: Array<[string, string, number, number]> = [
 ];
 
 export function WeatherScreen() {
+  const C = useTheme().c;
   const navigation = useNavigation<Nav>();
 
   return (

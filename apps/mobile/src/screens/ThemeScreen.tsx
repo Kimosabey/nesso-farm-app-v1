@@ -1,105 +1,120 @@
-import { useCallback, useEffect, useState } from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ChevronLeft, Sun, Moon, Monitor, Check } from 'lucide-react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { RootStackParamList } from '../../App';
+import { useTheme, type ThemeMode } from '@/theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ThemeSettings'>;
 
-const STORAGE_KEY = '@nesso/theme';
-
-type ThemeOption = 'light' | 'dark' | 'system';
-
 const THEME_OPTIONS: Array<{
-  value: ThemeOption;
+  value: ThemeMode;
   label: string;
   description: string;
-  icon: React.ReactNode;
+  Icon: typeof Sun;
 }> = [
   {
     value: 'light',
     label: 'Light',
     description: 'Always use light mode',
-    icon: <Sun size={28} color="#0D783C" />,
+    Icon: Sun,
   },
   {
     value: 'dark',
     label: 'Dark',
     description: 'Always use dark mode',
-    icon: <Moon size={28} color="#0D783C" />,
+    Icon: Moon,
   },
   {
     value: 'system',
     label: 'System',
     description: 'Follow your device setting',
-    icon: <Monitor size={28} color="#0D783C" />,
+    Icon: Monitor,
   },
 ];
 
 export function ThemeScreen({ navigation }: Props) {
-  const [selected, setSelected] = useState<ThemeOption>('system');
-
-  useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY)
-      .then((val) => {
-        if (val === 'light' || val === 'dark' || val === 'system') {
-          setSelected(val);
-        }
-      })
-      .catch(() => null);
-  }, []);
-
-  const handleSelect = useCallback(async (value: ThemeOption) => {
-    setSelected(value);
-    await AsyncStorage.setItem(STORAGE_KEY, value);
-  }, []);
+  const { c: C, mode, setMode } = useTheme();
 
   return (
-    <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }} edges={['top']}>
       {/* Header */}
-      <View className="flex-row items-center border-b border-border bg-bg-elevated px-4 py-4">
-        <Pressable onPress={() => navigation.goBack()} className="mr-3 p-1">
-          <ChevronLeft size={24} color="#0D783C" />
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 8,
+          paddingHorizontal: 12,
+          paddingVertical: 10,
+          backgroundColor: C.bgElevated,
+          borderBottomWidth: 1,
+          borderBottomColor: C.border,
+        }}
+      >
+        <Pressable
+          onPress={() => navigation.goBack()}
+          hitSlop={8}
+          style={{
+            width: 42,
+            height: 42,
+            borderRadius: 21,
+            backgroundColor: C.bgElevated,
+            borderWidth: 1.5,
+            borderColor: C.border,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <ChevronLeft size={22} color={C.fg} />
         </Pressable>
-        <Text className="font-display text-xl text-fg">Theme</Text>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: C.fg, letterSpacing: -0.2 }}>
+          Theme & display
+        </Text>
       </View>
 
       <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 24, gap: 12 }}>
         {THEME_OPTIONS.map((option) => {
-          const active = selected === option.value;
+          const active = mode === option.value;
+          const { Icon } = option;
           return (
             <Pressable
               key={option.value}
-              onPress={() => handleSelect(option.value)}
-              style={[
-                {
-                  borderRadius: 12,
-                  padding: 16,
-                  borderWidth: 2,
-                  borderColor: active ? '#0D783C' : 'rgba(0,0,0,0.08)',
-                  backgroundColor: active ? 'rgba(13,120,60,0.05)' : undefined,
-                },
-              ]}
+              onPress={() => setMode(option.value)}
+              style={{
+                borderRadius: 14,
+                padding: 16,
+                borderWidth: 2,
+                borderColor: active ? C.primary : C.border,
+                backgroundColor: active ? C.primary50 : C.bgElevated,
+              }}
             >
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-3">
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                   <View
                     style={{
                       width: 48,
                       height: 48,
                       borderRadius: 12,
-                      backgroundColor: 'rgba(13,120,60,0.1)',
+                      backgroundColor: C.primary50,
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}
                   >
-                    {option.icon}
+                    <Icon size={28} color={C.primary} />
                   </View>
                   <View>
-                    <Text className="text-base font-semibold text-fg">{option.label}</Text>
-                    <Text className="mt-0.5 text-sm text-fg-subtle">{option.description}</Text>
+                    <Text style={{ fontSize: 16, fontWeight: '600', color: C.fg }}>
+                      {option.label}
+                    </Text>
+                    <Text style={{ fontSize: 13, color: C.fgSubtle, marginTop: 1 }}>
+                      {option.description}
+                    </Text>
                   </View>
                 </View>
                 {active ? (
@@ -108,12 +123,12 @@ export function ThemeScreen({ navigation }: Props) {
                       width: 24,
                       height: 24,
                       borderRadius: 12,
-                      backgroundColor: '#0D783C',
+                      backgroundColor: C.primary,
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}
                   >
-                    <Check size={14} color="#fff" />
+                    <Check size={14} color={C.onPrimary} />
                   </View>
                 ) : (
                   <View
@@ -122,7 +137,7 @@ export function ThemeScreen({ navigation }: Props) {
                       height: 24,
                       borderRadius: 12,
                       borderWidth: 2,
-                      borderColor: 'rgba(0,0,0,0.15)',
+                      borderColor: C.borderStrong,
                     }}
                   />
                 )}

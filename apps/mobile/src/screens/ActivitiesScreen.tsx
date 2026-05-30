@@ -24,18 +24,7 @@ import {
   type LucideIcon,
 } from 'lucide-react-native';
 import { api, type ActivityRow } from '@/api/client';
-
-const C = {
-  primary: '#0D783C',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-  warning: '#9A8407',
-  onPrimary: '#FFFFFF',
-};
+import { useTheme } from '@/theme';
 
 const TABS = ['Pending', 'Approved'] as const;
 type Tab = (typeof TABS)[number];
@@ -62,6 +51,7 @@ function formatDate(iso?: string): string {
 }
 
 function StatusChip({ status }: { status: ActivityRow['status'] }) {
+  const C = useTheme().c;
   const tone =
     status === 'Completed'
       ? { bg: 'rgba(13,120,60,0.12)', fg: C.primary }
@@ -78,6 +68,7 @@ function StatusChip({ status }: { status: ActivityRow['status'] }) {
 }
 
 export function ActivitiesScreen() {
+  const C = useTheme().c;
   const navigation = useNavigation<Nav>();
   const [activities, setActivities] = useState<ActivityRow[]>([]);
   const [tab, setTab] = useState<Tab>('Pending');

@@ -18,19 +18,8 @@ import { Search, SlidersHorizontal, MapPin, Sprout, ChevronRight } from 'lucide-
 import { api, type Farmer } from '@/api/client';
 import { sync, type SyncStatus } from '@/sync/SyncManager';
 import { OfflineBanner } from '@/components/OfflineBanner';
+import { useTheme } from '@/theme';
 import type { RootStackParamList } from '../../App';
-
-const C = {
-  primary: '#0D783C',
-  secondaryD: '#3C6B51',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-  onPrimary: '#FFFFFF',
-};
 
 const CHIPS = ['All', 'Approved', 'Pending', 'Rejected'] as const;
 type Chip = (typeof CHIPS)[number];
@@ -44,6 +33,7 @@ function initials(first: string, last?: string): string {
 }
 
 function Avatar({ first, last, size = 46 }: { first: string; last?: string; size?: number }) {
+  const C = useTheme().c;
   return (
     <View
       style={{
@@ -63,6 +53,7 @@ function Avatar({ first, last, size = 46 }: { first: string; last?: string; size
 }
 
 function StatusChip({ status }: { status: Farmer['approvalStatus'] }) {
+  const C = useTheme().c;
   const tone =
     status === 'approved'
       ? { bg: 'rgba(13,120,60,0.12)', fg: C.primary }
@@ -78,6 +69,7 @@ function StatusChip({ status }: { status: Farmer['approvalStatus'] }) {
 }
 
 export function FarmersScreen() {
+  const C = useTheme().c;
   const navigation = useNavigation<Nav>();
   const [farmers, setFarmers] = useState<Farmer[]>([]);
   const [refreshing, setRefreshing] = useState(false);

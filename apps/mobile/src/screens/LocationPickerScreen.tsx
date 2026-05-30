@@ -16,6 +16,7 @@ import { useNavigation, useRoute, type RouteProp } from '@react-navigation/nativ
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Defs, Pattern, Path, Rect, Polygon, Circle } from 'react-native-svg';
 import { ChevronLeft, LocateFixed, MapPin, Check } from 'lucide-react-native';
+import { useTheme } from '@/theme';
 
 // Local nav/route param lists — LocationPicker is registered by the parent navigator.
 // Declared here so navigation typechecks without editing App.tsx / MainTabs.tsx.
@@ -24,20 +25,6 @@ type LocationPickerParamList = {
 };
 type Nav = NativeStackNavigationProp<LocationPickerParamList, 'LocationPicker'>;
 type LocationPickerRoute = RouteProp<LocationPickerParamList, 'LocationPicker'>;
-
-const C = {
-  primary: '#0D783C',
-  secondaryD: '#3C6B51',
-  accent: '#F1D412',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-  borderStrong: '#C4D2C9',
-  onPrimary: '#FFFFFF',
-};
 
 // Hassan, Karnataka default
 const DEFAULT_LAT = 13.005;
@@ -81,6 +68,7 @@ function FauxMap() {
 }
 
 export function LocationPickerScreen() {
+  const C = useTheme().c;
   const navigation = useNavigation<Nav>();
   const route = useRoute<LocationPickerRoute>();
   const initial = route.params ?? {};
@@ -264,6 +252,7 @@ function Coord({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const C = useTheme().c;
   return (
     <View style={{ flex: 1 }}>
       <Text style={{ fontSize: 12, fontWeight: '600', color: C.fgMuted, marginBottom: 6 }}>

@@ -41,6 +41,7 @@ import {
 } from 'lucide-react-native';
 import Svg, { Rect, Path, Circle, Defs, Pattern } from 'react-native-svg';
 import { api, type Farm, type Crop } from '@/api/client';
+import { useTheme } from '@/theme';
 
 // Local nav/route param lists — FarmDetails + AddCrop are registered by the
 // parent navigator. Declared here so navigation typechecks without editing
@@ -51,23 +52,6 @@ type DetailsParamList = {
 };
 type Nav = NativeStackNavigationProp<DetailsParamList, 'FarmDetails'>;
 type DetailsRoute = RouteProp<DetailsParamList, 'FarmDetails'>;
-
-const C = {
-  primary: '#0D783C',
-  primary50: '#EAF6EE',
-  secondary: '#518E6D',
-  secondaryD: '#3C6B51',
-  accent: '#F1D412',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  bgMuted: '#EEF3EF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-  onPrimary: '#FFFFFF',
-  secondaryBg: 'rgba(81,142,109,0.14)',
-};
 
 const TABS = ['Crops', 'Activities', 'Weather', 'Certificates', 'Soil'] as const;
 type TabName = (typeof TABS)[number];
@@ -81,6 +65,7 @@ function fmtDate(d?: string): string {
 
 /** Large polygon map (~180px). Draws polygonPoints if present, else a default. */
 function MiniMap({ polygonPoints, height = 180 }: { polygonPoints?: Array<{ lat: number; lng: number }>; height?: number }) {
+  const C = useTheme().c;
   let d = 'M34 26 L60 18 L70 44 L54 62 L30 52 Z';
   let dots: Array<[number, number]> = [
     [34, 26],
@@ -133,6 +118,7 @@ function MiniMap({ polygonPoints, height = 180 }: { polygonPoints?: Array<{ lat:
 }
 
 function StatCell({ label, value }: { label: string; value: string }) {
+  const C = useTheme().c;
   return (
     <View style={{ width: '50%', paddingVertical: 6 }}>
       <Text
@@ -159,6 +145,7 @@ const STATIC_ACTIVITIES: Array<{ icon: 'drop' | 'cloud' | 'wheat' | 'leaf'; titl
 ];
 
 export function FarmDetailsScreen() {
+  const C = useTheme().c;
   const navigation = useNavigation<Nav>();
   const route = useRoute<DetailsRoute>();
   const { farmId } = route.params;
@@ -575,6 +562,7 @@ export function FarmDetailsScreen() {
 }
 
 function EmptyState({ icon, label }: { icon: React.ReactNode; label: string }) {
+  const C = useTheme().c;
   return (
     <View style={{ alignItems: 'center', paddingVertical: 48, gap: 12 }}>
       {icon}

@@ -14,31 +14,20 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ChevronLeft, Shield, FileText, Phone, ScrollText, ChevronRight } from 'lucide-react-native';
 import type { RootStackParamList } from '../../App';
+import { useTheme, type ThemeTokens } from '@/theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'About'>;
 
-const C = {
-  primary: '#0D783C',
-  secondaryD: '#3C6B51',
-  info: '#0E7490',
-  warning: '#9A8407',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-};
-
-function tint(hex: string): string {
-  if (hex === C.primary) return 'rgba(13,120,60,0.14)';
-  if (hex === C.secondaryD) return 'rgba(60,107,81,0.14)';
-  if (hex === C.info) return 'rgba(14,116,144,0.14)';
-  if (hex === C.warning) return 'rgba(154,132,7,0.14)';
+function tint(c: ThemeTokens, hex: string): string {
+  if (hex === c.primary) return 'rgba(13,120,60,0.14)';
+  if (hex === c.secondaryD) return 'rgba(60,107,81,0.14)';
+  if (hex === c.info) return 'rgba(14,116,144,0.14)';
+  if (hex === c.warning) return 'rgba(154,132,7,0.14)';
   return 'rgba(13,120,60,0.14)';
 }
 
 export function AboutScreen({ navigation }: Props) {
+  const C = useTheme().c;
   const comingSoon = (what: string) => Alert.alert(what, 'Coming soon.');
 
   return (
@@ -183,6 +172,7 @@ function LinkRow({
   onPress: () => void;
   last?: boolean;
 }) {
+  const C = useTheme().c;
   return (
     <Pressable
       onPress={onPress}
@@ -201,7 +191,7 @@ function LinkRow({
           width: 36,
           height: 36,
           borderRadius: 10,
-          backgroundColor: tint(tintColor),
+          backgroundColor: tint(C, tintColor),
           alignItems: 'center',
           justifyContent: 'center',
         }}

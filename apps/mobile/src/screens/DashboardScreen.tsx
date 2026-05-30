@@ -30,27 +30,8 @@ import { api } from '@/api/client';
 import { sync, type SyncStatus } from '@/sync/SyncManager';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import type { MainTabParamList } from '@/navigation/MainTabs';
+import { useTheme, type ThemeTokens } from '@/theme';
 import type { RootStackParamList } from '../../App';
-
-// ---------------------------------------------------------------------------
-// Design tokens
-// ---------------------------------------------------------------------------
-const C = {
-  primary: '#0D783C',
-  secondary: '#518E6D',
-  secondaryD: '#3C6B51',
-  secondaryBg: '#EAF6EE',
-  accent: '#F1D412',
-  info: '#0E7490',
-  warning: '#9A8407',
-  danger: '#B42318',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-} as const;
 
 const shadowSm: ViewStyle = {
   shadowColor: '#0F1A14',
@@ -147,6 +128,7 @@ function Sparkline({
 // Avatar — initials in a tinted circle
 // ---------------------------------------------------------------------------
 function Avatar({ name, size = 46 }: { name: string; size?: number }) {
+  const C = useTheme().c;
   const parts = name.trim().split(/\s+/).filter(Boolean);
   const initials =
     parts.length === 0
@@ -187,6 +169,7 @@ function KpiCard({
   color: string;
   spark: number[];
 }) {
+  const C = useTheme().c;
   const displayed = useCountUp(value, 800);
   const text = value >= 100 ? displayed.toLocaleString() : String(displayed);
   return (
@@ -257,6 +240,7 @@ function QuickAction({
   color: string;
   onPress: () => void;
 }) {
+  const C = useTheme().c;
   return (
     <Pressable
       onPress={onPress}
@@ -307,6 +291,7 @@ function JumpPill({
   label: string;
   onPress: () => void;
 }) {
+  const C = useTheme().c;
   return (
     <Pressable
       onPress={onPress}
@@ -340,6 +325,7 @@ interface FeedItem {
 }
 
 function FeedRow({ item, first }: { item: FeedItem; first: boolean }) {
+  const C = useTheme().c;
   return (
     <View
       style={{
@@ -393,6 +379,7 @@ function SectionHeader({
   onAction?: () => void;
   paddingTop: number;
 }) {
+  const C = useTheme().c;
   return (
     <View
       style={{
@@ -414,31 +401,31 @@ function SectionHeader({
 }
 
 // Static placeholder feed (used when no real farmers available)
-const PLACEHOLDER_FEED: FeedItem[] = [
+const placeholderFeed = (c: ThemeTokens): FeedItem[] => [
   {
-    icon: <Users size={18} color={C.primary} strokeWidth={2} />,
-    color: C.primary,
+    icon: <Users size={18} color={c.primary} strokeWidth={2} />,
+    color: c.primary,
     title: 'Registered Lakshmi Gowda',
     subtitle: 'Channarayapatna · KYC pending',
     time: '12m',
   },
   {
-    icon: <Activity size={18} color={C.secondaryD} strokeWidth={2} />,
-    color: C.secondaryD,
+    icon: <Activity size={18} color={c.secondaryD} strokeWidth={2} />,
+    color: c.secondaryD,
     title: 'Logged spraying activity',
     subtitle: 'Farm FRM-2839 · ₹1,240',
     time: '1h',
   },
   {
-    icon: <MapPin size={18} color={C.info} strokeWidth={2} />,
-    color: C.info,
+    icon: <MapPin size={18} color={c.info} strokeWidth={2} />,
+    color: c.info,
     title: 'Mapped a 2.4 ha farm',
     subtitle: 'Belur · 6 vertices',
     time: '3h',
   },
   {
-    icon: <Sprout size={18} color={C.primary} strokeWidth={2} />,
-    color: C.primary,
+    icon: <Sprout size={18} color={c.primary} strokeWidth={2} />,
+    color: c.primary,
     title: 'Harvest plan approved',
     subtitle: 'Tuberose · 320 kg expected',
     time: '5h',
@@ -456,6 +443,7 @@ const FORECAST: Array<[string, string, number]> = [
 // Main component
 // ---------------------------------------------------------------------------
 export function DashboardScreen() {
+  const { c: C, toggle, isDark } = useTheme();
   const navigation = useNavigation<BottomTabNavigationProp<MainTabParamList>>();
 
   const [me, setMe] = useState<MeResponse | null>(null);
@@ -534,7 +522,7 @@ export function DashboardScreen() {
           subtitle: `${f.address?.village ?? 'Unknown'} · ${f.approvalStatus}`,
           time: 'just now',
         }))
-      : PLACEHOLDER_FEED;
+      : placeholderFeed(C);
 
   return (
     <View style={{ flex: 1, backgroundColor: C.bg }}>
@@ -590,6 +578,7 @@ export function DashboardScreen() {
           {/* Theme toggle */}
           <Pressable
             accessibilityLabel="Toggle theme"
+            onPress={toggle}
             style={{
               width: 42,
               height: 42,
@@ -601,7 +590,7 @@ export function DashboardScreen() {
               justifyContent: 'center',
             }}
           >
-            <Text style={{ fontSize: 18 }}>🌙</Text>
+            <Text style={{ fontSize: 18 }}>{isDark ? '☀️' : '🌙'}</Text>
           </Pressable>
           {/* Bell */}
           <Pressable

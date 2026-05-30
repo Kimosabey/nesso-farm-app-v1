@@ -16,18 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft, X, Check } from 'lucide-react-native';
 import { api, type AuditRow } from '@/api/client';
-
-const C = {
-  primary: '#0D783C',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  fg: '#0F1A14',
-  fgMuted: '#4A5A52',
-  fgSubtle: '#7A8A82',
-  border: '#DDE6E0',
-  danger: '#B42318',
-  onPrimary: '#FFFFFF',
-};
+import { useTheme } from '@/theme';
 
 const TABS = ['Pending', 'Approved', 'Rejected'] as const;
 type Tab = (typeof TABS)[number];
@@ -43,6 +32,7 @@ function initials(name?: string): string {
 }
 
 function Avatar({ name }: { name?: string }) {
+  const C = useTheme().c;
   return (
     <View
       style={{
@@ -67,6 +57,7 @@ function formatDate(iso?: string): string {
 }
 
 export function AuditScreen() {
+  const C = useTheme().c;
   const navigation = useNavigation<Nav>();
   const [audits, setAudits] = useState<AuditRow[]>([]);
   const [tab, setTab] = useState<Tab>('Pending');

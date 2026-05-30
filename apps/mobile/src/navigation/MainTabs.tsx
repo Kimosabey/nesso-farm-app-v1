@@ -20,6 +20,7 @@ import { RegisterFarmerScreen } from '@/screens/RegisterFarmerScreen';
 import { VerifyScreen } from '@/screens/VerifyScreen';
 import { SettingsScreen } from '@/screens/SettingsScreen';
 import { FarmsListScreen } from '@/screens/FarmsListScreen';
+import { useTheme } from '@/theme';
 
 export type MainTabParamList = {
   Dashboard: undefined;
@@ -32,16 +33,6 @@ export type MainTabParamList = {
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-const C = {
-  primary: '#0D783C',
-  primary2: '#207647',
-  primary50: '#EAF6EE',
-  fgSubtle: '#7A8A82',
-  bg: '#FAFDFA',
-  bgElevated: '#FFFFFF',
-  border: '#DDE6E0',
-};
-
 // Visible tabs (left pair + right pair). Register sits in the center as a FAB.
 const VISIBLE: { name: keyof MainTabParamList; label: string; Icon: typeof Home }[] = [
   { name: 'Dashboard', label: 'Home', Icon: Home },
@@ -51,6 +42,7 @@ const VISIBLE: { name: keyof MainTabParamList; label: string; Icon: typeof Home 
 ];
 
 function PulsingFab({ onPress }: { onPress: () => void }) {
+  const C = useTheme().c;
   const pulse = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -93,6 +85,7 @@ function PulsingFab({ onPress }: { onPress: () => void }) {
 }
 
 function CustomTabBar({ state, navigation }: BottomTabBarProps) {
+  const C = useTheme().c;
   const insets = useSafeAreaInsets();
   const activeName = state.routes[state.index]?.name;
 
