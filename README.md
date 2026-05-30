@@ -388,9 +388,10 @@ Coding standards live in [`packages/config`](packages/config) once Phase 0 ships
 
 ## Support
 
-- **Issues:** internal tracker (link TBD)
+- **Issues:** [GitHub Issues](https://github.com/Kimosabey/nesso-farm-app-v1/issues)
 - **Owner:** NESSO · NR Group
-- **Tech lead contact:** (set internally)
+- **Repo:** [Kimosabey/nesso-farm-app-v1](https://github.com/Kimosabey/nesso-farm-app-v1)
+- **Developer:** Harshan Aiyappa — [@Kimosabey](https://github.com/Kimosabey) · harshan.aiyappa@gmail.com
 
 <br />
 
