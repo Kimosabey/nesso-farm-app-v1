@@ -18,4 +18,7 @@ config.resolver.nodeModulesPaths = [
 ];
 config.resolver.disableHierarchicalLookup = true;
 
+// Fix for Expo 52 / Metro 0.81 strict package exports (resolves TerminalReporter error)
+config.resolver.unstable_enablePackageExports = false;
+
 module.exports = withNativeWind(config, { input: './global.css' });

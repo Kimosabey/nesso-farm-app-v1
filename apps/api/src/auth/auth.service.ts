@@ -3,9 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import { randomUUID } from 'crypto';
 import { UsersService } from '../users/users.service';
 import { UserDocument } from '../users/schemas/user.schema';
 import { FirebaseService } from '../firebase/firebase.service';
+import { RevokedTokensService } from './revoked-tokens.service';
 
 export interface AuthTokens {
   accessToken: string;
@@ -36,6 +38,7 @@ export class AuthService {
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
     private readonly firebase: FirebaseService,
+    private readonly revoked: RevokedTokensService,
   ) {
     const keyPath = this.config.get<string>('JWT_PRIVATE_KEY_PATH') ?? './keys/private.pem';
     this.privateKey = readFileSync(resolve(keyPath), 'utf-8');
@@ -91,9 +94,41 @@ export class AuthService {
   }
 
   async refresh(refreshToken: string): Promise<AuthSuccess> {
-    let payload: { sub: string; phone: string; role: string; type?: string };
+    const payload = this.verifyRefreshToken(refreshToken);
+    if (payload.jti && (await this.revoked.isRevoked(payload.jti))) {
+      throw new UnauthorizedException('Refresh token has been revoked');
+    }
+    const user = await this.users.findById(payload.sub);
+    if (!user || user.status !== 'active' || user.isDeleted) {
+      throw new UnauthorizedException('User no longer active');
+    }
+    return this.issueTokens(user);
+  }
+
+  /**
+   * Revoke a refresh token so its remaining lifespan can't be used to mint new
+   * access tokens. Idempotent — calling logout twice with the same token is fine.
+   *
+   * Returns silently when given a token that's malformed or already expired:
+   * logging out a session that's already dead should not surface as an error
+   * to the client (clients call this on app teardown / 401, when the token's
+   * state isn't predictable).
+   */
+  async logout(refreshToken: string): Promise<void> {
+    let payload: RefreshTokenPayload;
     try {
-      payload = await this.jwt.verifyAsync(refreshToken, {
+      payload = this.verifyRefreshToken(refreshToken);
+    } catch {
+      return;
+    }
+    if (!payload.jti || !payload.exp) return;
+    await this.revoked.revoke(payload.jti, payload.sub, payload.exp);
+  }
+
+  private verifyRefreshToken(refreshToken: string): RefreshTokenPayload {
+    let payload: RefreshTokenPayload;
+    try {
+      payload = this.jwt.verify<RefreshTokenPayload>(refreshToken, {
         algorithms: ['RS256'],
         publicKey: readFileSync(
           resolve(this.config.get<string>('JWT_PUBLIC_KEY_PATH') ?? './keys/public.pem'),
@@ -108,11 +143,7 @@ export class AuthService {
     if (payload.type !== 'refresh') {
       throw new UnauthorizedException('Wrong token type');
     }
-    const user = await this.users.findById(payload.sub);
-    if (!user || user.status !== 'active' || user.isDeleted) {
-      throw new UnauthorizedException('User no longer active');
-    }
-    return this.issueTokens(user);
+    return payload;
   }
 
   private async issueTokens(user: UserDocument): Promise<AuthSuccess> {
@@ -129,6 +160,7 @@ export class AuthService {
         expiresIn: this.accessTtl,
         issuer: 'nesso',
         audience: 'nesso-api',
+        jwtid: randomUUID(),
       },
     );
     const refreshToken = await this.jwt.signAsync(
@@ -139,6 +171,7 @@ export class AuthService {
         expiresIn: this.refreshTtl,
         issuer: 'nesso',
         audience: 'nesso-api',
+        jwtid: randomUUID(),
       },
     );
     return {
@@ -156,6 +189,15 @@ export class AuthService {
       },
     };
   }
+}
+
+interface RefreshTokenPayload {
+  sub: string;
+  phone: string;
+  role: string;
+  type?: string;
+  jti?: string;
+  exp?: number;
 }
 
 function parseTtlToSeconds(ttl: string): number {

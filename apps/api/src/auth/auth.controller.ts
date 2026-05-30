@@ -60,8 +60,7 @@ export class AuthController {
   @ApiBearerAuth()
   @Post('logout')
   @HttpCode(204)
-  logout(): void {
-    // Phase 1.5 will blacklist the refresh token's jti in Redis.
-    // For now the client discards the tokens; access expiry handles the rest.
+  async logout(@Body() dto: RefreshDto): Promise<void> {
+    await this.auth.logout(dto.refreshToken);
   }
 }
