@@ -212,6 +212,8 @@ nesso/
 > **Already running it?** → Read [**CONFIG.md**](CONFIG.md) — every URL, port, credential, connection string, and sample API call for the running local stack.
 >
 > **Want to browse the DB?** → Read [**docs/DB_CONNECT.md**](docs/DB_CONNECT.md) — step-by-step for MongoDB Compass, DBeaver, Redis, Minio, and Mailhog.
+>
+> **Running the mobile app?** → Read [**docs/MOBILE_SETUP.md**](docs/MOBILE_SETUP.md) — Expo login, `eas init`, dev server, phone/emulator setup, dev client, build profiles.
 
 > Implementation has **not** started yet. The full plan is approved, then we kick off Phase 0.
 > Until then, the commands below are the *intended* developer experience.
