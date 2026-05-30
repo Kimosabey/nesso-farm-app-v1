@@ -22,7 +22,6 @@ import {
   Platform,
   ScrollView,
   Image,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { HelpCircle } from 'lucide-react-native';
@@ -31,12 +30,18 @@ import type { RootStackParamList } from '../../App';
 import { api, ApiError } from '@/api/client';
 import { isPhoneOtpAvailable, sendOtp } from '@/firebase/auth';
 import { useTheme } from '@/theme';
+import { useT } from '@/i18n';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 export function LoginScreen({ navigation }: Props) {
   const { c: C, isDark, toggle } = useTheme();
+  const { t, locale, languages } = useT();
   const otpAvailable = isPhoneOtpAvailable();
+
+  // Short label for the language chip: the native script for known locales,
+  // else the uppercased code.
+  const localeLabel = languages.find((l) => l.code === locale)?.native ?? locale.toUpperCase();
 
   const [phone, setPhone] = useState(otpAvailable ? '' : '9066666481');
   const [password, setPassword] = useState(otpAvailable ? '' : 'Nesso!Admin!2026');
@@ -91,7 +96,9 @@ export function LoginScreen({ navigation }: Props) {
             alignItems: 'center',
           }}
         >
-          <View
+          <Pressable
+            onPress={() => navigation.navigate('LanguageSettings')}
+            accessibilityLabel="Change language"
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -105,9 +112,9 @@ export function LoginScreen({ navigation }: Props) {
             }}
           >
             <Text style={{ fontSize: 15 }}>🌐</Text>
-            <Text style={{ fontSize: 13, fontWeight: '600', color: C.fg }}>EN</Text>
+            <Text style={{ fontSize: 13, fontWeight: '600', color: C.fg }}>{localeLabel}</Text>
             <Text style={{ fontSize: 11, color: C.fgSubtle, marginLeft: 2 }}>›</Text>
-          </View>
+          </Pressable>
           <Pressable
             onPress={toggle}
             accessibilityLabel="Toggle theme"
@@ -165,18 +172,20 @@ export function LoginScreen({ navigation }: Props) {
           </Pressable>
 
           <Text style={{ fontSize: 34, fontWeight: '700', color: C.fg, letterSpacing: -0.7, lineHeight: 38 }}>
-            {'Welcome to\nNesso'}
+            {t('auth.login.title')}
           </Text>
 
           <Text style={{ fontSize: 16, color: C.fgMuted, marginTop: 14, lineHeight: 24, maxWidth: 280 }}>
             {showPasswordMode
               ? 'Staff login — enter your phone and password.'
-              : "Log in with your mobile number. We'll send a one-time code to verify it's you."}
+              : t('auth.login.subtitle')}
           </Text>
 
           {/* Phone field */}
           <View style={{ marginTop: 36 }}>
-            <Text style={{ fontSize: 13, fontWeight: '600', color: C.fg, marginBottom: 8 }}>Phone</Text>
+            <Text style={{ fontSize: 13, fontWeight: '600', color: C.fg, marginBottom: 8 }}>
+              {t('auth.login.phoneLabel')}
+            </Text>
             <View
               style={{
                 flexDirection: 'row',
@@ -212,14 +221,16 @@ export function LoginScreen({ navigation }: Props) {
               />
             </View>
             <Text style={{ fontSize: 12, color: C.fgSubtle, marginTop: 6, lineHeight: 18 }}>
-              Standard SMS rates may apply.
+              {t('auth.login.phoneHint')}
             </Text>
           </View>
 
           {/* Password field — staff mode only */}
           {showPasswordMode && (
             <View style={{ marginTop: 20 }}>
-              <Text style={{ fontSize: 13, fontWeight: '600', color: C.fg, marginBottom: 8 }}>Password</Text>
+              <Text style={{ fontSize: 13, fontWeight: '600', color: C.fg, marginBottom: 8 }}>
+                {t('auth.login.passwordLabel')}
+              </Text>
               <TextInput
                 value={password}
                 onChangeText={setPassword}
@@ -282,7 +293,7 @@ export function LoginScreen({ navigation }: Props) {
             ) : (
               <>
                 <Text style={{ fontSize: 17, fontWeight: '600', color: C.onPrimary, letterSpacing: 0.2 }}>
-                  {showPasswordMode ? 'Sign in' : 'Send OTP'}
+                  {showPasswordMode ? t('auth.login.sign_in') : t('auth.login.send_otp')}
                 </Text>
                 {!showPasswordMode && <Text style={{ fontSize: 17, color: C.onPrimary }}>›</Text>}
               </>
@@ -298,7 +309,7 @@ export function LoginScreen({ navigation }: Props) {
             style={{ marginTop: 14, alignSelf: 'center' }}
           >
             <Text style={{ fontSize: 13, color: C.primary, fontWeight: '600' }}>
-              {showPasswordMode ? 'Use phone OTP instead' : 'Staff? Sign in with password'}
+              {showPasswordMode ? t('auth.login.useOtp') : t('auth.login.usePassword')}
             </Text>
           </Pressable>
 
@@ -309,20 +320,12 @@ export function LoginScreen({ navigation }: Props) {
           ) : null}
 
           <Text style={{ textAlign: 'center', fontSize: 12, color: C.fgSubtle, marginTop: 14, lineHeight: 18 }}>
-            By continuing you agree to Nesso&apos;s{' '}
-            <Text style={{ color: C.primary, fontWeight: '600' }}>Terms</Text>
-            {' & '}
-            <Text style={{ color: C.primary, fontWeight: '600' }}>Privacy Policy</Text>.
+            {t('auth.login.terms')}
           </Text>
 
-          {/* Need help — support (coming soon) */}
+          {/* Need help — opens the in-app support screen */}
           <Pressable
-            onPress={() =>
-              Alert.alert(
-                'Need help signing in?',
-                'In-app support chat is coming soon. For now, contact your field supervisor or email help@nesso.in.',
-              )
-            }
+            onPress={() => navigation.navigate('Support')}
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -333,7 +336,7 @@ export function LoginScreen({ navigation }: Props) {
           >
             <HelpCircle size={15} color={C.fgMuted} />
             <Text style={{ fontSize: 13, color: C.fgMuted, fontWeight: '500' }}>
-              Need help signing in?
+              {t('auth.login.needHelp')}
             </Text>
           </Pressable>
 

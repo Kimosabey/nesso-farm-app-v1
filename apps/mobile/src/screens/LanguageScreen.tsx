@@ -1,83 +1,94 @@
-import { useCallback, useEffect, useState } from 'react';
-import { View, Text, Pressable, ScrollView, Alert } from 'react-native';
+/**
+ * Language picker — 12 languages, themed, live-switching.
+ *
+ * Selecting a language calls i18n `setLocale(code)`, which persists to
+ * AsyncStorage `@nesso/language` and re-renders every `useT()` consumer, so the
+ * app language changes immediately (no Alert, no restart). The active row shows a
+ * primary ring + Check.
+ */
+import { View, Text, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ChevronLeft, Check } from 'lucide-react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { RootStackParamList } from '../../App';
+import { useTheme } from '@/theme';
+import { useT } from '@/i18n';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LanguageSettings'>;
 
-const STORAGE_KEY = '@nesso/language';
-
-const LANGUAGES = [
-  { code: 'en', name: 'English', native: 'English' },
-  { code: 'hi', name: 'Hindi', native: 'हिंदी' },
-  { code: 'kn', name: 'Kannada', native: 'ಕನ್ನಡ' },
-  { code: 'ta', name: 'Tamil', native: 'தமிழ்' },
-  { code: 'te', name: 'Telugu', native: 'తెలుగు' },
-  { code: 'ml', name: 'Malayalam', native: 'മലയാളം' },
-  { code: 'mr', name: 'Marathi', native: 'मराठी' },
-  { code: 'gu', name: 'Gujarati', native: 'ગુજરાતી' },
-  { code: 'pa', name: 'Punjabi', native: 'ਪੰਜਾਬੀ' },
-  { code: 'bn', name: 'Bengali', native: 'বাংলা' },
-  { code: 'or', name: 'Odia', native: 'ଓଡ଼ିଆ' },
-  { code: 'ur', name: 'Urdu', native: 'اردو' },
-];
-
 export function LanguageScreen({ navigation }: Props) {
-  const [selected, setSelected] = useState('en');
-
-  useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY)
-      .then((val) => {
-        if (val) setSelected(val);
-      })
-      .catch(() => null);
-  }, []);
-
-  const handleSelect = useCallback(
-    async (code: string) => {
-      setSelected(code);
-      await AsyncStorage.setItem(STORAGE_KEY, code);
-      Alert.alert('Language updated', '', [{ text: 'OK' }]);
-    },
-    [],
-  );
+  const C = useTheme().c;
+  const { locale, setLocale, languages } = useT();
 
   return (
-    <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }} edges={['top']}>
       {/* Header */}
-      <View className="flex-row items-center border-b border-border bg-bg-elevated px-4 py-4">
-        <Pressable onPress={() => navigation.goBack()} className="mr-3 p-1">
-          <ChevronLeft size={24} color="#0D783C" />
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 8,
+          paddingHorizontal: 12,
+          paddingVertical: 10,
+          backgroundColor: C.bgElevated,
+          borderBottomWidth: 1,
+          borderBottomColor: C.border,
+        }}
+      >
+        <Pressable
+          onPress={() => navigation.goBack()}
+          hitSlop={8}
+          style={{
+            width: 42,
+            height: 42,
+            borderRadius: 21,
+            backgroundColor: C.bgElevated,
+            borderWidth: 1.5,
+            borderColor: C.border,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <ChevronLeft size={22} color={C.fg} />
         </Pressable>
-        <Text className="font-display text-xl text-fg">Language</Text>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: C.fg, letterSpacing: -0.2 }}>
+          Language
+        </Text>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
-        {LANGUAGES.map((lang) => {
-          const active = selected === lang.code;
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
+        {languages.map((lang) => {
+          const active = locale === lang.code;
           return (
             <Pressable
               key={lang.code}
-              onPress={() => handleSelect(lang.code)}
-              className="flex-row items-center border-b border-border bg-bg-elevated px-4 py-4"
+              onPress={() => setLocale(lang.code)}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingHorizontal: 16,
+                paddingVertical: 16,
+                marginBottom: 10,
+                borderRadius: 14,
+                backgroundColor: active ? C.primary50 : C.bgElevated,
+                borderWidth: active ? 2 : 1,
+                borderColor: active ? C.primary : C.border,
+              }}
             >
-              <View className="flex-1 min-w-0">
+              <View style={{ flex: 1, minWidth: 0 }}>
                 <Text
-                  className="text-lg font-medium text-fg"
-                  style={lang.code === 'ur' ? { textAlign: 'right' } : undefined}
+                  style={{
+                    fontSize: 17,
+                    fontWeight: '600',
+                    color: C.fg,
+                    textAlign: lang.code === 'ur' ? 'right' : 'left',
+                  }}
                 >
                   {lang.native}
                 </Text>
-                <Text className="mt-0.5 text-sm text-fg-subtle">{lang.name}</Text>
+                <Text style={{ fontSize: 13, color: C.fgSubtle, marginTop: 2 }}>{lang.name}</Text>
               </View>
-              {active ? (
-                <Check size={20} color="#0D783C" />
-              ) : (
-                <View style={{ width: 20 }} />
-              )}
+              {active ? <Check size={20} color={C.primary} /> : <View style={{ width: 20 }} />}
             </Pressable>
           );
         })}

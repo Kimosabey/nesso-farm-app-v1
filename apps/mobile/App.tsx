@@ -32,10 +32,12 @@ import { LocationPickerScreen } from '@/screens/LocationPickerScreen';
 import { OfflineMapsScreen } from '@/screens/OfflineMapsScreen';
 import { SyncScreen } from '@/screens/SyncScreen';
 import { OtpScreen } from '@/screens/OtpScreen';
+import { SupportScreen } from '@/screens/SupportScreen';
 import type { OtpConfirmation } from '@/firebase/auth';
 import { sync } from '@/sync/SyncManager';
 import { initSentry, sentry } from '@/sentry';
 import { ThemeProvider } from '@/theme';
+import { LanguageProvider } from '@/i18n';
 
 initSentry();
 
@@ -68,6 +70,7 @@ export type RootStackParamList = {
   OfflineMaps: undefined;
   Sync: undefined;
   Otp: { phone: string; confirmation: OtpConfirmation };
+  Support: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -81,6 +84,7 @@ function App() {
 
   return (
     <ThemeProvider>
+      <LanguageProvider>
       <SafeAreaProvider>
         <NavigationContainer>
         <StatusBar style="auto" />
@@ -116,9 +120,11 @@ function App() {
           <Stack.Screen name="OfflineMaps" component={OfflineMapsScreen} />
           <Stack.Screen name="Sync" component={SyncScreen} />
           <Stack.Screen name="Otp" component={OtpScreen} />
+          <Stack.Screen name="Support" component={SupportScreen} />
         </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>
+      </LanguageProvider>
     </ThemeProvider>
   );
 }
