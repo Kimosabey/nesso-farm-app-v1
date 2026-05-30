@@ -181,7 +181,10 @@ export class QrService {
             village: farmer.address?.village,
             district: farmer.address?.district,
             state: farmer.address?.state,
-            enrolledYear: farmer.createdAt ? new Date(farmer.createdAt).getFullYear() : undefined,
+            enrolledYear:
+              (farmer as { createdAt?: Date }).createdAt
+                ? new Date((farmer as { createdAt: Date }).createdAt).getFullYear()
+                : undefined,
           }
         : undefined,
       farm: farm
