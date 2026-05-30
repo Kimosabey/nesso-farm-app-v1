@@ -29,7 +29,9 @@ function resolveApiBase(): string {
   // failure is at least cause-and-effect.
   if (Platform.OS === 'web') return 'http://localhost:4000/api/v1';
 
-  const hostUri = Constants.expoConfig?.hostUri ?? Constants.expoGoConfig?.hostUri;
+  const hostUri =
+    Constants.expoConfig?.hostUri ??
+    (Constants.expoGoConfig as { hostUri?: string } | null | undefined)?.hostUri;
   if (hostUri) {
     const host = hostUri.split(':')[0];
     if (host) return `http://${host}:4000/api/v1`;

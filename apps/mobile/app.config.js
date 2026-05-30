@@ -106,6 +106,16 @@ module.exports = () => {
       // and `localhost:8081` only act as the Metro bundler endpoint for
       // native devices. Reintroduce only when we ship a real web client.
       plugins,
+      // EAS Update — OTA JS bundle delivery. The build profile pins a
+      // channel (development/preview/production); runtime version is
+      // tied to appVersion so every native version bump cuts a new
+      // update lane (prevents incompatible JS landing on old binaries).
+      updates: {
+        url: 'https://u.expo.dev/225186ac-02a2-4849-abea-9e2ff813a520',
+      },
+      runtimeVersion: {
+        policy: 'appVersion',
+      },
       extra: {
         eas: { projectId: '225186ac-02a2-4849-abea-9e2ff813a520' },
         router: { origin: false },
