@@ -51,7 +51,9 @@
 | **Java JDK 17** | Required by Android Gradle | Android Studio bundles it; otherwise `winget install Microsoft.OpenJDK.17` |
 | **Android Emulator (AVD)** | Test without a phone | In Android Studio → **Tools → Device Manager** → create a **Pixel 7, API 34** image |
 | **Expo CLI** | Comes via `pnpm dlx expo` | No global install required |
-| **EAS CLI** | Cloud builds (Phase 1+) | `pnpm add -g eas-cli` when needed |
+| **EAS CLI** | Cloud builds (Phase 1+) | **`npm install --global eas-cli`** ← npm not pnpm; see note below |
+
+> **npm vs pnpm for global CLIs (Windows):** the npm global bin is already in your PATH. The pnpm global bin isn't until you run `pnpm setup` and reopen your shell. For zero hassle, install globals (like `eas-cli`) with **npm**, and use **pnpm** for everything inside the repo. Deprecation warnings during `eas-cli` install (uuid@8, glob@10, etc.) come from EAS's transitive deps — not your code. Ignore them. Full mobile setup details: [`docs/MOBILE_SETUP.md`](docs/MOBILE_SETUP.md).
 
 ### 2.2 On your phone
 

@@ -20,16 +20,45 @@ Use it only if you ever need to start a *new* Expo project somewhere else.
 
 ## 1 · CLI install (one-time)
 
+> **TL;DR — on Windows, use npm for `eas-cli`. Use pnpm for everything inside the repo.**
+
+### Why npm for global CLIs
+
+Expo CLI is bundled in the project (no global install needed — we use `npx expo` / `pnpm --filter`). The only global tool you need is `eas-cli`. On Windows, the **npm global bin is already in your PATH** by default; **pnpm's global bin is not**.
+
+### Recommended (works first try)
+
 ```powershell
-# Expo CLI is bundled — no global install needed (we use `npx expo` / `pnpm --filter`).
-# EAS CLI: install globally so `eas` works from anywhere.
-pnpm add -g eas-cli
+npm install --global eas-cli
 
 # Verify
-eas --version       # should print 16.x or newer
+eas --version       # should print eas-cli/20.x or newer
 ```
 
-> If `pnpm add -g eas-cli` complains about PATH, run a new PowerShell window — pnpm's global bin needs to be picked up.
+You'll see a flurry of `npm warn deprecated …` lines about transitive deps (uuid@8, glob@10, xmldom, lodash.get). **Those are inside `eas-cli`, not your code — ignore them.**
+
+### Optional — make pnpm globals work too
+
+If you want `pnpm add -g <anything>` to also work in the future, run **once**:
+
+```powershell
+pnpm setup
+# Output: "Setup complete. Open a new terminal to start using pnpm."
+
+# Close PowerShell. Open a fresh window.
+pnpm add -g <some-other-cli>    # now works
+```
+
+This permanently adds `%PNPM_HOME%\bin` to your user PATH.
+
+### Rule of thumb (used everywhere in this repo)
+
+```
+Inside the repo →  pnpm install · pnpm dev · pnpm --filter @nesso/mobile start
+Global tools    →  npm install --global <cli>
+```
+
+`pnpm install` at the repo root is the only safe install — npm at the root would break workspace resolution.
 
 ---
 
