@@ -58,6 +58,12 @@ module.exports = () => {
       ...(icon ? { icon } : {}),
       userInterfaceStyle: 'automatic',
       newArchEnabled: true,
+      // Explicitly opt out of web. expo-sqlite/web/worker.ts pulls in
+      // a wa-sqlite WASM file that Metro can't bundle without extra
+      // config, and Firebase/Sentry RN have no web shims that would
+      // work at runtime anyway. Skipping web also removes the
+      // "Press w | open web" prompt from `expo start`.
+      platforms: ['ios', 'android'],
       splash: {
         ...(splash ? { image: splash } : {}),
         resizeMode: 'contain',
