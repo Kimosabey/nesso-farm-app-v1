@@ -26,6 +26,7 @@ import { ReportsModule } from './reports/reports.module';
 import { WeatherModule } from './weather/weather.module';
 import { HealthModule } from './health/health.module';
 import { FirebaseModule } from './firebase/firebase.module';
+import { DebugModule } from './debug/debug.module';
 
 @Module({
   imports: [
@@ -78,6 +79,7 @@ import { FirebaseModule } from './firebase/firebase.module';
     ReportsModule,
     WeatherModule,
     HealthModule,
+    DebugModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: SentryGlobalFilter },

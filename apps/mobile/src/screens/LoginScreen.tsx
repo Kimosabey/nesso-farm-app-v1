@@ -18,6 +18,7 @@ type RootStackParamList = {
   Splash: undefined;
   Login: undefined;
   Main: undefined;
+  Debug: undefined;
 };
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
@@ -117,10 +118,14 @@ export function LoginScreen({ navigation }: Props) {
           contentContainerClassName="flex-1 justify-center px-6 py-12"
           keyboardShouldPersistTaps="handled"
         >
-          <View className="mb-2 flex-row items-center gap-2">
+          <Pressable
+            onLongPress={() => navigation.navigate('Debug')}
+            delayLongPress={800}
+            className="mb-2 flex-row items-center gap-2"
+          >
             <View className="size-2 rounded-full bg-primary" />
             <Text className="text-xs uppercase tracking-wider text-fg-subtle">Nesso</Text>
-          </View>
+          </Pressable>
 
           <Text className="font-display text-4xl text-fg tracking-tight">Welcome back</Text>
           <Text className="mt-2 text-base text-fg-muted">

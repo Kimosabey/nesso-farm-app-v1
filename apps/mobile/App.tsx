@@ -6,6 +6,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SplashScreen } from '@/screens/SplashScreen';
 import { LoginScreen } from '@/screens/LoginScreen';
+import { DebugScreen } from '@/screens/DebugScreen';
 import { MainTabs } from '@/navigation/MainTabs';
 import { sync } from '@/sync/SyncManager';
 import { initSentry, sentry } from '@/sentry';
@@ -16,6 +17,7 @@ export type RootStackParamList = {
   Splash: undefined;
   Login: undefined;
   Main: undefined;
+  Debug: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -38,6 +40,7 @@ function App() {
           <Stack.Screen name="Splash" component={SplashScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Main" component={MainTabs} />
+          <Stack.Screen name="Debug" component={DebugScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
