@@ -73,16 +73,20 @@ function ThemeToggle() {
 }
 
 export function LoginScreen({ navigation }: Props) {
-  const [phone, setPhone] = useState('');
+  const otpAvailable = isPhoneOtpAvailable();
+
+  // OTP is the spec path for farmers, but it requires a dev build. In Expo Go
+  // (otp unavailable) we surface the staff password login as the visible path
+  // so the screen always has a working button. In a dev/prod build the clean
+  // OTP-only design shows, with staff password reachable via long-press logo.
+  const [phone, setPhone] = useState(otpAvailable ? '' : '9066666481');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Hidden password login for staff (long-press logo)
-  const [showPasswordMode, setShowPasswordMode] = useState(false);
-  const [password, setPassword] = useState('');
+  const [showPasswordMode, setShowPasswordMode] = useState(!otpAvailable);
+  const [password, setPassword] = useState(otpAvailable ? '' : 'Nesso!Admin!2026');
 
   const valid = /^[6-9]\d{9}$/.test(phone);
-  const otpAvailable = isPhoneOtpAvailable();
 
   async function handleSendOtp() {
     if (!valid || busy) return;
@@ -403,8 +407,8 @@ export function LoginScreen({ navigation }: Props) {
             <Text style={{ color: '#0D783C', fontWeight: '600' }}>Privacy Policy</Text>.
           </Text>
 
-          {/* Dev hint — only in Expo Go */}
-          {!otpAvailable && !showPasswordMode && (
+          {/* Dev hint — Expo Go can't run native phone OTP */}
+          {!otpAvailable && showPasswordMode && (
             <Text
               style={{
                 textAlign: 'center',
@@ -413,7 +417,7 @@ export function LoginScreen({ navigation }: Props) {
                 marginTop: 8,
               }}
             >
-              Long-press the logo for password login (Expo Go)
+              Staff password login (Expo Go) · Phone OTP needs a dev build
             </Text>
           )}
         </View>
