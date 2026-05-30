@@ -13,6 +13,7 @@ import {
 import { CounterService } from '../common/counter/counter.service';
 import { ProcurementService } from '../procurement/procurement.service';
 import { WarehousesService } from '../warehouses/warehouses.service';
+import { QrService } from '../qr/qr.service';
 
 const DEFAULT_PAGE_SIZE = 25;
 const MAX_PAGE_SIZE = 200;
@@ -32,6 +33,7 @@ export class InventoryService {
     private readonly counter: CounterService,
     private readonly procurement: ProcurementService,
     private readonly warehouses: WarehousesService,
+    private readonly qr: QrService,
   ) {}
 
   async acceptGrn(dto: AcceptGrnDto, actorId: string): Promise<InventoryDocument> {
@@ -48,7 +50,7 @@ export class InventoryService {
     const now = new Date();
     const stageHistory = [{ stage: 'Received', at: now, by: actorId, notes: 'GRN accepted' }];
 
-    return this.model.create({
+    const created = await this.model.create({
       batchId,
       productName: proc.crop,
       variant: proc.variety,
@@ -66,6 +68,17 @@ export class InventoryService {
       linkedProcurementId: proc._id?.toString(),
       stageHistory,
     });
+
+    // Auto-mint a QR code + denormalized payload (best-effort, non-fatal)
+    try {
+      await this.qr.generateForBatch(batchId);
+      // Re-read to include the qrCode field we just stamped on it
+      return (await this.model.findOne({ batchId }).exec()) ?? created;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('[GRN] QR generation failed:', e);
+      return created;
+    }
   }
 
   async list(query: ListInventoryQueryDto) {
@@ -344,6 +357,11 @@ export class InventoryService {
       )
       .exec();
     if (!updated) throw new NotFoundException('Batch not found');
+
+    // Refresh QR payload best-effort so /public/trace/:code reflects the
+    // new stage history. Don't block the transition on it.
+    void this.qr.refreshPayload(updated.batchId).catch(() => {});
+
     return updated;
   }
 }

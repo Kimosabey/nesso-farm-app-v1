@@ -18,7 +18,10 @@ import { SamplesModule } from './samples/samples.module';
 import { AuditsModule } from './audits/audits.module';
 import { ProcurementModule } from './procurement/procurement.module';
 import { WarehousesModule } from './warehouses/warehouses.module';
+import { QrModule } from './qr/qr.module';
 import { InventoryModule } from './inventory/inventory.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { ReportsModule } from './reports/reports.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
@@ -64,7 +67,10 @@ import { HealthModule } from './health/health.module';
     AuditsModule,
     ProcurementModule,
     WarehousesModule,
+    QrModule,
     InventoryModule,
+    NotificationsModule,
+    ReportsModule,
     HealthModule,
   ],
   providers: [
