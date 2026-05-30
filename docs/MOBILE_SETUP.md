@@ -109,7 +109,7 @@ When prompted:
 |---|---|
 | "Which account?" | `harshimos-team` |
 | "Slug?" | `nesso` (or accept whatever it suggests) |
-| "Bundle identifier?" | `ai.graylinx.nesso.farmer` (already set in app.json) |
+| "Bundle identifier?" | `app.nesso.farmer` (already set in app.json) |
 
 This rewrites `app.json` so `extra.eas.projectId` is a real UUID. **Commit that change.**
 

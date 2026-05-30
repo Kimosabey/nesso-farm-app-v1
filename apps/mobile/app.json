@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "ai.graylinx.nesso.farmer",
+      "bundleIdentifier": "app.nesso.farmer",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Nesso uses your location to map farms accurately and tag field activities.",
         "NSCameraUsageDescription": "Nesso uses the camera to capture ID proofs, farm photos, and scan batch QR codes.",
@@ -24,7 +24,7 @@
       }
     },
     "android": {
-      "package": "ai.graylinx.nesso.farmer",
+      "package": "app.nesso.farmer",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0D783C"

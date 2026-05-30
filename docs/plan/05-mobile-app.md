@@ -125,7 +125,7 @@ NativeWind preset extends shared `packages/design-system/tailwind-preset.js`. Se
 ## Permissions & native config (`app.json`)
 
 - `scheme`: `nesso`
-- `bundleIdentifier` / `package`: `ai.graylinx.nesso.farmer` (replace FoodSign's `com.lingotran.nesso.farmer`)
+- `bundleIdentifier` / `package`: `app.nesso.farmer`
 - iOS plist:
   - `NSLocationWhenInUseUsageDescription`
   - `NSCameraUsageDescription`

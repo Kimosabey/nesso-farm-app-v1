@@ -61,6 +61,11 @@ apps/mobile/ios
 keys/
 google-services.json
 GoogleService-Info.plist
+# Firebase service account JSONs — any name pattern, anywhere in the tree
+*firebase-adminsdk*.json
+*-firebase-adminsdk-*.json
+firebase-service-account*.json
+*service-account*.json
 
 # Test artifacts
 coverage

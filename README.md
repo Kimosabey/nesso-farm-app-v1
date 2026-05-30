@@ -390,7 +390,7 @@ Coding standards live in [`packages/config`](packages/config) once Phase 0 ships
 
 - **Issues:** internal tracker (link TBD)
 - **Owner:** NESSO · NR Group
-- **Tech lead contact:** harshan.aiyappa@graylinx.ai
+- **Tech lead contact:** (set internally)
 
 <br />
 

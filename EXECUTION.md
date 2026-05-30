@@ -364,7 +364,7 @@ pnpm add -D @types/react
 
 Set up:
 - [ ] Configure NativeWind v4 (`tailwind.config.js` with `presets: [require('@nesso/design-system/tailwind-preset')]`)
-- [ ] `app.json`: `scheme: "nesso"`, bundle id `ai.graylinx.nesso.farmer`, brand splash colors
+- [ ] `app.json`: `scheme: "nesso"`, bundle id `app.nesso.farmer`, brand splash colors
 - [ ] `App.tsx`: NavigationContainer → Stack → SplashLoading → MainTabs (placeholder)
 - [ ] Splash screen with logo
 - [ ] `pnpm --filter mobile start` → open in Expo Go via QR or `a` for Android emulator
