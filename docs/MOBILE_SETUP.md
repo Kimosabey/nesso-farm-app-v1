@@ -181,26 +181,56 @@ Restart `pnpm --filter @nesso/mobile start` after editing `.env`.
 
 ---
 
-## 6 · Dev client (when native modules arrive)
+## 6 · Dev client (required — we have native modules)
 
-Phase 1.5 adds `@react-native-firebase/app` + `@react-native-firebase/auth` + `react-native-mmkv` — native modules that Expo Go cannot run.
+`@react-native-firebase/{app,auth}` + `react-native-mmkv` + `@sentry/react-native` are all native modules. **Expo Go cannot run them.** To exercise Phone OTP (or actually capture native crashes in Sentry), you need a custom dev client APK.
 
-Switch to a **dev client** (your own custom Expo Go, built for our app):
+`expo-dev-client` is already installed (it's the runtime that replaces Expo Go inside the build). `apps/mobile/eas.json` is also already configured. Two ways to build:
+
+### 6a · Local build (fastest if you have Android Studio)
+
+Compiles on your machine using your local Android SDK. **5–10 minutes** the first time, then incremental rebuilds are seconds.
 
 ```powershell
 cd d:\Harshan\farmer-app\nesso-farm-app-v1\apps\mobile
 
-# One-time cloud build of a dev-client APK (takes ~10-15 min on EAS)
+# Prereqs (one-time):
+#   - Android Studio installed
+#   - JAVA_HOME points at JDK 17+
+#   - ANDROID_HOME points at your Android SDK (usually %LOCALAPPDATA%\Android\Sdk)
+#   - `adb devices` shows your phone over USB, OR an emulator is running
+
+# Build + install in one shot:
+npx expo run:android
+```
+
+This generates the `android/` native project from `app.config.js`, runs Gradle, installs the APK on your connected device/emulator, and starts Metro. After the first install you don't need to rebuild every time — just `pnpm start --dev-client` and reload.
+
+### 6b · Cloud build (no local Android setup needed)
+
+EAS Build does it on their servers — slower but you don't need Java/Gradle locally. ~15-20 min on the free tier.
+
+```powershell
+# One-time CLI install:
+npm install -g eas-cli
+eas login                # signs you into harshimos-team
+
+cd d:\Harshan\farmer-app\nesso-farm-app-v1\apps\mobile
 eas build --profile development --platform android
 ```
 
-When it finishes, EAS gives you a link or QR. Install it on your phone (Expo Orbit makes this easy). After install:
+EAS emails/posts a QR + download link when done. Install the APK on your phone (Expo Orbit makes it one click).
+
+> **Skip `eas build:configure`** — `apps/mobile/eas.json` is already in the repo.
+
+### After install — connecting Metro
 
 ```powershell
+cd d:\Harshan\farmer-app\nesso-farm-app-v1
 pnpm --filter @nesso/mobile start --dev-client
 ```
 
-Scan the QR in the dev-client app (not Expo Go). Hot reload still works.
+Open the dev-client app on your phone (NOT Expo Go), scan the QR. Hot reload + native debugging + Phone OTP all work.
 
 ---
 

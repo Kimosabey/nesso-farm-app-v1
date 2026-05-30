@@ -166,6 +166,26 @@ The metro `overrides:` block is gone from `pnpm-workspace.yaml`.
 
 The project is now on SDK 54. Use the standard Play Store Expo Go.
 
+### 5.4 `Native module RNFBAppModule not found` in Expo Go
+
+Expo Go can't load `@react-native-firebase/*` (native code). The
+`apps/mobile/src/firebase/auth.ts` guard already prevents the require
+in Expo Go, but any code that touches Firebase will crash there. To
+actually exercise Phone OTP you need a **dev build**:
+
+```powershell
+# fastest if you have Android Studio (compiles locally in 5-10 min)
+cd D:\Harshan\farmer-app\nesso-farm-app-v1\apps\mobile
+npx expo run:android
+
+# or cloud build via EAS (no local Android SDK needed, ~15-20 min)
+npm install -g eas-cli
+eas login
+eas build --profile development --platform android
+```
+
+Full walkthrough in [MOBILE_SETUP.md §6](./MOBILE_SETUP.md#6--dev-client-required--we-have-native-modules).
+
 ### 5.4 `Could not parse Expo config: android.googleServicesFile`
 
 You used to see this when `apps/mobile/google-services.json` didn't exist.
