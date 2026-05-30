@@ -315,6 +315,6 @@ Tick these off the first time you set up:
 
 <br /><br />
 
-<sub>Nesso · © 2026 Harshan Aiyappa</sub>
+<sub>NESSO · NR Group · © 2026</sub>
 
 </div>

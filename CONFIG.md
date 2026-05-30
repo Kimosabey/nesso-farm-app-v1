@@ -317,6 +317,6 @@ All of these are documented in [`docs/plan/10-deployment.md`](docs/plan/10-deplo
 
 <br /><br />
 
-<sub>Nesso · © 2026 Harshan Aiyappa</sub>
+<sub>NESSO · NR Group · © 2026</sub>
 
 </div>

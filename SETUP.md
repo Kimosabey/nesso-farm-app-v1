@@ -243,10 +243,10 @@ Stop the conflicting service, or override ports in `docker-compose.override.yml`
 
 <br /><br />
 
-<img src="docs/nesso___nr_group_logo.jpeg" alt="Nesso" width="60" />
+<img src="docs/nesso___nr_group_logo.jpeg" alt="NR Group" width="60" />
 
 <br />
 
-<sub>Nesso · © 2026 Harshan Aiyappa</sub>
+<sub>NESSO · NR Group · © 2026</sub>
 
 </div>

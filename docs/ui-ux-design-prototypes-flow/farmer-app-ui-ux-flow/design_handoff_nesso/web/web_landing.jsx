@@ -73,7 +73,7 @@ function LandingPage({ theme, onToggleTheme, onSignIn }) {
         </div>
       </section>
 
-      <footer style={{ position: 'relative', zIndex: 2, borderTop: '1px solid var(--border)', padding: '28px', textAlign: 'center', color: 'var(--fg-subtle)', fontSize: 12.5 }}>Nesso — farm-to-fork traceability · © 2026</footer>
+      <footer style={{ position: 'relative', zIndex: 2, borderTop: '1px solid var(--border)', padding: '28px', textAlign: 'center', color: 'var(--fg-subtle)', fontSize: 12.5 }}>Nesso · NR Group — farm-to-fork traceability · © 2026</footer>
     </div>
   );
 }

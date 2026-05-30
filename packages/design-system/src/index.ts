@@ -9,6 +9,7 @@
 
 export const brand = {
   name: 'Nesso',
+  org: 'NR Group',
   tagline: 'Farm-to-fork traceability',
 } as const;
 

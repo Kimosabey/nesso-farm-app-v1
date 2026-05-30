@@ -233,6 +233,6 @@ pnpm --filter @nesso/api seed:catalog  # re-seed POP + inputs
 
 <br /><br />
 
-<sub>Nesso · © 2026 Harshan Aiyappa</sub>
+<sub>NESSO · NR Group · © 2026</sub>
 
 </div>

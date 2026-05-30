@@ -45,7 +45,7 @@ function SplashScreen({ onDone }) {
       </div>
       <div className="splash-word2" style={{ position: 'absolute', bottom: 72, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
         <div style={{ width: 38, height: 38, borderRadius: '50%', border: '2.5px solid rgba(255,255,255,0.25)', borderTopColor: '#F1D412', animation: 'spin 0.9s linear infinite' }} />
-        <span className="mono" style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.05em' }}>v1.0 · Nesso</span>
+        <span className="mono" style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.05em' }}>v1.0 · NR Group</span>
       </div>
     </div>
   );
