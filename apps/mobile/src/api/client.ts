@@ -4,30 +4,41 @@
  * - Writes go through outbox when offline; drained by SyncManager.
  */
 import Constants from 'expo-constants';
-import { Platform } from 'react-native';
+import { NativeModules, Platform } from 'react-native';
 import { keychain, type PersistedUser } from '@/storage/keychain';
 import { outbox } from '@/db/outbox';
 
 /**
- * Pick the right API base URL for whatever device we're running on:
- *   1. If `EXPO_PUBLIC_API_URL` is set, trust the developer's override
- *      (works for staging/prod and odd network setups).
- *   2. Otherwise, derive from Metro's `hostUri` — which Expo Go already
- *      knows is reachable from this device (e.g. `192.168.1.4:8081`).
- *      Swap 8081 → 4000 and append `/api/v1`. This Just Works on real
- *      phones over WiFi without anyone editing `.env`.
- *   3. Final fallback: `10.0.2.2:4000` for the Android emulator.
+ * Pick the right API base URL for whatever device we're running on.
+ *
+ * Order of preference:
+ *   1. `EXPO_PUBLIC_API_URL` env override — wins always.
+ *   2. The IP of the machine that served us the JS bundle, taken from
+ *      React Native's own `NativeModules.SourceCode.scriptURL`. This is
+ *      the most reliable source: the device just downloaded the bundle
+ *      from this address, so it definitely has a network route to it.
+ *      Works identically in Expo Go and dev builds.
+ *   3. `Constants.expoConfig.hostUri` as a secondary, since it's the
+ *      canonical Expo signal even if it doesn't always populate.
+ *   4. Platform-specific fallback (emulator loopback or localhost).
  */
+function deriveHostFromScriptUrl(): string | null {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+  const scriptURL: string | undefined = (NativeModules as any)?.SourceCode?.scriptURL;
+  if (!scriptURL) return null;
+  // e.g. http://192.168.1.4:8081/index.bundle?platform=android&dev=true
+  const match = /^https?:\/\/([^/:]+)(?::\d+)?\//.exec(scriptURL);
+  return match?.[1] ?? null;
+}
+
 function resolveApiBase(): string {
   const override = process.env.EXPO_PUBLIC_API_URL;
   if (override) return override;
 
-  // If someone accidentally loads the mobile bundle in a desktop browser
-  // (by hitting Metro's bundler URL at :8081), the previous fallbacks
-  // would send requests to the Android emulator loopback (10.0.2.2),
-  // which a browser obviously can't reach. Use localhost for web so the
-  // failure is at least cause-and-effect.
   if (Platform.OS === 'web') return 'http://localhost:4000/api/v1';
+
+  const bundleHost = deriveHostFromScriptUrl();
+  if (bundleHost) return `http://${bundleHost}:4000/api/v1`;
 
   const hostUri =
     Constants.expoConfig?.hostUri ??
