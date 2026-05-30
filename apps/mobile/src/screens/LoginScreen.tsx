@@ -1,12 +1,15 @@
 /**
- * Login screen — 100% spec parity with design handoff (M2).
+ * Login screen — 100% spec parity with design handoff (M2), themed + robust.
  *
  * Spec source: docs/.../design_handoff_nesso/app/screens_auth.jsx — LoginScreen
- *   - Top row: Language chip (🌐 EN) + Theme toggle
+ *   - Top row: Language chip (🌐 EN) + Theme toggle (live)
  *   - Hero: 60px logo tile + H1 "Welcome to Nesso" + description
  *   - "+91" prefix field, mono hint, 10-digit validation
- *   - Sticky bottom: "Send OTP" CTA (disabled until valid) + T&C line
- *   - Long-press logo (800ms) → hidden password login (staff only)
+ *   - Primary CTA pinned to the bottom of the scroll (always reachable,
+ *     never hidden behind the keyboard) + T&C line
+ *   - Expo Go: staff password mode auto-shows with a working "Sign in".
+ *     Dev build: OTP-only "Send OTP" per spec. Long-press logo also
+ *     forces password mode.
  */
 import { useState } from 'react';
 import {
@@ -18,86 +21,35 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
   Image,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { HelpCircle } from 'lucide-react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { api, ApiError } from '@/api/client';
 import { isPhoneOtpAvailable, sendOtp } from '@/firebase/auth';
+import { useTheme } from '@/theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
-/** Language chip — top-left */
-function LangChip() {
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        height: 38,
-        paddingHorizontal: 13,
-        borderRadius: 999,
-        backgroundColor: '#FFFFFF',
-        borderWidth: 1.5,
-        borderColor: '#DDE6E0',
-      }}
-    >
-      <Text style={{ fontSize: 15 }}>🌐</Text>
-      <Text style={{ fontSize: 13, fontWeight: '600', color: '#0F1A14', fontFamily: 'System' }}>EN</Text>
-      <Text style={{ fontSize: 11, color: '#7A8A82', marginLeft: 2 }}>›</Text>
-    </View>
-  );
-}
-
-/** Theme toggle — top-right (placeholder, wired to AsyncStorage in ThemeScreen) */
-function ThemeToggle() {
-  return (
-    <View
-      style={{
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#FFFFFF',
-        borderWidth: 1.5,
-        borderColor: '#DDE6E0',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <Text style={{ fontSize: 18 }}>🌙</Text>
-    </View>
-  );
-}
-
 export function LoginScreen({ navigation }: Props) {
+  const { c: C, isDark, toggle } = useTheme();
   const otpAvailable = isPhoneOtpAvailable();
 
-  // OTP is the spec path for farmers, but it requires a dev build. In Expo Go
-  // (otp unavailable) we surface the staff password login as the visible path
-  // so the screen always has a working button. In a dev/prod build the clean
-  // OTP-only design shows, with staff password reachable via long-press logo.
   const [phone, setPhone] = useState(otpAvailable ? '' : '9066666481');
+  const [password, setPassword] = useState(otpAvailable ? '' : 'Nesso!Admin!2026');
+  const [showPasswordMode, setShowPasswordMode] = useState(!otpAvailable);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [showPasswordMode, setShowPasswordMode] = useState(!otpAvailable);
-  const [password, setPassword] = useState(otpAvailable ? '' : 'Nesso!Admin!2026');
-
   const valid = /^[6-9]\d{9}$/.test(phone);
+  const canSubmit = showPasswordMode ? !!phone && !!password : valid;
 
   async function handleSendOtp() {
     if (!valid || busy) return;
     setError(null);
-    if (!otpAvailable) {
-      Alert.alert(
-        'Dev build required',
-        'Phone OTP requires a development build. Use password login (long-press the logo).',
-      );
-      return;
-    }
     setBusy(true);
     try {
       const confirmation = await sendOtp(phone.trim());
@@ -124,10 +76,10 @@ export function LoginScreen({ navigation }: Props) {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#FAFDFA' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         {/* Top row: Lang chip + Theme toggle */}
         <View
@@ -139,288 +91,257 @@ export function LoginScreen({ navigation }: Props) {
             alignItems: 'center',
           }}
         >
-          <LangChip />
-          <ThemeToggle />
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 6,
+              height: 38,
+              paddingHorizontal: 13,
+              borderRadius: 999,
+              backgroundColor: C.bgElevated,
+              borderWidth: 1.5,
+              borderColor: C.border,
+            }}
+          >
+            <Text style={{ fontSize: 15 }}>🌐</Text>
+            <Text style={{ fontSize: 13, fontWeight: '600', color: C.fg }}>EN</Text>
+            <Text style={{ fontSize: 11, color: C.fgSubtle, marginLeft: 2 }}>›</Text>
+          </View>
+          <Pressable
+            onPress={toggle}
+            accessibilityLabel="Toggle theme"
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: C.bgElevated,
+              borderWidth: 1.5,
+              borderColor: C.border,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Text style={{ fontSize: 18 }}>{isDark ? '☀️' : '🌙'}</Text>
+          </Pressable>
         </View>
 
+        {/* Everything scrolls; the CTA is pushed to the bottom by a flex
+            spacer, so it's always reachable even with the keyboard up. */}
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
+          contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 26, paddingBottom: 24 }}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          {/* Hero section */}
-          <View style={{ padding: 26, paddingTop: 26, flex: 1 }}>
-            {/* Logo tile — long-press for password mode */}
-            <Pressable
-              onLongPress={() => {
-                setShowPasswordMode(true);
-                setPassword('Nesso!Admin!2026');
-              }}
-              delayLongPress={800}
+          {/* Logo tile — long-press forces staff password mode */}
+          <Pressable
+            onLongPress={() => {
+              setShowPasswordMode(true);
+              setPassword('Nesso!Admin!2026');
+            }}
+            delayLongPress={800}
+            style={{
+              width: 60,
+              height: 60,
+              borderRadius: 18,
+              backgroundColor: '#FFFFFF',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginTop: 26,
+              marginBottom: 26,
+              shadowColor: '#000',
+              shadowOpacity: 0.12,
+              shadowRadius: 12,
+              shadowOffset: { width: 0, height: 4 },
+              elevation: 4,
+              overflow: 'hidden',
+            }}
+          >
+            <Image
+              source={require('../../assets/nesso-logo.jpeg')}
+              style={{ width: 42, height: 42, borderRadius: 8 }}
+              resizeMode="contain"
+            />
+          </Pressable>
+
+          <Text style={{ fontSize: 34, fontWeight: '700', color: C.fg, letterSpacing: -0.7, lineHeight: 38 }}>
+            {'Welcome to\nNesso'}
+          </Text>
+
+          <Text style={{ fontSize: 16, color: C.fgMuted, marginTop: 14, lineHeight: 24, maxWidth: 280 }}>
+            {showPasswordMode
+              ? 'Staff login — enter your phone and password.'
+              : "Log in with your mobile number. We'll send a one-time code to verify it's you."}
+          </Text>
+
+          {/* Phone field */}
+          <View style={{ marginTop: 36 }}>
+            <Text style={{ fontSize: 13, fontWeight: '600', color: C.fg, marginBottom: 8 }}>Phone</Text>
+            <View
               style={{
-                width: 60,
-                height: 60,
-                borderRadius: 18,
-                backgroundColor: '#FFFFFF',
+                flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 26,
-                shadowColor: '#000',
-                shadowOpacity: 0.12,
-                shadowRadius: 12,
-                shadowOffset: { width: 0, height: 4 },
-                elevation: 4,
+                height: 54,
+                borderWidth: 1.5,
+                borderColor: C.border,
+                borderRadius: 12,
+                backgroundColor: C.bgElevated,
                 overflow: 'hidden',
               }}
             >
-              <Image
-                source={require('../../assets/nesso-logo.jpeg')}
-                style={{ width: 42, height: 42, borderRadius: 8 }}
-                resizeMode="contain"
-              />
-            </Pressable>
-
-            {/* H1 */}
-            <Text
-              style={{
-                fontSize: 34,
-                fontWeight: '700',
-                color: '#0F1A14',
-                letterSpacing: -0.7,
-                lineHeight: 38,
-              }}
-            >
-              {'Welcome to\nNesso'}
-            </Text>
-
-            {/* Description */}
-            <Text
-              style={{
-                fontSize: 16,
-                color: '#4A5A52',
-                marginTop: 14,
-                lineHeight: 24,
-                maxWidth: 280,
-              }}
-            >
-              {showPasswordMode
-                ? 'Staff login — enter your phone and password.'
-                : "Log in with your mobile number. We'll send a one-time code to verify it's you."}
-            </Text>
-
-            {/* Phone field */}
-            <View style={{ marginTop: 36 }}>
-              <Text
-                style={{
-                  fontSize: 13,
-                  fontWeight: '600',
-                  color: '#0F1A14',
-                  marginBottom: 8,
-                }}
-              >
-                Mobile number
-              </Text>
-
-              {/* +91 prefix + input */}
               <View
                 style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
+                  paddingHorizontal: 14,
+                  height: '100%',
+                  justifyContent: 'center',
+                  borderRightWidth: 1.5,
+                  borderRightColor: C.border,
+                }}
+              >
+                <Text style={{ fontSize: 16, fontWeight: '600', color: C.fg }}>+91</Text>
+              </View>
+              <TextInput
+                value={phone}
+                onChangeText={(t) => setPhone(t.replace(/\D/g, '').slice(0, 10))}
+                placeholder="9XXXXXXXXX"
+                placeholderTextColor={C.fgSubtle}
+                keyboardType="number-pad"
+                maxLength={10}
+                editable={!busy}
+                style={{ flex: 1, paddingHorizontal: 14, fontSize: 16, color: C.fg }}
+              />
+            </View>
+            <Text style={{ fontSize: 12, color: C.fgSubtle, marginTop: 6, lineHeight: 18 }}>
+              Standard SMS rates may apply.
+            </Text>
+          </View>
+
+          {/* Password field — staff mode only */}
+          {showPasswordMode && (
+            <View style={{ marginTop: 20 }}>
+              <Text style={{ fontSize: 13, fontWeight: '600', color: C.fg, marginBottom: 8 }}>Password</Text>
+              <TextInput
+                value={password}
+                onChangeText={setPassword}
+                placeholder="••••••••"
+                placeholderTextColor={C.fgSubtle}
+                secureTextEntry
+                autoComplete="current-password"
+                editable={!busy}
+                style={{
                   height: 54,
                   borderWidth: 1.5,
-                  borderColor: '#DDE6E0',
+                  borderColor: C.border,
                   borderRadius: 12,
-                  backgroundColor: '#FFFFFF',
-                  overflow: 'hidden',
-                }}
-              >
-                {/* Prefix pill */}
-                <View
-                  style={{
-                    height: '100%',
-                    paddingHorizontal: 14,
-                    justifyContent: 'center',
-                    borderRightWidth: 1.5,
-                    borderRightColor: '#DDE6E0',
-                    backgroundColor: '#F1F5F2',
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontWeight: '600',
-                      color: '#0F1A14',
-                      letterSpacing: 0.2,
-                    }}
-                  >
-                    +91
-                  </Text>
-                </View>
-
-                <TextInput
-                  value={phone}
-                  onChangeText={(v) => setPhone(v.replace(/\D/g, '').slice(0, 10))}
-                  placeholder="98765 43210"
-                  placeholderTextColor="#7A8A82"
-                  keyboardType="number-pad"
-                  maxLength={10}
-                  autoComplete="tel"
-                  editable={!busy}
-                  style={{
-                    flex: 1,
-                    height: '100%',
-                    paddingHorizontal: 14,
-                    fontSize: 17,
-                    color: '#0F1A14',
-                    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-                    letterSpacing: 1,
-                  }}
-                />
-              </View>
-
-              <Text
-                style={{
-                  fontSize: 12,
-                  color: '#7A8A82',
-                  marginTop: 6,
-                  lineHeight: 18,
-                }}
-              >
-                Standard SMS rates may apply.
-              </Text>
-            </View>
-
-            {/* Password field — only in staff mode */}
-            {showPasswordMode && (
-              <View style={{ marginTop: 20 }}>
-                <Text
-                  style={{
-                    fontSize: 13,
-                    fontWeight: '600',
-                    color: '#0F1A14',
-                    marginBottom: 8,
-                  }}
-                >
-                  Password
-                </Text>
-                <TextInput
-                  value={password}
-                  onChangeText={setPassword}
-                  placeholder="••••••••"
-                  placeholderTextColor="#7A8A82"
-                  secureTextEntry
-                  autoComplete="current-password"
-                  editable={!busy}
-                  style={{
-                    height: 54,
-                    borderWidth: 1.5,
-                    borderColor: '#DDE6E0',
-                    borderRadius: 12,
-                    backgroundColor: '#FFFFFF',
-                    paddingHorizontal: 14,
-                    fontSize: 16,
-                    color: '#0F1A14',
-                  }}
-                />
-              </View>
-            )}
-
-            {/* Error */}
-            {error ? (
-              <View
-                style={{
-                  marginTop: 16,
-                  borderRadius: 10,
-                  borderWidth: 1,
-                  borderColor: 'rgba(180,35,24,0.3)',
-                  backgroundColor: 'rgba(180,35,24,0.06)',
+                  backgroundColor: C.bgElevated,
                   paddingHorizontal: 14,
-                  paddingVertical: 10,
+                  fontSize: 16,
+                  color: C.fg,
                 }}
-              >
-                <Text style={{ fontSize: 14, color: '#B42318' }}>{error}</Text>
-              </View>
-            ) : null}
-          </View>
-        </ScrollView>
+              />
+            </View>
+          )}
 
-        {/* Sticky bottom CTA */}
-        <View
-          style={{
-            paddingHorizontal: 26,
-            paddingTop: 16,
-            paddingBottom: Platform.OS === 'ios' ? 40 : 28,
-            backgroundColor: '#FAFDFA',
-          }}
-        >
+          {/* Error */}
+          {error ? (
+            <View
+              style={{
+                marginTop: 16,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: 'rgba(180,35,24,0.3)',
+                backgroundColor: C.dangerBg,
+                paddingHorizontal: 14,
+                paddingVertical: 10,
+              }}
+            >
+              <Text style={{ fontSize: 14, color: C.danger }}>{error}</Text>
+            </View>
+          ) : null}
+
+          {/* Flex spacer pushes the CTA to the bottom of the viewport */}
+          <View style={{ flex: 1, minHeight: 28 }} />
+
+          {/* Primary CTA — inside the scroll, always reachable */}
           <Pressable
             onPress={showPasswordMode ? handlePasswordLogin : handleSendOtp}
-            disabled={busy || (showPasswordMode ? !phone || !password : !valid)}
+            disabled={busy || !canSubmit}
             style={({ pressed }) => ({
               height: 54,
               borderRadius: 14,
-              backgroundColor: '#0D783C',
+              backgroundColor: C.primary,
               alignItems: 'center',
               justifyContent: 'center',
               flexDirection: 'row',
               gap: 8,
-              opacity:
-                busy || (showPasswordMode ? !phone || !password : !valid)
-                  ? 0.5
-                  : pressed
-                    ? 0.9
-                    : 1,
+              opacity: busy || !canSubmit ? 0.5 : pressed ? 0.9 : 1,
             })}
           >
             {busy ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={C.onPrimary} />
             ) : (
               <>
-                <Text
-                  style={{
-                    fontSize: 17,
-                    fontWeight: '600',
-                    color: '#FFFFFF',
-                    letterSpacing: 0.2,
-                  }}
-                >
+                <Text style={{ fontSize: 17, fontWeight: '600', color: C.onPrimary, letterSpacing: 0.2 }}>
                   {showPasswordMode ? 'Sign in' : 'Send OTP'}
                 </Text>
-                {!showPasswordMode && (
-                  <Text style={{ fontSize: 17, color: '#FFFFFF' }}>›</Text>
-                )}
+                {!showPasswordMode && <Text style={{ fontSize: 17, color: C.onPrimary }}>›</Text>}
               </>
             )}
           </Pressable>
 
-          <Text
-            style={{
-              textAlign: 'center',
-              fontSize: 12,
-              color: '#7A8A82',
-              marginTop: 16,
-              lineHeight: 18,
+          {/* Mode hint + toggle to switch between OTP and password */}
+          <Pressable
+            onPress={() => {
+              setError(null);
+              setShowPasswordMode((m) => !m);
             }}
+            style={{ marginTop: 14, alignSelf: 'center' }}
           >
+            <Text style={{ fontSize: 13, color: C.primary, fontWeight: '600' }}>
+              {showPasswordMode ? 'Use phone OTP instead' : 'Staff? Sign in with password'}
+            </Text>
+          </Pressable>
+
+          {!otpAvailable && showPasswordMode ? (
+            <Text style={{ textAlign: 'center', fontSize: 11, color: C.fgSubtle, marginTop: 8 }}>
+              Phone OTP needs a dev build · password works in Expo Go
+            </Text>
+          ) : null}
+
+          <Text style={{ textAlign: 'center', fontSize: 12, color: C.fgSubtle, marginTop: 14, lineHeight: 18 }}>
             By continuing you agree to Nesso&apos;s{' '}
-            <Text style={{ color: '#0D783C', fontWeight: '600' }}>Terms</Text>
+            <Text style={{ color: C.primary, fontWeight: '600' }}>Terms</Text>
             {' & '}
-            <Text style={{ color: '#0D783C', fontWeight: '600' }}>Privacy Policy</Text>.
+            <Text style={{ color: C.primary, fontWeight: '600' }}>Privacy Policy</Text>.
           </Text>
 
-          {/* Dev hint — Expo Go can't run native phone OTP */}
-          {!otpAvailable && showPasswordMode && (
-            <Text
-              style={{
-                textAlign: 'center',
-                fontSize: 11,
-                color: '#7A8A82',
-                marginTop: 8,
-              }}
-            >
-              Staff password login (Expo Go) · Phone OTP needs a dev build
+          {/* Need help — support (coming soon) */}
+          <Pressable
+            onPress={() =>
+              Alert.alert(
+                'Need help signing in?',
+                'In-app support chat is coming soon. For now, contact your field supervisor or email help@nesso.in.',
+              )
+            }
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              alignSelf: 'center',
+              gap: 6,
+              marginTop: 16,
+            }}
+          >
+            <HelpCircle size={15} color={C.fgMuted} />
+            <Text style={{ fontSize: 13, color: C.fgMuted, fontWeight: '500' }}>
+              Need help signing in?
             </Text>
-          )}
-        </View>
+          </Pressable>
+
+          {/* Version footer */}
+          <Text style={{ textAlign: 'center', fontSize: 11, color: C.fgSubtle, marginTop: 14 }}>
+            Nesso v1.0.0 · NR Group
+          </Text>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
