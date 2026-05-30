@@ -1,31 +1,39 @@
 import { redirect } from 'next/navigation';
 import { api, ApiError, readAccessToken } from '@/lib/api';
-import { Sidebar } from '@/components/dashboard/Sidebar';
-import { Topbar } from '@/components/dashboard/Topbar';
+import { DashboardShell } from '@/components/dashboard/DashboardShell';
+
+function formatRole(role: string): string {
+  if (!role) return 'NESSO';
+  const pretty = role
+    .split(/[_\s]+/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
+  return `${pretty} · NESSO`;
+}
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const token = await readAccessToken();
   if (!token) redirect('/login');
 
   try {
-    const [me, stats, inbox] = await Promise.all([
+    const [me, stats] = await Promise.all([
       api.me(token),
       api
         .getFarmerStats(token)
         .catch(() => ({ pending: 0, approved: 0, rejected: 0, total: 0 })),
-      api
-        .listNotifications(token, { pageSize: 1 })
-        .catch(() => ({ data: [], page: 1, pageSize: 1, total: 0, totalPages: 0, unread: 0 })),
     ]);
 
+    const userName =
+      [me.firstName, me.lastName].filter(Boolean).join(' ').trim() || me.phone;
+
     return (
-      <div className="flex min-h-dvh bg-bg">
-        <Sidebar pendingApprovals={stats.pending} />
-        <div className="flex min-h-dvh flex-1 flex-col">
-          <Topbar me={me} unreadNotifications={inbox.unread} />
-          <main className="flex-1">{children}</main>
-        </div>
-      </div>
+      <DashboardShell
+        pendingApprovals={stats.pending}
+        userName={userName}
+        userRole={formatRole(me.role)}
+      >
+        {children}
+      </DashboardShell>
     );
   } catch (err) {
     if (err instanceof ApiError && err.status === 401) redirect('/login');
