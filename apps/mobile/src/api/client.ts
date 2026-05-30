@@ -22,6 +22,13 @@ function resolveApiBase(): string {
   const override = process.env.EXPO_PUBLIC_API_URL;
   if (override) return override;
 
+  // If someone accidentally loads the mobile bundle in a desktop browser
+  // (by hitting Metro's bundler URL at :8081), the previous fallbacks
+  // would send requests to the Android emulator loopback (10.0.2.2),
+  // which a browser obviously can't reach. Use localhost for web so the
+  // failure is at least cause-and-effect.
+  if (Platform.OS === 'web') return 'http://localhost:4000/api/v1';
+
   const hostUri = Constants.expoConfig?.hostUri ?? Constants.expoGoConfig?.hostUri;
   if (hostUri) {
     const host = hostUri.split(':')[0];
