@@ -14,6 +14,11 @@ import { FarmsModule } from './farms/farms.module';
 import { CropsModule } from './crops/crops.module';
 import { ActivitiesModule } from './activities/activities.module';
 import { CatalogModule } from './catalog/catalog.module';
+import { SamplesModule } from './samples/samples.module';
+import { AuditsModule } from './audits/audits.module';
+import { ProcurementModule } from './procurement/procurement.module';
+import { WarehousesModule } from './warehouses/warehouses.module';
+import { InventoryModule } from './inventory/inventory.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
@@ -55,6 +60,11 @@ import { HealthModule } from './health/health.module';
     CropsModule,
     ActivitiesModule,
     CatalogModule,
+    SamplesModule,
+    AuditsModule,
+    ProcurementModule,
+    WarehousesModule,
+    InventoryModule,
     HealthModule,
   ],
   providers: [
