@@ -24,7 +24,6 @@ module.exports = () => {
   const adaptiveIcon = rel('./assets/adaptive-icon.png');
 
   const plugins = [
-    'expo-splash-screen',
     'expo-localization',
     'expo-camera',
     'expo-location',
@@ -40,6 +39,16 @@ module.exports = () => {
     ],
     ['expo-build-properties', { ios: { useFrameworks: 'static' } }],
   ];
+
+  // expo-splash-screen generates an Android drawable resource at build
+  // time from `splash.image`. If we don't have an image on disk yet,
+  // including the plugin causes Gradle to fail with
+  //   "resource drawable/splashscreen_logo not found"
+  // during :app:processDebugResources. Skip the plugin until an asset
+  // actually exists; Expo will fall back to its default splash.
+  if (splash) {
+    plugins.unshift('expo-splash-screen');
+  }
 
   // Only wire Firebase native plugins if the config files are present —
   // otherwise the dev server fails to start before any of our code runs.
