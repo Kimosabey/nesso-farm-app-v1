@@ -169,6 +169,15 @@ export const api = {
     return res;
   },
 
+  async otpVerify(firebaseIdToken: string): Promise<AuthSuccess> {
+    const res = await request<AuthSuccess>('/auth/otp/verify', {
+      method: 'POST',
+      body: JSON.stringify({ firebaseIdToken }),
+    });
+    await setSession(res);
+    return res;
+  },
+
   me(): Promise<MeResponse> {
     return request<MeResponse>('/auth/me');
   },

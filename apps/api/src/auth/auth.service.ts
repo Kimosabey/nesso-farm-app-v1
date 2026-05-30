@@ -1,10 +1,11 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { UsersService } from '../users/users.service';
 import { UserDocument } from '../users/schemas/user.schema';
+import { FirebaseService } from '../firebase/firebase.service';
 
 export interface AuthTokens {
   accessToken: string;
@@ -34,6 +35,7 @@ export class AuthService {
     private readonly users: UsersService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
+    private readonly firebase: FirebaseService,
   ) {
     const keyPath = this.config.get<string>('JWT_PRIVATE_KEY_PATH') ?? './keys/private.pem';
     this.privateKey = readFileSync(resolve(keyPath), 'utf-8');
@@ -49,6 +51,40 @@ export class AuthService {
     const ok = await this.users.verifyPassword(user, password);
     if (!ok) {
       throw new UnauthorizedException('Phone or password is incorrect');
+    }
+    await this.users.markLoggedIn(user.id as string);
+    return this.issueTokens(user);
+  }
+
+  /**
+   * Exchange a Firebase ID token (from mobile, after the Phone-OTP step) for
+   * our own RS256 access + refresh tokens.
+   *
+   * Behavior:
+   *   1. Verify the Firebase ID token against Google's public keys
+   *   2. Pull the phone number from the decoded token
+   *   3. Look up an existing `users` row by that phone
+   *   4. If found, issue our tokens (preserving the existing role)
+   *   5. If not found, refuse — staff must be pre-provisioned by an admin.
+   *      (Auto-creating "farmer" users via this path is a Phase 6 decision —
+   *      farmers live in a different collection with KYC + approval status.)
+   */
+  async verifyOtp(firebaseIdToken: string): Promise<AuthSuccess> {
+    const verified = await this.firebase.verifyIdToken(firebaseIdToken);
+    const phone = FirebaseService.normalizeIndianMobile(verified.phone);
+    if (!phone) {
+      throw new UnauthorizedException(
+        `Firebase token has no usable Indian mobile number (got "${verified.phone ?? 'none'}")`,
+      );
+    }
+    const user = await this.users.findByPhone(phone);
+    if (!user) {
+      throw new NotFoundException(
+        `No staff account exists for phone ${phone}. Ask an admin to register you first.`,
+      );
+    }
+    if (user.status !== 'active') {
+      throw new UnauthorizedException('Account is inactive');
     }
     await this.users.markLoggedIn(user.id as string);
     return this.issueTokens(user);

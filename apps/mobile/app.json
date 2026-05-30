@@ -16,6 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.nesso.farmer",
+      "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Nesso uses your location to map farms accurately and tag field activities.",
         "NSCameraUsageDescription": "Nesso uses the camera to capture ID proofs, farm photos, and scan batch QR codes.",
@@ -25,6 +26,7 @@
     },
     "android": {
       "package": "app.nesso.farmer",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0D783C"
@@ -53,7 +55,15 @@
       "expo-location",
       "expo-font",
       "expo-notifications",
-      "expo-sqlite"
+      "expo-sqlite",
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      [
+        "expo-build-properties",
+        {
+          "ios": { "useFrameworks": "static" }
+        }
+      ]
     ],
     "extra": {
       "eas": {

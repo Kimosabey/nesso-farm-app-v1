@@ -24,6 +24,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ReportsModule } from './reports/reports.module';
 import { WeatherModule } from './weather/weather.module';
 import { HealthModule } from './health/health.module';
+import { FirebaseModule } from './firebase/firebase.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { HealthModule } from './health/health.module';
     ]),
     DatabaseModule,
     CounterModule,
+    FirebaseModule,
     UsersModule,
     AuthModule,
     FilesModule,
