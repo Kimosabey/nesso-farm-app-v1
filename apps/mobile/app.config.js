@@ -22,7 +22,6 @@ module.exports = () => {
   const icon = rel('./assets/icon.png');
   const splash = rel('./assets/splash.png');
   const adaptiveIcon = rel('./assets/adaptive-icon.png');
-  const favicon = rel('./assets/favicon.png');
 
   const plugins = [
     'expo-splash-screen',
@@ -98,10 +97,14 @@ module.exports = () => {
           'android.permission.ACCESS_FINE_LOCATION',
         ],
       },
-      web: {
-        bundler: 'metro',
-        ...(favicon ? { favicon } : {}),
-      },
+      // Web is intentionally NOT a supported target for this app:
+      //   - @react-native-firebase/* has no web shim
+      //   - @sentry/react-native has no web shim
+      //   - expo-sqlite's web target uses wa-sqlite (WASM) which Metro
+      //     can't bundle without extra config
+      // Leaving `web` undefined makes `expo start` skip the web prompt
+      // and `localhost:8081` only act as the Metro bundler endpoint for
+      // native devices. Reintroduce only when we ship a real web client.
       plugins,
       extra: {
         eas: { projectId: '225186ac-02a2-4849-abea-9e2ff813a520' },
