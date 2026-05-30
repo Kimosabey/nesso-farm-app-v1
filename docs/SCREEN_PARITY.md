@@ -67,10 +67,10 @@ Last updated: 2026-05-30
 
 | # | Screen | File | Status | Notes |
 |---|---|---|---|---|
-| W1 | Landing page | `app/page.tsx` | 🟡 | Basic card exists — needs aurora blobs, stat chips, feature cards, CTA band |
-| W2 | Login | `(auth)/login/` | 🟡 | Functional — needs glass card, aurora bg |
-| W3 | Dashboard — bento + charts | `(dashboard)/dashboard/page.tsx` | 🟡 | 4 flat tiles — needs bento grid, recharts, map card |
-| W4 | App shell — sidebar + topbar | `Sidebar.tsx`, `Topbar.tsx` | 🟡 | Fixed sidebar — needs collapse, ⌘K, theme toggle, breadcrumbs |
+| W1 | Landing page | `app/page.tsx` | ✅ | Aurora 3-blob hero, gradient H1, dual CTAs (auth-aware), 4 stat chips, browser-preview, 3 feature cards, CTA band, footer |
+| W2 | Login | `(auth)/login/` | 🟡 | Functional, prefilled dev creds — needs glass card, aurora bg |
+| W3 | Dashboard — bento + charts | `(dashboard)/dashboard/page.tsx` | ✅ | 4-col bento, KPI count-ups + sparklines, recharts donuts + bar, SVG MiniMap, recent feed, weather card. Real data wired |
+| W4 | App shell — sidebar + topbar | `Sidebar.tsx`, `Topbar.tsx`, `CommandPalette.tsx`, `DashboardShell.tsx` | ✅ | Collapsible sidebar 248↔74, glass topbar, breadcrumbs, ⌘K cmdk palette, theme toggle, account dropdown |
 | W5 | Approvals | `(dashboard)/approvals/page.tsx` | 🟡 | Route exists, no split master-detail |
 | W6 | Farmers — DataTable | `(dashboard)/farmers/page.tsx` | 🟡 | List exists, no @tanstack/react-table |
 | W7 | Farmer Profile — 5 tabs | `(dashboard)/farmers/[id]/page.tsx` | 🟡 | 4 info cards, no tabs, no avatar |
@@ -96,7 +96,7 @@ Last updated: 2026-05-30
 | # | Screen | File | Status | Notes |
 |---|---|---|---|---|
 | P1 | Landing — scan card | `app/page.tsx` | 🟡 | Glass card exists — needs aurora hero |
-| P2 | Trace — full journey | `app/[locale]/t/[code]/page.tsx` | 🟡 | Blocks render — needs photo hero, scroll-linked timeline, shimmer |
+| P2 | Trace — full journey | `app/[locale]/t/[code]/page.tsx` | ✅ | Gradient+stripe hero, trace chip, holographic shimmer trust card, framer-motion scroll-linked journey timeline, farmer+farm cards, animated polygon-draw, raw JSON link |
 | P3 | Farmer profile | ❌ | Not built | `/farmer/[id]` |
 | P4 | Farm detail | ❌ | Not built | `/farm/[id]` |
 | P5 | About | ❌ | Not built | `/about` |
@@ -109,10 +109,10 @@ Last updated: 2026-05-30
 
 | Surface | Total | ✅ Done | 🟡 Partial | ❌ Missing |
 |---|---|---|---|---|
-| Mobile | 32 | 0 | 18 | 14 |
-| Web | 21 | 0 | 17 | 4 |
-| Portal | 7 | 0 | 2 | 5 |
-| **Total** | **60** | **5** | **32** | **23** |
+| Mobile | 32 | 5 | 13 | 14 |
+| Web | 21 | 3 | 14 | 4 |
+| Portal | 7 | 1 | 1 | 5 |
+| **Total** | **60** | **9** | **28** | **23** |
 
 ---
 
