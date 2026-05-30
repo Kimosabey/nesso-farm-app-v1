@@ -26,4 +26,75 @@
     -webkit-backdrop-filter: blur(14px) saturate(140%);
     border: 1px solid rgb(var(--glass-border) / var(--glass-border-alpha));
   }
+
+  /* Hero striped pattern + diagonal legibility overlay (matches design handoff) */
+  .hero-photo {
+    background:
+      linear-gradient(135deg, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.55) 100%),
+      repeating-linear-gradient(125deg, rgba(13, 120, 60, 0.12) 0 2px, transparent 2px 13px),
+      linear-gradient(160deg, #5db683, #0d783c 55%, #06401f);
+  }
+
+  /* Holographic shimmer sweep for the "Verified by Nesso" trust card */
+  .holo-shimmer {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .holo-shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(
+      115deg,
+      transparent 30%,
+      rgba(93, 182, 131, 0.18) 45%,
+      rgba(241, 212, 18, 0.22) 50%,
+      rgba(93, 182, 131, 0.18) 55%,
+      transparent 70%
+    );
+    background-size: 250% 100%;
+    background-repeat: no-repeat;
+    animation: holo-shimmer 4.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .holo-shimmer > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+@keyframes holo-shimmer {
+  0% {
+    background-position: 150% 0;
+  }
+  60%,
+  100% {
+    background-position: -150% 0;
+  }
+}
+
+@keyframes polygon-draw {
+  from {
+    stroke-dashoffset: 320;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.polygon-draw {
+  stroke-dasharray: 320;
+  animation: polygon-draw 2.2s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .holo-shimmer::after {
+    animation: none;
+  }
+  .polygon-draw {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
 }
