@@ -1,4 +1,4 @@
-// Metro config — monorepo aware + NativeWind v4
+// Metro config — monorepo aware + NativeWind v4 (SDK 54).
 const { getDefaultConfig } = require('expo/metro-config');
 const { withNativeWind } = require('nativewind/metro');
 const path = require('path');
@@ -17,8 +17,5 @@ config.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, 'node_modules'),
 ];
 config.resolver.disableHierarchicalLookup = true;
-
-// Fix for Expo 52 / Metro 0.81 strict package exports (resolves TerminalReporter error)
-config.resolver.unstable_enablePackageExports = false;
 
 module.exports = withNativeWind(config, { input: './global.css' });

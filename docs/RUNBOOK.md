@@ -156,31 +156,15 @@ Reanimated 3.16 doesn't run it, but the require still has to resolve.
 pnpm --filter @nesso/mobile add react-native-worklets
 ```
 
-### 5.2 `Package subpath './src/lib/TerminalReporter' is not defined by "exports" in metro/package.json`
+### 5.2 ~~`TerminalReporter` not defined by "exports"~~ — fixed by SDK 54 upgrade
 
-Node 22's strict `exports` enforcement + Expo SDK 52's CLI requiring a
-non-exported metro internal. Pin metro to 0.81.5 via `pnpm-workspace.yaml`
-`overrides:` (already in repo) and **fresh-install** to make it stick:
+Was a Node 22 × Expo SDK 52 incompatibility. Resolved by upgrading the
+project to SDK 54 (see [SDK_UPGRADE_NOTES.md](./SDK_UPGRADE_NOTES.md)).
+The metro `overrides:` block is gone from `pnpm-workspace.yaml`.
 
-```powershell
-cd D:\Harshan\farmer-app\nesso-farm-app-v1
-Remove-Item -Recurse -Force node_modules, pnpm-lock.yaml
-pnpm install
-```
+### 5.3 ~~`Project is incompatible with this version of Expo Go — SDK 54 vs SDK 52`~~ — fixed
 
-> `pnpm install --force` on its own does NOT re-run resolution — only a
-> clean install picks up `overrides` retroactively.
-
-### 5.3 `Project is incompatible with this version of Expo Go — SDK 54 vs SDK 52`
-
-Your phone's Expo Go auto-updated past the project. Two options:
-
-- **Easy**: install the SDK 52 build of Expo Go from the link in the error
-  (`https://expo.dev/go?sdkVersion=52&platform=android&device=true`), then
-  uninstall the modern Expo Go from your phone before sideloading.
-- **Durable**: upgrade the project to SDK 54 (`npx expo upgrade`). 30–60min
-  of work + risk to native modules. Defer until you're already touching
-  the mobile stack.
+The project is now on SDK 54. Use the standard Play Store Expo Go.
 
 ### 5.4 `Could not parse Expo config: android.googleServicesFile`
 

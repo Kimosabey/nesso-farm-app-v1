@@ -15,18 +15,3 @@ allowBuilds:
   protobufjs: true # firebase-admin / grpc
   sharp: true # Next.js image optimization native binary
   unrs-resolver: true # Turbo / Next.js resolver native binary
-
-# Pin Metro to the version Expo SDK 52 ships with. Newer transitive deps
-# (Sentry RN, RN Firebase) try to pull in metro 0.84.x whose `exports` field
-# omits `./src/lib/TerminalReporter`, which @expo/cli still requires on
-# Node 22+. Pinning avoids that resolution failure at `expo start`.
-overrides:
-  metro: '0.81.5'
-  metro-resolver: '0.81.5'
-  metro-config: '0.81.5'
-  metro-runtime: '0.81.5'
-  metro-source-map: '0.81.5'
-  metro-cache: '0.81.5'
-  metro-cache-key: '0.81.5'
-  metro-core: '0.81.5'
-  metro-file-map: '0.81.5'

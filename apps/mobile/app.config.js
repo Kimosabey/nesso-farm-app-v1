@@ -32,6 +32,13 @@ module.exports = () => {
     'expo-font',
     'expo-notifications',
     'expo-sqlite',
+    [
+      '@sentry/react-native/expo',
+      {
+        organization: 'harshimos-team',
+        project: 'nesso-mobile',
+      },
+    ],
     ['expo-build-properties', { ios: { useFrameworks: 'static' } }],
   ];
 
