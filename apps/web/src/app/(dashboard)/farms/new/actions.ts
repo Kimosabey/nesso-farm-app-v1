@@ -52,7 +52,7 @@ export async function createFarmAction(
   };
 
   try {
-    const created = await api.createFarm(token, input);
+    await api.createFarm(token, input);
     revalidatePath('/farms');
     revalidatePath('/dashboard');
     revalidatePath(`/farmers/${farmerId}`);

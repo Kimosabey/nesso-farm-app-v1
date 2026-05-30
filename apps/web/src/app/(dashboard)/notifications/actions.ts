@@ -3,27 +3,25 @@
 import { revalidatePath } from 'next/cache';
 import { api, readAccessToken } from '@/lib/api';
 
-export async function markAllReadAction() {
+export async function markAllReadAction(): Promise<void> {
   const token = await readAccessToken();
-  if (!token) return { ok: false };
+  if (!token) return;
   try {
     await api.markAllNotificationsRead(token);
     revalidatePath('/notifications');
     revalidatePath('/dashboard');
-    return { ok: true };
   } catch {
-    return { ok: false };
+    // swallow — UI will reflect the actual unread count on next render
   }
 }
 
-export async function markOneReadAction(id: string) {
+export async function markOneReadAction(id: string): Promise<void> {
   const token = await readAccessToken();
-  if (!token) return { ok: false };
+  if (!token) return;
   try {
     await api.markNotificationRead(token, id);
     revalidatePath('/notifications');
-    return { ok: true };
   } catch {
-    return { ok: false };
+    // swallow
   }
 }

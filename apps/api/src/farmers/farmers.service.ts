@@ -2,6 +2,11 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, FilterQuery } from 'mongoose';
 import { Farmer, FarmerDocument } from './schemas/farmer.schema';
+import { Farm, FarmDocument } from '../farms/schemas/farm.schema';
+import { Crop, CropDocument } from '../crops/schemas/crop.schema';
+import { Activity, ActivityDocument } from '../activities/schemas/activity.schema';
+import { Sample, SampleDocument } from '../samples/schemas/sample.schema';
+import { Audit, AuditDocument } from '../audits/schemas/audit.schema';
 import {
   CreateFarmerDto,
   UpdateFarmerDto,
@@ -26,6 +31,11 @@ export interface PageEnvelope<T> {
 export class FarmersService {
   constructor(
     @InjectModel(Farmer.name) private readonly model: Model<FarmerDocument>,
+    @InjectModel(Farm.name) private readonly farms: Model<FarmDocument>,
+    @InjectModel(Crop.name) private readonly crops: Model<CropDocument>,
+    @InjectModel(Activity.name) private readonly activities: Model<ActivityDocument>,
+    @InjectModel(Sample.name) private readonly samples: Model<SampleDocument>,
+    @InjectModel(Audit.name) private readonly audits: Model<AuditDocument>,
     private readonly counter: CounterService,
     private readonly notifications: NotificationsService,
   ) {}
@@ -142,14 +152,34 @@ export class FarmersService {
     return doc;
   }
 
-  async softDelete(id: string): Promise<{ ok: true }> {
+  /**
+   * Soft-delete a farmer and cascade the same soft-delete to every
+   * record that references them. We mark instead of dropping rows so:
+   *   - audit history is preserved (deleted=true rows are queryable)
+   *   - approvals / procurements that already shipped don't disappear
+   *
+   * Procurement + QR + warehouse records are intentionally NOT cascaded —
+   * they represent transactions that physically occurred and must remain
+   * intact for traceability + financial reconciliation.
+   */
+  async softDelete(id: string): Promise<{ ok: true; cascaded: Record<string, number> }> {
     const res = await this.model.updateOne(
       { _id: id, isDeleted: false },
       { $set: { isDeleted: true } },
     );
     if (res.matchedCount === 0) throw new NotFoundException('Farmer not found');
-    // Phase 2.x: cascade to farms/crops/activities
-    return { ok: true };
+
+    const filter = { farmerId: id, isDeleted: false };
+    const update = { $set: { isDeleted: true } };
+    const [farms, crops, activities, samples, audits] = await Promise.all([
+      this.farms.updateMany(filter, update).then((r) => r.modifiedCount),
+      this.crops.updateMany(filter, update).then((r) => r.modifiedCount),
+      this.activities.updateMany(filter, update).then((r) => r.modifiedCount),
+      this.samples.updateMany(filter, update).then((r) => r.modifiedCount),
+      this.audits.updateMany(filter, update).then((r) => r.modifiedCount),
+    ]);
+
+    return { ok: true, cascaded: { farms, crops, activities, samples, audits } };
   }
 
   async countByStatus(): Promise<Record<string, number>> {

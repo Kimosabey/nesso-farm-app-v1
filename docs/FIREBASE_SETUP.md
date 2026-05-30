@@ -19,13 +19,17 @@
 | Test phone numbers added | ✅ |
 | Service-account JSON downloaded → `apps/api/keys/firebase-service-account.json` | ✅ (gitignored) |
 | `FIREBASE_SERVICE_ACCOUNT_PATH` in `apps/api/.env` | ✅ |
-| Service-account key **rotated** (key was momentarily out of secure storage) | ⚠️ pending |
-| Android app registered with **new bundle ID** `app.nesso.farmer` | ⚠️ pending |
-| `apps/mobile/google-services.json` (matching new bundle ID) | ⚠️ pending |
-| Code wiring (backend `firebase-admin` + mobile `@react-native-firebase/auth`) | ❌ pending |
-| Dev-client build (Expo Go can't run native Firebase) | ❌ pending |
+| **Backend code wiring** (`firebase-admin` + `FirebaseModule` + `POST /auth/otp/verify`) | ✅ commit `685b237` |
+| **Mobile code wiring** (`@react-native-firebase/{app,auth}` + `app.config.js` plugin guards + OTP toggle in LoginScreen) | ✅ commit `685b237` |
+| Service-account key **rotated** (key was momentarily out of secure storage) | ⚠️ user action — do this in Firebase console |
+| Android app re-registered with **new bundle ID** `app.nesso.farmer` | ⚠️ user action |
+| `apps/mobile/google-services.json` (matching new bundle ID) downloaded | ⚠️ user action |
+| EAS dev build (Expo Go can't run native Firebase) | ⚠️ user action: `npx eas build --profile development --platform android` |
+| End-to-end OTP smoke test on a real device | ❌ untested — see [TESTING.md §5](./TESTING.md) |
 
 **Project URL:** https://console.firebase.google.com/project/nesso-farm
+
+**Note on graceful degradation:** the API boots fine without the service account file (only `/auth/otp/verify` returns 503 in that case). The mobile app's `app.config.js` uses `existsSync` guards so missing `google-services.json` / `GoogleService-Info.plist` no longer block `expo start` — the Firebase plugin is just not loaded.
 
 ---
 

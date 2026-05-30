@@ -12,13 +12,15 @@
 
 ## TL;DR — where we are right now
 
-| App | Project on Sentry | DSN | Stored in `.env`? | Wired in code? |
-|---|---|---|---|---|
-| **API** (NestJS) | `nesso-api` | ✅ | ✅ `apps/api/.env` | ❌ pending |
-| **Web** (Next.js) | `nesso-web` | ✅ | ✅ `apps/web/.env` | ❌ pending |
-| **Portal** (Next.js) | `nesso-portal` | ✅ | ✅ `apps/portal/.env` | ❌ pending |
-| **Mobile** (Expo) | `nesso-mobile` | ✅ | ✅ `apps/mobile/.env` | ❌ pending |
-| **Sentry CLI** (releases + sourcemaps) | — | — | not yet | not yet |
+| App | Project on Sentry | DSN | Stored in `.env`? | Wired in code? | Runtime-verified? |
+|---|---|---|---|---|---|
+| **API** (NestJS) | `nesso-api` | ✅ | ✅ `apps/api/.env` | ✅ commit `7df1c2d` | ❌ (curl `/debug/sentry/throw`) |
+| **Web** (Next.js) | `nesso-web` | ✅ | ✅ `apps/web/.env` | ✅ commit `7df1c2d` | ❌ (visit `/debug/sentry`) |
+| **Portal** (Next.js) | `nesso-portal` | ✅ | ✅ `apps/portal/.env` | ✅ commit `7df1c2d` | ❌ (visit `/debug/sentry`) |
+| **Mobile** (Expo) | `nesso-mobile` | ✅ | ✅ `apps/mobile/.env` | ✅ commit `7df1c2d` | ❌ (long-press Nesso pill) |
+| **Sentry CLI** (releases + sourcemaps) | — | — | not yet | n/a — Phase 6 | n/a |
+
+**Status: all code wiring shipped. Smoke tests still pending — see [TESTING.md](./TESTING.md).**
 
 **Org:** `harshimos-team` · **URL:** https://harshimos-team.sentry.io · **Plan:** Developer (free, 5,000 errors/mo, 10k perf traces, 7-day retention)
 
@@ -227,25 +229,26 @@ Add a button on `/dashboard` (web) or `/` (portal) that calls `throw new Error('
 - [x] Create `nesso-api` project + DSN in `apps/api/.env`
 - [x] Create `nesso-web` project + DSN in `apps/web/.env`
 - [x] Create `nesso-portal` project + DSN in `apps/portal/.env`
-- [ ] **Create `nesso-mobile` project + DSN in `apps/mobile/.env`** ← you do this next
-- [ ] Generate `SENTRY_AUTH_TOKEN` and save to all 4 `.env` files
+- [x] Create `nesso-mobile` project + DSN in `apps/mobile/.env`
+- [ ] Generate `SENTRY_AUTH_TOKEN` (User Auth Token with `project:releases` + `org:read`) and save to all 4 `.env` files — only needed when you start uploading sourcemaps
 - [ ] Add the same token as a GitHub Actions repo secret (Phase 6)
 
-### Code wiring (I do these after you confirm)
-- [ ] API: install `@sentry/nestjs`, create `instrument.ts`, wire main.ts + AppModule
-- [ ] Web: install `@sentry/nextjs`, create 4 config files + global error boundary + wrap next.config
-- [ ] Portal: same as web
-- [ ] Mobile: install `sentry-expo`, wire App.tsx + app.json plugin
-- [ ] Add `@sentry/cli` to workspace dev deps (root)
-- [ ] Add hidden `/dev/throw` endpoint to API (dev-only) for sanity checking
+### Code wiring — ✅ all shipped
+- [x] API: `@sentry/nestjs` + `@sentry/profiling-node`, `src/instrument.ts` loaded first in main.ts, `SentryModule.forRoot()` + `SentryGlobalFilter` in app.module.ts. Commit `7df1c2d`.
+- [x] Web: `@sentry/nextjs` with the 4-file layout (`sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`, `src/instrumentation.ts`), `src/app/global-error.tsx`, `withSentryConfig()` in `next.config.mjs`. Commit `7df1c2d`.
+- [x] Portal: same layout as web. Commit `7df1c2d`.
+- [x] Mobile: `@sentry/react-native`, `initSentry()` in `src/sentry.ts`, `App.tsx` wrapped with `sentry.wrap()`. Commit `7df1c2d`.
+- [x] Debug routes for smoke-testing (`/debug/sentry/*` in API + web + portal, long-press → Debug screen on mobile). Commit `30958ff`.
+- [ ] **Runtime verification** — walk through [TESTING.md](./TESTING.md) sections 1-4. None of the wiring has been hit with a real event yet.
 
 ### Production hardening (Phase 6)
-- [ ] Source-map upload from GitHub Actions
+- [ ] Source-map upload from GitHub Actions (needs `SENTRY_AUTH_TOKEN`)
 - [ ] Release tagging by git SHA
 - [ ] PII scrubbing rules in Sentry dashboard (Settings → Data Scrubbers)
 - [ ] Alert rules: email on new error type, page on 50+ events/hr
 - [ ] Slack integration (optional)
-- [ ] Bump `SENTRY_TRACES_SAMPLE_RATE` to 0.05–0.10 in production (currently 0.10 in dev)
+- [ ] Tune `tracesSampleRate` per app for production traffic volume
+- [ ] Remove the `/debug/sentry/*` smoke-test routes (see [TESTING.md](./TESTING.md) §6)
 
 ---
 
