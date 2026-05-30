@@ -47,17 +47,14 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router",
       "expo-splash-screen",
       "expo-localization",
       "expo-camera",
       "expo-location",
       "expo-font",
-      "expo-notifications"
+      "expo-notifications",
+      "expo-sqlite"
     ],
-    "experiments": {
-      "typedRoutes": true
-    },
     "extra": {
       "eas": {
         "projectId": "225186ac-02a2-4849-abea-9e2ff813a520"

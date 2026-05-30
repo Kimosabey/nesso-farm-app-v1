@@ -16,7 +16,7 @@ import { api, ApiError } from '@/api/client';
 type RootStackParamList = {
   Splash: undefined;
   Login: undefined;
-  Home: undefined;
+  Main: undefined;
 };
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
@@ -28,14 +28,18 @@ export function LoginScreen({ navigation }: Props) {
 
   async function submit() {
     setError(null);
-    if (!phone.trim() || !password) {
-      setError('Phone and password are required');
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+      setError('Enter a valid 10-digit Indian mobile number');
+      return;
+    }
+    if (!password) {
+      setError('Password is required');
       return;
     }
     setBusy(true);
     try {
       await api.passwordLogin(phone.trim(), password);
-      navigation.replace('Home');
+      navigation.replace('Main');
     } catch (e) {
       setError(e instanceof ApiError ? e.message : 'Could not reach the server');
     } finally {
@@ -70,8 +74,8 @@ export function LoginScreen({ navigation }: Props) {
                 placeholder="9066666481"
                 placeholderTextColor="#7A8A82"
                 keyboardType="number-pad"
+                maxLength={10}
                 autoComplete="tel"
-                returnKeyType="next"
                 editable={!busy}
                 className="h-12 rounded-md border border-border-strong bg-bg-elevated px-3 text-base text-fg"
               />
@@ -112,13 +116,13 @@ export function LoginScreen({ navigation }: Props) {
           </Pressable>
 
           <Text className="mt-6 text-xs text-fg-subtle">
-            Try the seeded admin: <Text className="font-mono">9066666481</Text> /{' '}
+            Seeded admin: <Text className="font-mono">9066666481</Text> /{' '}
             <Text className="font-mono">Nesso!Admin!2026</Text>
           </Text>
           <Text className="mt-2 text-xs text-fg-subtle">
-            Note: on Android emulator the API URL is{' '}
-            <Text className="font-mono">http://10.0.2.2:4000</Text>. On a real phone, set{' '}
-            <Text className="font-mono">EXPO_PUBLIC_API_URL</Text> to your PC's LAN IP.
+            On Android emulator the API is at <Text className="font-mono">10.0.2.2:4000</Text>. On a
+            real phone, set <Text className="font-mono">EXPO_PUBLIC_API_URL</Text> to your PC's LAN
+            IP.
           </Text>
         </ScrollView>
       </KeyboardAvoidingView>
