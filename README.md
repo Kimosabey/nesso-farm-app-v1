@@ -210,6 +210,8 @@ nesso/
 > **Ready to build?** → Read [**EXECUTION.md**](EXECUTION.md) — the phase-by-phase step-by-step checklist with literal commands. Tick boxes as you go.
 >
 > **Already running it?** → Read [**CONFIG.md**](CONFIG.md) — every URL, port, credential, connection string, and sample API call for the running local stack.
+>
+> **Want to browse the DB?** → Read [**docs/DB_CONNECT.md**](docs/DB_CONNECT.md) — step-by-step for MongoDB Compass, DBeaver, Redis, Minio, and Mailhog.
 
 > Implementation has **not** started yet. The full plan is approved, then we kick off Phase 0.
 > Until then, the commands below are the *intended* developer experience.
