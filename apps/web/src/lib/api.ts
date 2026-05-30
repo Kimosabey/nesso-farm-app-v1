@@ -259,7 +259,215 @@ export const api = {
     const suffix = qs.toString() ? `?${qs.toString()}` : '';
     return apiFetch<InputCatalogItem[]>(`/catalog/inputs${suffix}`, { token });
   },
+
+  // --- Samples ---
+  listSamples(
+    token: string,
+    params: { status?: string; page?: number; pageSize?: number } = {},
+  ) {
+    const qs = new URLSearchParams();
+    if (params.status) qs.set('status', params.status);
+    if (params.page) qs.set('page', String(params.page));
+    if (params.pageSize) qs.set('pageSize', String(params.pageSize));
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return apiFetch<SamplePage>(`/samples${suffix}`, { token });
+  },
+  getSampleStats(token: string) {
+    return apiFetch<Record<string, number>>('/samples/stats', { token });
+  },
+
+  // --- Audits ---
+  listAudits(
+    token: string,
+    params: { status?: string; auditType?: string; page?: number; pageSize?: number } = {},
+  ) {
+    const qs = new URLSearchParams();
+    if (params.status) qs.set('status', params.status);
+    if (params.auditType) qs.set('auditType', params.auditType);
+    if (params.page) qs.set('page', String(params.page));
+    if (params.pageSize) qs.set('pageSize', String(params.pageSize));
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return apiFetch<AuditPage>(`/audits${suffix}`, { token });
+  },
+  getAuditStats(token: string) {
+    return apiFetch<Record<string, number>>('/audits/stats', { token });
+  },
+
+  // --- Procurement ---
+  listProcurement(
+    token: string,
+    params: { status?: string; page?: number; pageSize?: number } = {},
+  ) {
+    const qs = new URLSearchParams();
+    if (params.status) qs.set('status', params.status);
+    if (params.page) qs.set('page', String(params.page));
+    if (params.pageSize) qs.set('pageSize', String(params.pageSize));
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return apiFetch<ProcurementPage>(`/procurement${suffix}`, { token });
+  },
+  getProcurementStats(token: string) {
+    return apiFetch<{ total: number; pending: number; completed: number; totalValue: number }>(
+      '/procurement/stats',
+      { token },
+    );
+  },
+
+  // --- Warehouses ---
+  listWarehouses(token: string, params: { type?: string; page?: number; pageSize?: number } = {}) {
+    const qs = new URLSearchParams();
+    if (params.type) qs.set('type', params.type);
+    if (params.page) qs.set('page', String(params.page));
+    if (params.pageSize) qs.set('pageSize', String(params.pageSize));
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return apiFetch<WarehousePage>(`/warehouses${suffix}`, { token });
+  },
+
+  // --- Inventory ---
+  listInventory(
+    token: string,
+    params: { status?: string; warehouseId?: string; page?: number; pageSize?: number } = {},
+  ) {
+    const qs = new URLSearchParams();
+    if (params.status) qs.set('status', params.status);
+    if (params.warehouseId) qs.set('warehouseId', params.warehouseId);
+    if (params.page) qs.set('page', String(params.page));
+    if (params.pageSize) qs.set('pageSize', String(params.pageSize));
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return apiFetch<InventoryPage>(`/inventory${suffix}`, { token });
+  },
+  getInventoryStats(token: string) {
+    return apiFetch<{
+      total: number;
+      available: number;
+      processing: number;
+      sold: number;
+      transferred: number;
+    }>('/inventory/stats', { token });
+  },
 };
+
+// --- Phase 4 types ---
+
+export interface Sample {
+  _id: string;
+  sampleCode: string;
+  farmerId: string;
+  farmerName?: string;
+  association?: string;
+  crop: string;
+  variety: string;
+  season?: string;
+  status: 'Queue' | 'Sent' | 'Received' | 'Tested' | 'Approved' | 'Rejected';
+  sentDate?: string;
+  receivedDate?: string;
+  testedDate?: string;
+  notes?: string;
+  createdAt: string;
+}
+export interface SamplePage {
+  data: Sample[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface Audit {
+  _id: string;
+  farmerId: string;
+  farmerName?: string;
+  association?: string;
+  auditType: 'Internal' | 'External' | 'Compliance';
+  description: string;
+  remarks?: string;
+  status: 'Pending' | 'Approved' | 'Rejected';
+  auditDate: string;
+  reviewedAt?: string;
+  rejectionReason?: string;
+  rejectionTags?: string[];
+  createdAt: string;
+}
+export interface AuditPage {
+  data: Audit[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface Procurement {
+  _id: string;
+  procurementId: string;
+  farmerId: string;
+  farmerName?: string;
+  crop: string;
+  variety?: string;
+  quantity: number;
+  pricePerUnit: number;
+  totalAmount: number;
+  unit: 'kg' | 'quintal';
+  procurementDate: string;
+  status: 'Pending' | 'Completed' | 'Cancelled';
+  paymentStatus: 'Unpaid' | 'Partial' | 'Paid';
+  linkedBatchId?: string;
+  createdAt: string;
+}
+export interface ProcurementPage {
+  data: Procurement[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface Warehouse {
+  _id: string;
+  warehouseName: string;
+  type: 'Storage' | 'FoodProcessing';
+  ownership: 'Own' | 'Leased';
+  capacity: number;
+  totalArea: number;
+  certificationStatus: string;
+  certifyingAgency?: string;
+  primaryContact?: { name?: string; mobileNumber?: string; email?: string };
+  address?: { state?: string; district?: string; city?: string; pincode?: string };
+  createdAt: string;
+}
+export interface WarehousePage {
+  data: Warehouse[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface InventoryBatch {
+  _id: string;
+  batchId: string;
+  productName: string;
+  variant?: string;
+  grade?: string;
+  supplier?: string;
+  warehouseId?: string;
+  warehouseName?: string;
+  type: 'RawMaterial' | 'SemiProcessed' | 'FinishedGood';
+  currentStage: string;
+  status: 'AVAILABLE' | 'PROCESSING' | 'SOLD' | 'TRANSFERRED';
+  quantity: number;
+  unit: string;
+  incomingDate: string;
+  expiryDate?: string;
+  qrCode?: string;
+  stageHistory: Array<{ stage: string; at: string; by?: string; notes?: string }>;
+  createdAt: string;
+}
+export interface InventoryPage {
+  data: InventoryBatch[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
 
 // --- Farm types ---
 

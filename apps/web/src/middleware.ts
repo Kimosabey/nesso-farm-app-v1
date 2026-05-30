@@ -8,6 +8,11 @@ const PROTECTED_PREFIXES = [
   '/farms',
   '/approvals',
   '/activities',
+  '/samples',
+  '/audits',
+  '/procurement',
+  '/warehouses',
+  '/inventory',
   '/reports',
   '/settings',
 ];
