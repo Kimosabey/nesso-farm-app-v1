@@ -14,20 +14,48 @@ All values below are `$0 NOW` — local Docker + localhost. Phase 6 paid cloud v
 
 ## 1 · URLs you can open in the browser right now
 
-| Surface | URL | What you'll see |
-|---|---|---|
-| **Web Dashboard** | http://localhost:3001 | Public home → "Sign in" CTA |
-| **Web Login** | http://localhost:3001/login | Glass card form |
-| **Web Dashboard (after login)** | http://localhost:3001/dashboard | Sidebar + KPI tiles + recent farmers |
-| **Farmers list** | http://localhost:3001/farmers | Searchable, filterable table |
-| **Add farmer** | http://localhost:3001/farmers/new | Full registration form |
-| **Approvals queue** | http://localhost:3001/approvals | Pending farmers + inline approve/reject |
-| **QR Portal** | http://localhost:3002 | Public landing |
-| **Sample trace page** | http://localhost:3002/en/t/SAMPLE12 | Mock trace timeline |
-| **NestJS API health** | http://localhost:4000/api/v1/health | `{"status":"ok",…}` |
-| **NestJS Swagger** | http://localhost:4000/api/docs | Live API explorer |
-| **Minio console** | http://localhost:9001 | S3 stub admin UI |
-| **Mailhog UI** | http://localhost:8025 | Inbox for outgoing emails |
+### Web Dashboard (Next.js · :3001)
+
+| URL | What you'll see |
+|---|---|
+| http://localhost:3001 | Public home → "Sign in" CTA |
+| http://localhost:3001/login | Glass card form (the only public page besides `/`) |
+| http://localhost:3001/dashboard | KPI tiles + recent farmers + Add Farmer CTA |
+| http://localhost:3001/farmers | Searchable / filterable table |
+| http://localhost:3001/farmers/new | Full registration form |
+| http://localhost:3001/farmers/{id} | Detail with approve/reject inline |
+| http://localhost:3001/approvals | Pending farmers queue |
+| http://localhost:3001/activities | Day-grouped timeline + status tiles |
+| http://localhost:3001/activities/new | Farmer→Farm→Crop + input picker form |
+| http://localhost:3001/samples | 6-tile state machine + table |
+| http://localhost:3001/audits | Pending/Approved/Rejected stats + table |
+| http://localhost:3001/procurement | 4-tile stats (incl. ₹ total) + status filter |
+| http://localhost:3001/warehouses | Card grid |
+| http://localhost:3001/inventory | Batch table + status tiles |
+| http://localhost:3001/reports | Pre-harvest aggregation with filter form |
+| http://localhost:3001/notifications | Inbox + mark-all-read |
+| http://localhost:3001/farms · /crops · /settings | (placeholder routes — content in 5.x) |
+
+### Public QR Portal (Next.js · :3002)
+
+| URL | What you'll see |
+|---|---|
+| http://localhost:3002 | Public landing |
+| http://localhost:3002/en/t/{code} | **Live** consumer-facing trace page (calls real API, ISR 5min) |
+
+### NestJS API (:4000)
+
+| URL | What you'll see |
+|---|---|
+| http://localhost:4000/api/v1/health | `{"status":"ok",…}` (public) |
+| http://localhost:4000/api/docs | **Live Swagger** — all 60+ routes interactively |
+
+### Docker tooling
+
+| URL | Credentials |
+|---|---|
+| http://localhost:9001 | Minio console — `nesso` / `nessoadmin` |
+| http://localhost:8025 | Mailhog UI — no auth |
 
 ## 2 · Bootstrap admin login
 
