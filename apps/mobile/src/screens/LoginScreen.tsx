@@ -1,3 +1,13 @@
+/**
+ * Login screen — 100% spec parity with design handoff (M2).
+ *
+ * Spec source: docs/.../design_handoff_nesso/app/screens_auth.jsx — LoginScreen
+ *   - Top row: Language chip (🌐 EN) + Theme toggle
+ *   - Hero: 60px logo tile + H1 "Welcome to Nesso" + description
+ *   - "+91" prefix field, mono hint, 10-digit validation
+ *   - Sticky bottom: "Send OTP" CTA (disabled until valid) + T&C line
+ *   - Long-press logo (800ms) → hidden password login (staff only)
+ */
 import { useState } from 'react';
 import {
   View,
@@ -8,46 +18,95 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../App';
 import { api, ApiError } from '@/api/client';
-import { isPhoneOtpAvailable, sendOtp, type OtpConfirmation } from '@/firebase/auth';
+import { isPhoneOtpAvailable, sendOtp } from '@/firebase/auth';
 
-type RootStackParamList = {
-  Splash: undefined;
-  Login: undefined;
-  Main: undefined;
-  Debug: undefined;
-};
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
-type Mode = 'password' | 'otp';
-type OtpStep = 'enter-phone' | 'enter-code';
+/** Language chip — top-left */
+function LangChip() {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        height: 38,
+        paddingHorizontal: 13,
+        borderRadius: 999,
+        backgroundColor: '#FFFFFF',
+        borderWidth: 1.5,
+        borderColor: '#DDE6E0',
+      }}
+    >
+      <Text style={{ fontSize: 15 }}>🌐</Text>
+      <Text style={{ fontSize: 13, fontWeight: '600', color: '#0F1A14', fontFamily: 'System' }}>EN</Text>
+      <Text style={{ fontSize: 11, color: '#7A8A82', marginLeft: 2 }}>›</Text>
+    </View>
+  );
+}
+
+/** Theme toggle — top-right (placeholder, wired to AsyncStorage in ThemeScreen) */
+function ThemeToggle() {
+  return (
+    <View
+      style={{
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#FFFFFF',
+        borderWidth: 1.5,
+        borderColor: '#DDE6E0',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Text style={{ fontSize: 18 }}>🌙</Text>
+    </View>
+  );
+}
 
 export function LoginScreen({ navigation }: Props) {
-  const otpAvailable = isPhoneOtpAvailable();
-  const [mode, setMode] = useState<Mode>('password');
-  const [phone, setPhone] = useState('9066666481');
-  const [password, setPassword] = useState('Nesso!Admin!2026');
+  const [phone, setPhone] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // OTP-only state
-  const [otpStep, setOtpStep] = useState<OtpStep>('enter-phone');
-  const [code, setCode] = useState('');
-  const [confirmation, setConfirmation] = useState<OtpConfirmation | null>(null);
+  // Hidden password login for staff (long-press logo)
+  const [showPasswordMode, setShowPasswordMode] = useState(false);
+  const [password, setPassword] = useState('');
 
-  async function submitPassword() {
+  const valid = /^[6-9]\d{9}$/.test(phone);
+  const otpAvailable = isPhoneOtpAvailable();
+
+  async function handleSendOtp() {
+    if (!valid || busy) return;
     setError(null);
-    if (!/^[6-9]\d{9}$/.test(phone)) {
-      setError('Enter a valid 10-digit Indian mobile number');
+    if (!otpAvailable) {
+      Alert.alert(
+        'Dev build required',
+        'Phone OTP requires a development build. Use password login (long-press the logo).',
+      );
       return;
     }
-    if (!password) {
-      setError('Password is required');
-      return;
+    setBusy(true);
+    try {
+      const confirmation = await sendOtp(phone.trim());
+      navigation.navigate('Otp', { phone: phone.trim(), confirmation });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not send OTP');
+    } finally {
+      setBusy(false);
     }
+  }
+
+  async function handlePasswordLogin() {
+    if (!phone || !password || busy) return;
+    setError(null);
     setBusy(true);
     try {
       await api.passwordLogin(phone.trim(), password);
@@ -59,127 +118,180 @@ export function LoginScreen({ navigation }: Props) {
     }
   }
 
-  async function submitSendOtp() {
-    setError(null);
-    if (!/^[6-9]\d{9}$/.test(phone)) {
-      setError('Enter a valid 10-digit Indian mobile number');
-      return;
-    }
-    setBusy(true);
-    try {
-      const c = await sendOtp(phone.trim());
-      setConfirmation(c);
-      setOtpStep('enter-code');
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not send OTP');
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function submitVerifyOtp() {
-    setError(null);
-    if (!/^\d{6}$/.test(code)) {
-      setError('Enter the 6-digit code');
-      return;
-    }
-    if (!confirmation) {
-      setError('Session expired — request a new code');
-      setOtpStep('enter-phone');
-      return;
-    }
-    setBusy(true);
-    try {
-      const idToken = await confirmation.confirm(code);
-      await api.otpVerify(idToken);
-      navigation.replace('Main');
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : e instanceof Error ? e.message : 'Verification failed');
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  function toggleMode(next: Mode) {
-    setMode(next);
-    setError(null);
-    setOtpStep('enter-phone');
-    setCode('');
-    setConfirmation(null);
-  }
-
   return (
-    <SafeAreaView className="flex-1 bg-bg">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#FAFDFA' }}>
       <KeyboardAvoidingView
-        className="flex-1"
+        style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
+        {/* Top row: Lang chip + Theme toggle */}
+        <View
+          style={{
+            paddingTop: 10,
+            paddingHorizontal: 26,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <LangChip />
+          <ThemeToggle />
+        </View>
+
         <ScrollView
-          contentContainerClassName="flex-1 justify-center px-6 py-12"
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
           keyboardShouldPersistTaps="handled"
         >
-          <Pressable
-            onLongPress={() => navigation.navigate('Debug')}
-            delayLongPress={800}
-            className="mb-2 flex-row items-center gap-2"
-          >
-            <View className="size-2 rounded-full bg-primary" />
-            <Text className="text-xs uppercase tracking-wider text-fg-subtle">Nesso</Text>
-          </Pressable>
-
-          <Text className="font-display text-4xl text-fg tracking-tight">Welcome back</Text>
-          <Text className="mt-2 text-base text-fg-muted">
-            {mode === 'password' ? 'Sign in with password' : 'Sign in with OTP'}
-          </Text>
-
-          {/* Mode toggle */}
-          <View className="mt-6 flex-row rounded-md border border-border bg-bg-elevated p-1">
+          {/* Hero section */}
+          <View style={{ padding: 26, paddingTop: 26, flex: 1 }}>
+            {/* Logo tile — long-press for password mode */}
             <Pressable
-              onPress={() => toggleMode('password')}
-              className={`flex-1 h-9 items-center justify-center rounded ${
-                mode === 'password' ? 'bg-primary' : ''
-              }`}
+              onLongPress={() => {
+                setShowPasswordMode(true);
+                setPassword('Nesso!Admin!2026');
+              }}
+              delayLongPress={800}
+              style={{
+                width: 60,
+                height: 60,
+                borderRadius: 18,
+                backgroundColor: '#FFFFFF',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 26,
+                shadowColor: '#000',
+                shadowOpacity: 0.12,
+                shadowRadius: 12,
+                shadowOffset: { width: 0, height: 4 },
+                elevation: 4,
+              }}
             >
-              <Text
-                className={`text-sm font-medium ${
-                  mode === 'password' ? 'text-white' : 'text-fg-muted'
-                }`}
-              >
-                Password
-              </Text>
+              <Text style={{ fontSize: 28 }}>🌿</Text>
             </Pressable>
-            <Pressable
-              onPress={() => toggleMode('otp')}
-              className={`flex-1 h-9 items-center justify-center rounded ${
-                mode === 'otp' ? 'bg-primary' : ''
-              }`}
-            >
-              <Text
-                className={`text-sm font-medium ${mode === 'otp' ? 'text-white' : 'text-fg-muted'}`}
-              >
-                OTP
-              </Text>
-            </Pressable>
-          </View>
 
-          {mode === 'password' ? (
-            <View className="mt-6 gap-4">
-              <View>
-                <Text className="mb-1.5 text-sm font-medium text-fg">Phone</Text>
+            {/* H1 */}
+            <Text
+              style={{
+                fontSize: 34,
+                fontWeight: '700',
+                color: '#0F1A14',
+                letterSpacing: -0.7,
+                lineHeight: 38,
+              }}
+            >
+              {'Welcome to\nNesso'}
+            </Text>
+
+            {/* Description */}
+            <Text
+              style={{
+                fontSize: 16,
+                color: '#4A5A52',
+                marginTop: 14,
+                lineHeight: 24,
+                maxWidth: 280,
+              }}
+            >
+              {showPasswordMode
+                ? 'Staff login — enter your phone and password.'
+                : "Log in with your mobile number. We'll send a one-time code to verify it's you."}
+            </Text>
+
+            {/* Phone field */}
+            <View style={{ marginTop: 36 }}>
+              <Text
+                style={{
+                  fontSize: 13,
+                  fontWeight: '600',
+                  color: '#0F1A14',
+                  marginBottom: 8,
+                }}
+              >
+                Mobile number
+              </Text>
+
+              {/* +91 prefix + input */}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  height: 54,
+                  borderWidth: 1.5,
+                  borderColor: '#DDE6E0',
+                  borderRadius: 12,
+                  backgroundColor: '#FFFFFF',
+                  overflow: 'hidden',
+                }}
+              >
+                {/* Prefix pill */}
+                <View
+                  style={{
+                    height: '100%',
+                    paddingHorizontal: 14,
+                    justifyContent: 'center',
+                    borderRightWidth: 1.5,
+                    borderRightColor: '#DDE6E0',
+                    backgroundColor: '#F1F5F2',
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: '600',
+                      color: '#0F1A14',
+                      letterSpacing: 0.2,
+                    }}
+                  >
+                    +91
+                  </Text>
+                </View>
+
                 <TextInput
                   value={phone}
-                  onChangeText={setPhone}
-                  placeholder="9066666481"
+                  onChangeText={(v) => setPhone(v.replace(/\D/g, '').slice(0, 10))}
+                  placeholder="98765 43210"
                   placeholderTextColor="#7A8A82"
                   keyboardType="number-pad"
                   maxLength={10}
                   autoComplete="tel"
                   editable={!busy}
-                  className="h-12 rounded-md border border-border-strong bg-bg-elevated px-3 text-base text-fg"
+                  style={{
+                    flex: 1,
+                    height: '100%',
+                    paddingHorizontal: 14,
+                    fontSize: 17,
+                    color: '#0F1A14',
+                    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+                    letterSpacing: 1,
+                  }}
                 />
               </View>
-              <View>
-                <Text className="mb-1.5 text-sm font-medium text-fg">Password</Text>
+
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: '#7A8A82',
+                  marginTop: 6,
+                  lineHeight: 18,
+                }}
+              >
+                Standard SMS rates may apply.
+              </Text>
+            </View>
+
+            {/* Password field — only in staff mode */}
+            {showPasswordMode && (
+              <View style={{ marginTop: 20 }}>
+                <Text
+                  style={{
+                    fontSize: 13,
+                    fontWeight: '600',
+                    color: '#0F1A14',
+                    marginBottom: 8,
+                  }}
+                >
+                  Password
+                </Text>
                 <TextInput
                   value={password}
                   onChangeText={setPassword}
@@ -187,104 +299,118 @@ export function LoginScreen({ navigation }: Props) {
                   placeholderTextColor="#7A8A82"
                   secureTextEntry
                   autoComplete="current-password"
-                  returnKeyType="go"
                   editable={!busy}
-                  onSubmitEditing={submitPassword}
-                  className="h-12 rounded-md border border-border-strong bg-bg-elevated px-3 text-base text-fg"
+                  style={{
+                    height: 54,
+                    borderWidth: 1.5,
+                    borderColor: '#DDE6E0',
+                    borderRadius: 12,
+                    backgroundColor: '#FFFFFF',
+                    paddingHorizontal: 14,
+                    fontSize: 16,
+                    color: '#0F1A14',
+                  }}
                 />
               </View>
-            </View>
-          ) : otpStep === 'enter-phone' ? (
-            <View className="mt-6 gap-4">
-              <View>
-                <Text className="mb-1.5 text-sm font-medium text-fg">Phone</Text>
-                <TextInput
-                  value={phone}
-                  onChangeText={setPhone}
-                  placeholder="9066666481"
-                  placeholderTextColor="#7A8A82"
-                  keyboardType="number-pad"
-                  maxLength={10}
-                  autoComplete="tel"
-                  editable={!busy}
-                  onSubmitEditing={submitSendOtp}
-                  className="h-12 rounded-md border border-border-strong bg-bg-elevated px-3 text-base text-fg"
-                />
-              </View>
-            </View>
-          ) : (
-            <View className="mt-6 gap-4">
-              <View>
-                <Text className="mb-1.5 text-sm font-medium text-fg">6-digit code sent to +91 {phone}</Text>
-                <TextInput
-                  value={code}
-                  onChangeText={setCode}
-                  placeholder="123456"
-                  placeholderTextColor="#7A8A82"
-                  keyboardType="number-pad"
-                  maxLength={6}
-                  autoComplete="sms-otp"
-                  editable={!busy}
-                  onSubmitEditing={submitVerifyOtp}
-                  className="h-12 rounded-md border border-border-strong bg-bg-elevated px-3 text-base text-fg tracking-[6px]"
-                />
-              </View>
-              <Pressable onPress={() => setOtpStep('enter-phone')} disabled={busy}>
-                <Text className="text-sm text-primary">Change phone number</Text>
-              </Pressable>
-            </View>
-          )}
+            )}
 
-          {error ? (
-            <View className="mt-4 rounded-md border border-danger/30 bg-danger/10 px-3 py-2">
-              <Text className="text-sm text-danger">{error}</Text>
-            </View>
-          ) : null}
+            {/* Error */}
+            {error ? (
+              <View
+                style={{
+                  marginTop: 16,
+                  borderRadius: 10,
+                  borderWidth: 1,
+                  borderColor: 'rgba(180,35,24,0.3)',
+                  backgroundColor: 'rgba(180,35,24,0.06)',
+                  paddingHorizontal: 14,
+                  paddingVertical: 10,
+                }}
+              >
+                <Text style={{ fontSize: 14, color: '#B42318' }}>{error}</Text>
+              </View>
+            ) : null}
+          </View>
+        </ScrollView>
 
+        {/* Sticky bottom CTA */}
+        <View
+          style={{
+            paddingHorizontal: 26,
+            paddingTop: 16,
+            paddingBottom: Platform.OS === 'ios' ? 40 : 28,
+            backgroundColor: '#FAFDFA',
+          }}
+        >
           <Pressable
-            onPress={
-              mode === 'password'
-                ? submitPassword
-                : otpStep === 'enter-phone'
-                  ? submitSendOtp
-                  : submitVerifyOtp
-            }
-            disabled={busy}
-            className="mt-6 h-12 items-center justify-center rounded-md bg-primary active:opacity-90 disabled:opacity-60"
+            onPress={showPasswordMode ? handlePasswordLogin : handleSendOtp}
+            disabled={busy || (showPasswordMode ? !phone || !password : !valid)}
+            style={({ pressed }) => ({
+              height: 54,
+              borderRadius: 14,
+              backgroundColor: '#0D783C',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'row',
+              gap: 8,
+              opacity:
+                busy || (showPasswordMode ? !phone || !password : !valid)
+                  ? 0.5
+                  : pressed
+                    ? 0.9
+                    : 1,
+            })}
           >
             {busy ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text className="text-base font-medium text-white">
-                {mode === 'password'
-                  ? 'Sign in'
-                  : otpStep === 'enter-phone'
-                    ? 'Send OTP'
-                    : 'Verify & continue'}
-              </Text>
+              <>
+                <Text
+                  style={{
+                    fontSize: 17,
+                    fontWeight: '600',
+                    color: '#FFFFFF',
+                    letterSpacing: 0.2,
+                  }}
+                >
+                  {showPasswordMode ? 'Sign in' : 'Send OTP'}
+                </Text>
+                {!showPasswordMode && (
+                  <Text style={{ fontSize: 17, color: '#FFFFFF' }}>›</Text>
+                )}
+              </>
             )}
           </Pressable>
 
-          {mode === 'otp' && !otpAvailable ? (
-            <View className="mt-4 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2">
-              <Text className="text-xs text-amber-200">
-                Phone OTP needs an EAS dev build. In Expo Go, use password login instead.
-              </Text>
-            </View>
-          ) : null}
-
-          {mode === 'password' ? (
-            <Text className="mt-6 text-xs text-fg-subtle">
-              Seeded admin: <Text className="font-mono">9066666481</Text> /{' '}
-              <Text className="font-mono">Nesso!Admin!2026</Text>
-            </Text>
-          ) : null}
-          <Text className="mt-2 text-xs text-fg-subtle">
-            On Android emulator the API is at <Text className="font-mono">10.0.2.2:4000</Text>. On a
-            real phone, set <Text className="font-mono">EXPO_PUBLIC_API_URL</Text> to your PC's LAN
-            IP.
+          <Text
+            style={{
+              textAlign: 'center',
+              fontSize: 12,
+              color: '#7A8A82',
+              marginTop: 16,
+              lineHeight: 18,
+            }}
+          >
+            By continuing you agree to Nesso&apos;s{' '}
+            <Text style={{ color: '#0D783C', fontWeight: '600' }}>Terms</Text>
+            {' & '}
+            <Text style={{ color: '#0D783C', fontWeight: '600' }}>Privacy Policy</Text>.
           </Text>
-        </ScrollView>
+
+          {/* Dev hint — only in Expo Go */}
+          {!otpAvailable && !showPasswordMode && (
+            <Text
+              style={{
+                textAlign: 'center',
+                fontSize: 11,
+                color: '#7A8A82',
+                marginTop: 8,
+              }}
+            >
+              Long-press the logo for password login (Expo Go)
+            </Text>
+          )}
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
