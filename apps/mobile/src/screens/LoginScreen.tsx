@@ -19,6 +19,7 @@ import {
   Platform,
   ScrollView,
   Alert,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -164,9 +165,14 @@ export function LoginScreen({ navigation }: Props) {
                 shadowRadius: 12,
                 shadowOffset: { width: 0, height: 4 },
                 elevation: 4,
+                overflow: 'hidden',
               }}
             >
-              <Text style={{ fontSize: 28 }}>🌿</Text>
+              <Image
+                source={require('../../assets/nesso-logo.jpeg')}
+                style={{ width: 42, height: 42, borderRadius: 8 }}
+                resizeMode="contain"
+              />
             </Pressable>
 
             {/* H1 */}
