@@ -32,7 +32,7 @@ Last updated: 2026-05-30
 | M2 | Login — phone + OTP toggle | `LoginScreen.tsx` | ✅ | +91 prefix field, lang chip, theme toggle, logo tile, description, sticky CTA, T&C, password mode hidden behind long-press |
 | M3 | OTP verify — 6-segment inputs | `OtpScreen.tsx` | ✅ | 42px circle back, masked +91 ••••• XXX mono, 6 aspect-1 boxes (2px ring filled / inset empty), auto-advance, backspace-prev, 0:30 countdown→resend, Verify & continue ✓ |
 | M4 | Dashboard — hero + KPI + FAB | `DashboardScreen.tsx` | ✅ | DashHeader (avatar+role pill+theme+bell w/dot), sync chip, weather card w/4-day forecast + advisory, This season + 2×2 KPI grid (count-ups + sparklines + deltas), Quick actions 4-col, Jump-to pills, Recent activity feed. Real data wired. |
-| M5 | Farmers list — cards + filter | `FarmersScreen.tsx` | 🟡 | List exists, no filter chips, no card design |
+| M5 | Farmers list — cards + filter | `FarmersScreen.tsx` | ✅ | PageTop, search bar (search+filter icons), All/Approved/Pending/Rejected chips, avatar cards w/ village·crop + farmerId mono + status chip + chevron, live search/filter, tap→FarmerProfile |
 | M6 | Verify — KYC approval flow | `VerifyScreen.tsx` | 🟡 | Functional, no spec visual polish |
 | M7 | Register Farmer — 4-step wizard | `RegisterFarmerScreen.tsx` | 🟡 | Single form, no 4-step wizard |
 | M8 | Farmer Profile — 5 tabs | `FarmerProfileScreen.tsx` | 🟡 | Structure done, tabs stub, needs real data in tabs |
@@ -112,7 +112,7 @@ Last updated: 2026-05-30
 | Mobile | 32 | 0 | 18 | 14 |
 | Web | 21 | 0 | 17 | 4 |
 | Portal | 7 | 0 | 2 | 5 |
-| **Total** | **60** | **4** | **33** | **23** |
+| **Total** | **60** | **5** | **32** | **23** |
 
 ---
 
