@@ -20,9 +20,9 @@ recovering from the bugs you actually hit.**
 | MinIO (S3) | http://localhost:9000 (API) · http://localhost:9001 (console) | Docker |
 | Mailhog (SMTP capture) | http://localhost:8025 | Docker |
 | API (NestJS) | http://localhost:4000 · Swagger at `/api/docs` | `pnpm --filter @nesso/api dev` |
-| Web (Dashboard) | http://localhost:3000 | `pnpm --filter @nesso/web dev` |
-| Portal (QR public) | http://localhost:3001 | `pnpm --filter @nesso/portal dev` |
-| Mobile (Expo) | Metro at http://localhost:8081 | `pnpm --filter @nesso/mobile dev` |
+| Web (Dashboard) | http://localhost:3001 | `pnpm --filter @nesso/web dev` |
+| Portal (QR public) | http://localhost:3002 | `pnpm --filter @nesso/portal dev` |
+| Mobile (Expo) | Metro at http://localhost:8081 (open QR in Expo Go, NOT in a browser) | `pnpm --filter @nesso/mobile dev` |
 
 > Credentials live in `docker-compose.yml` and per-app `.env` files. None of
 > them are committed. See [DB_CONNECT.md](./DB_CONNECT.md) for browsing the
@@ -136,8 +136,8 @@ Fast-path entry points:
 | App | URL / action |
 |---|---|
 | API | `curl http://localhost:4000/api/v1/debug/sentry/throw` |
-| Web | http://localhost:3000/debug/sentry (3 buttons) |
-| Portal | http://localhost:3001/debug/sentry (3 buttons) |
+| Web | http://localhost:3001/debug/sentry (3 buttons) |
+| Portal | http://localhost:3002/debug/sentry (3 buttons) |
 | Mobile | Long-press the "● Nesso" pill on Login → Debug screen |
 
 The `/debug/*` routes are intentionally unauth'd — remove before
@@ -273,12 +273,12 @@ pnpm --filter @nesso/api seed
 ## 8 · Cheatsheet — port → service
 
 ```
-3000 → web (Next.js dashboard)
-3001 → portal (Next.js QR trace)
+3001 → web (Next.js dashboard)
+3002 → portal (Next.js QR trace)
 4000 → api (NestJS)
 6379 → redis
 8025 → mailhog UI
-8081 → metro bundler (mobile)
+8081 → metro bundler (mobile — NOT a browser-viewable URL)
 9000 → minio S3 API
 9001 → minio console
 27017 → mongo

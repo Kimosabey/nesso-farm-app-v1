@@ -78,7 +78,7 @@ cd apps/web
 pnpm dev
 ```
 
-Open <http://localhost:3000/debug/sentry> in a browser.
+Open <http://localhost:3001/debug/sentry> in a browser.
 
 Click each button in turn:
 1. **captureMessage (info)** → page shows `eventId <uuid>`. Should land
@@ -112,7 +112,7 @@ cd apps/portal
 pnpm dev
 ```
 
-Open <http://localhost:3001/debug/sentry> (portal runs on 3001 by
+Open <http://localhost:3002/debug/sentry> (portal runs on 3002 by
 default; if yours differs, check `apps/portal/package.json` `dev`
 script). Repeat the three-button sequence from step 2.
 
