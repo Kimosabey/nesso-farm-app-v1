@@ -22,6 +22,12 @@ import { HarvestBoardScreen } from '@/screens/HarvestBoardScreen';
 import { ActivitiesScreen } from '@/screens/ActivitiesScreen';
 import { PreHarvestScreen } from '@/screens/PreHarvestScreen';
 import { NotificationsScreen } from '@/screens/NotificationsScreen';
+import { PostHarvestScreen } from '@/screens/PostHarvestScreen';
+import { BatchesScreen } from '@/screens/BatchesScreen';
+import { InventoryScreen } from '@/screens/InventoryScreen';
+import { ProcurementScreen } from '@/screens/ProcurementScreen';
+import { SamplesScreen } from '@/screens/SamplesScreen';
+import { AuditScreen } from '@/screens/AuditScreen';
 import { OtpScreen } from '@/screens/OtpScreen';
 import type { OtpConfirmation } from '@/firebase/auth';
 import { sync } from '@/sync/SyncManager';
@@ -48,6 +54,12 @@ export type RootStackParamList = {
   Activities: undefined;
   PreHarvest: undefined;
   Notifications: undefined;
+  PostHarvest: undefined;
+  Batches: undefined;
+  Inventory: undefined;
+  Procurement: undefined;
+  Samples: undefined;
+  Audit: undefined;
   Otp: { phone: string; confirmation: OtpConfirmation };
 };
 
@@ -86,6 +98,12 @@ function App() {
           <Stack.Screen name="Activities" component={ActivitiesScreen} />
           <Stack.Screen name="PreHarvest" component={PreHarvestScreen} />
           <Stack.Screen name="Notifications" component={NotificationsScreen} />
+          <Stack.Screen name="PostHarvest" component={PostHarvestScreen} />
+          <Stack.Screen name="Batches" component={BatchesScreen} />
+          <Stack.Screen name="Inventory" component={InventoryScreen} />
+          <Stack.Screen name="Procurement" component={ProcurementScreen} />
+          <Stack.Screen name="Samples" component={SamplesScreen} />
+          <Stack.Screen name="Audit" component={AuditScreen} />
           <Stack.Screen name="Otp" component={OtpScreen} />
         </Stack.Navigator>
       </NavigationContainer>

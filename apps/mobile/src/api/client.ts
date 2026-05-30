@@ -251,6 +251,87 @@ interface NotificationsPage extends Paged<NotificationRow> {
   unread: number;
 }
 
+// --- Post-harvest domain types (mirror apps/api schemas) ---
+
+export type InventoryStatus = 'AVAILABLE' | 'PROCESSING' | 'SOLD' | 'TRANSFERRED';
+
+export interface InventoryBatch {
+  _id: string;
+  batchId: string;
+  productName: string;
+  variant?: string;
+  grade?: string;
+  supplier?: string;
+  warehouseId?: string;
+  warehouseName?: string;
+  type: 'RawMaterial' | 'SemiProcessed' | 'FinishedGood';
+  currentStage: string;
+  status: InventoryStatus;
+  quantity: number;
+  unit: string;
+  incomingDate: string;
+  expiryDate?: string;
+  qrCode?: string;
+  linkedProcurementId?: string;
+  createdAt?: string;
+}
+
+export interface ProcurementRow {
+  _id: string;
+  procurementId: string;
+  farmerId: string;
+  farmerName?: string;
+  association?: string;
+  crop: string;
+  variety?: string;
+  quantity: number;
+  pricePerUnit: number;
+  totalAmount: number;
+  unit: string;
+  procurementDate: string;
+  status: 'Pending' | 'Completed' | 'Cancelled';
+  paymentStatus: 'Unpaid' | 'Partial' | 'Paid';
+  linkedBatchId?: string;
+  createdAt?: string;
+}
+
+export type SampleStatus = 'Queue' | 'Sent' | 'Received' | 'Tested' | 'Approved' | 'Rejected';
+
+export interface SampleRow {
+  _id: string;
+  sampleCode: string;
+  farmerId: string;
+  farmerName?: string;
+  association?: string;
+  crop: string;
+  variety: string;
+  season?: string;
+  status: SampleStatus;
+  sentDate?: string;
+  receivedDate?: string;
+  testedDate?: string;
+  notes?: string;
+  createdAt?: string;
+}
+
+export interface AuditRow {
+  _id: string;
+  farmerId: string;
+  farmerName?: string;
+  association?: string;
+  auditType: 'Internal' | 'External' | 'Compliance';
+  description: string;
+  remarks?: string;
+  status: 'Pending' | 'Approved' | 'Rejected';
+  auditDate: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  attachments: string[];
+  rejectionReason?: string;
+  rejectionTags?: string[];
+  createdAt?: string;
+}
+
 export interface CreateFarmerInput {
   firstName: string;
   lastName?: string;
@@ -532,6 +613,114 @@ export const api = {
 
   acceptGRN(code: string): Promise<{ ok: boolean; message?: string }> {
     return request('/inventory/grn/accept', { method: 'POST', body: JSON.stringify({ code }) });
+  },
+
+  // --- Inventory / Batches (GET /inventory) ---
+  listInventory(
+    params: {
+      status?: InventoryStatus;
+      warehouseId?: string;
+      grade?: string;
+      supplier?: string;
+      page?: number;
+      pageSize?: number;
+    } = {},
+  ) {
+    const qs = new URLSearchParams();
+    if (params.status) qs.set('status', params.status);
+    if (params.warehouseId) qs.set('warehouseId', params.warehouseId);
+    if (params.grade) qs.set('grade', params.grade);
+    if (params.supplier) qs.set('supplier', params.supplier);
+    if (params.page) qs.set('page', String(params.page));
+    if (params.pageSize) qs.set('pageSize', String(params.pageSize));
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return request<Paged<InventoryBatch>>(`/inventory${suffix}`);
+  },
+
+  sellInventory(
+    id: string,
+    input: { quantity: number; buyer: string; notes?: string },
+  ): Promise<InventoryBatch> {
+    return request<InventoryBatch>(`/inventory/${id}/sell`, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  },
+
+  transferInventory(
+    id: string,
+    input: { toWarehouseId: string; quantity: number; notes?: string },
+  ): Promise<InventoryBatch> {
+    return request<InventoryBatch>(`/inventory/${id}/transfer`, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  },
+
+  processInventory(
+    id: string,
+    input: { toStage: string; notes?: string },
+  ): Promise<InventoryBatch> {
+    return request<InventoryBatch>(`/inventory/${id}/process`, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  },
+
+  // --- Procurement (GET /procurement) ---
+  listProcurement(
+    params: {
+      status?: 'Pending' | 'Completed' | 'Cancelled';
+      farmerId?: string;
+      page?: number;
+      pageSize?: number;
+    } = {},
+  ) {
+    const qs = new URLSearchParams();
+    if (params.status) qs.set('status', params.status);
+    if (params.farmerId) qs.set('farmerId', params.farmerId);
+    if (params.page) qs.set('page', String(params.page));
+    if (params.pageSize) qs.set('pageSize', String(params.pageSize));
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return request<Paged<ProcurementRow>>(`/procurement${suffix}`);
+  },
+
+  // --- Samples (GET /samples) ---
+  listSamples(
+    params: { status?: SampleStatus; farmerId?: string; page?: number; pageSize?: number } = {},
+  ) {
+    const qs = new URLSearchParams();
+    if (params.status) qs.set('status', params.status);
+    if (params.farmerId) qs.set('farmerId', params.farmerId);
+    if (params.page) qs.set('page', String(params.page));
+    if (params.pageSize) qs.set('pageSize', String(params.pageSize));
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return request<Paged<SampleRow>>(`/samples${suffix}`);
+  },
+
+  // --- Audits (GET /audits) ---
+  listAudits(
+    params: {
+      status?: 'Pending' | 'Approved' | 'Rejected';
+      farmerId?: string;
+      page?: number;
+      pageSize?: number;
+    } = {},
+  ) {
+    const qs = new URLSearchParams();
+    if (params.status) qs.set('status', params.status);
+    if (params.farmerId) qs.set('farmerId', params.farmerId);
+    if (params.page) qs.set('page', String(params.page));
+    if (params.pageSize) qs.set('pageSize', String(params.pageSize));
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return request<Paged<AuditRow>>(`/audits${suffix}`);
+  },
+
+  reviewAudit(id: string, approved: boolean, reason?: string, tags?: string[]): Promise<AuditRow> {
+    return request<AuditRow>(`/audits/${id}/review`, {
+      method: 'POST',
+      body: JSON.stringify({ approved, reason, tags }),
+    });
   },
 
   /**

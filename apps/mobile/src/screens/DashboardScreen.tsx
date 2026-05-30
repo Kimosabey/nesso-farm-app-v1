@@ -873,17 +873,17 @@ export function DashboardScreen() {
           <JumpPill
             icon={<Package size={16} color={C.primary} />}
             label="Post-harvest"
-            onPress={() => {}}
+            onPress={() => stackNav()?.navigate('PostHarvest')}
           />
           <JumpPill
             icon={<Droplet size={16} color={C.primary} />}
             label="Samples"
-            onPress={() => {}}
+            onPress={() => stackNav()?.navigate('Samples')}
           />
           <JumpPill
             icon={<FileText size={16} color={C.primary} />}
             label="Procurement"
-            onPress={() => {}}
+            onPress={() => stackNav()?.navigate('Procurement')}
           />
         </ScrollView>
 
