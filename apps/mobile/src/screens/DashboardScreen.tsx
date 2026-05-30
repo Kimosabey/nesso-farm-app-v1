@@ -20,11 +20,13 @@ import {
 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { FarmerStats, MeResponse, Farmer } from '@/api/client';
 import { api } from '@/api/client';
 import { sync, type SyncStatus } from '@/sync/SyncManager';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import type { MainTabParamList } from '@/navigation/MainTabs';
+import type { RootStackParamList } from '../../App';
 
 // ---------------------------------------------------------------------------
 // Animated count-up hook
@@ -334,7 +336,10 @@ export function DashboardScreen() {
 
           {/* Add Farm */}
           <TouchableOpacity
-            onPress={() => console.log('Add Farm — coming soon')}
+            onPress={() => {
+              const rootNav = navigation.getParent<NativeStackNavigationProp<RootStackParamList>>();
+              rootNav?.navigate('AddFarm', {});
+            }}
             className="flex-row items-center gap-2 rounded-full border border-border bg-bg-elevated px-4 py-2"
             activeOpacity={0.7}
           >
@@ -344,7 +349,10 @@ export function DashboardScreen() {
 
           {/* Accept GRN */}
           <TouchableOpacity
-            onPress={() => console.log('Accept GRN — coming soon')}
+            onPress={() => {
+              const rootNav = navigation.getParent<NativeStackNavigationProp<RootStackParamList>>();
+              rootNav?.navigate('AcceptGRN');
+            }}
             className="flex-row items-center gap-2 rounded-full border border-border bg-bg-elevated px-4 py-2"
             activeOpacity={0.7}
           >

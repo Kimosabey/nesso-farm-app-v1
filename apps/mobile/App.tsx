@@ -12,6 +12,9 @@ import { FarmerProfileScreen } from '@/screens/FarmerProfileScreen';
 import { LanguageScreen } from '@/screens/LanguageScreen';
 import { ThemeScreen } from '@/screens/ThemeScreen';
 import { AboutScreen } from '@/screens/AboutScreen';
+import { AddFarmScreen } from '@/screens/AddFarmScreen';
+import { AddActivityScreen } from '@/screens/AddActivityScreen';
+import { AcceptGRNScreen } from '@/screens/AcceptGRNScreen';
 import { sync } from '@/sync/SyncManager';
 import { initSentry, sentry } from '@/sentry';
 
@@ -26,6 +29,9 @@ export type RootStackParamList = {
   LanguageSettings: undefined;
   ThemeSettings: undefined;
   About: undefined;
+  AddFarm: { farmerId?: string };
+  AddActivity: { farmId?: string; farmerId?: string };
+  AcceptGRN: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -53,6 +59,9 @@ function App() {
           <Stack.Screen name="LanguageSettings" component={LanguageScreen} />
           <Stack.Screen name="ThemeSettings" component={ThemeScreen} />
           <Stack.Screen name="About" component={AboutScreen} />
+          <Stack.Screen name="AddFarm" component={AddFarmScreen} />
+          <Stack.Screen name="AddActivity" component={AddActivityScreen} />
+          <Stack.Screen name="AcceptGRN" component={AcceptGRNScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

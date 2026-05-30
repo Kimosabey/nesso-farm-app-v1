@@ -282,6 +282,33 @@ export const api = {
     return { mode: 'queued', outboxId };
   },
 
+  createFarm(input: {
+    farmerId: string;
+    farmName: string;
+    latitude: number;
+    longitude: number;
+    polygonPoints?: Array<{ lat: number; lng: number }>;
+  }): Promise<{ _id: string; farmId: string }> {
+    return request('/farms', { method: 'POST', body: JSON.stringify(input) });
+  },
+
+  createActivity(input: {
+    farmId: string;
+    farmerId: string;
+    category: string;
+    date: string;
+    notes?: string;
+    labourCount?: number;
+    inputUsed?: string;
+    weather?: string;
+  }): Promise<{ _id: string }> {
+    return request('/activities', { method: 'POST', body: JSON.stringify(input) });
+  },
+
+  acceptGRN(code: string): Promise<{ ok: boolean; message?: string }> {
+    return request('/inventory/grn/accept', { method: 'POST', body: JSON.stringify({ code }) });
+  },
+
   /**
    * Internal: drain a single outbox row. Used by SyncManager.
    */
