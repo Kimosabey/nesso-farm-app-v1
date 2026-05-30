@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_FILTER } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { SentryGlobalFilter, SentryModule } from '@sentry/nestjs/setup';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
@@ -55,6 +56,7 @@ import { FirebaseModule } from './firebase/firebase.module';
       { name: 'short', ttl: 1000, limit: 10 },
       { name: 'medium', ttl: 60_000, limit: 60 },
     ]),
+    SentryModule.forRoot(),
     DatabaseModule,
     CounterModule,
     FirebaseModule,
@@ -78,6 +80,7 @@ import { FirebaseModule } from './firebase/firebase.module';
     HealthModule,
   ],
   providers: [
+    { provide: APP_FILTER, useClass: SentryGlobalFilter },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
   ],

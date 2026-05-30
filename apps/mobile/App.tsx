@@ -8,6 +8,9 @@ import { SplashScreen } from '@/screens/SplashScreen';
 import { LoginScreen } from '@/screens/LoginScreen';
 import { MainTabs } from '@/navigation/MainTabs';
 import { sync } from '@/sync/SyncManager';
+import { initSentry, sentry } from '@/sentry';
+
+initSentry();
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -17,7 +20,7 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-export default function App() {
+function App() {
   useEffect(() => {
     // Start the network watcher + outbox drainer once at app boot.
     const stop = sync.start();
@@ -40,3 +43,5 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
+
+export default sentry.wrap(App);

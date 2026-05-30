@@ -1,3 +1,5 @@
+import { withSentryConfig } from '@sentry/nextjs';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -10,4 +12,13 @@ const nextConfig = {
     ],
   },
 };
-export default nextConfig;
+
+export default withSentryConfig(nextConfig, {
+  org: 'harshimos-team',
+  project: 'nesso-portal',
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+  disableLogger: true,
+  tunnelRoute: '/monitoring',
+  reactComponentAnnotation: { enabled: true },
+});
