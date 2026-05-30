@@ -4,6 +4,8 @@ import { withSentryConfig } from '@sentry/nextjs';
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@nesso/design-system', '@nesso/i18n'],
+  // Allow LAN access for dev (same reason as the web app).
+  allowedDevOrigins: ['192.168.1.4', '*.local'],
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
