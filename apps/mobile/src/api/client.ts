@@ -3,11 +3,37 @@
  * - Token persisted in AsyncStorage (survives app restart).
  * - Writes go through outbox when offline; drained by SyncManager.
  */
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 import { keychain, type PersistedUser } from '@/storage/keychain';
 import { outbox } from '@/db/outbox';
 
-const API_BASE =
-  process.env.EXPO_PUBLIC_API_URL ?? 'http://10.0.2.2:4000/api/v1';
+/**
+ * Pick the right API base URL for whatever device we're running on:
+ *   1. If `EXPO_PUBLIC_API_URL` is set, trust the developer's override
+ *      (works for staging/prod and odd network setups).
+ *   2. Otherwise, derive from Metro's `hostUri` — which Expo Go already
+ *      knows is reachable from this device (e.g. `192.168.1.4:8081`).
+ *      Swap 8081 → 4000 and append `/api/v1`. This Just Works on real
+ *      phones over WiFi without anyone editing `.env`.
+ *   3. Final fallback: `10.0.2.2:4000` for the Android emulator.
+ */
+function resolveApiBase(): string {
+  const override = process.env.EXPO_PUBLIC_API_URL;
+  if (override) return override;
+
+  const hostUri = Constants.expoConfig?.hostUri ?? Constants.expoGoConfig?.hostUri;
+  if (hostUri) {
+    const host = hostUri.split(':')[0];
+    if (host) return `http://${host}:4000/api/v1`;
+  }
+
+  return Platform.OS === 'android'
+    ? 'http://10.0.2.2:4000/api/v1'
+    : 'http://localhost:4000/api/v1';
+}
+
+const API_BASE = resolveApiBase();
 
 let accessToken: string | null = null;
 let isOnline = true;

@@ -29,7 +29,7 @@ export function LoginScreen({ navigation }: Props) {
   const otpAvailable = isPhoneOtpAvailable();
   const [mode, setMode] = useState<Mode>('password');
   const [phone, setPhone] = useState('9066666481');
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState('Nesso!Admin!2026');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
