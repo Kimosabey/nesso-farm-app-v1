@@ -22,7 +22,7 @@ const mono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: { default: 'Nesso · Farm Traceability', template: '%s · Nesso' },
-  description: 'Farm-to-fork traceability platform — NR Group',
+  description: 'Farm-to-fork traceability platform',
   applicationName: 'Nesso',
   icons: {
     icon: '/favicon.ico',

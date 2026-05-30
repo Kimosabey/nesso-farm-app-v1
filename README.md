@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/nesso___nr_group_logo.jpeg" alt="Nesso · NR Group" width="180" />
+<img src="docs/nesso___nr_group_logo.jpeg" alt="Nesso" width="180" />
 
 # Nesso — Farm Traceability Platform
 
@@ -27,7 +27,7 @@ Digitally connects farmers, field agents, operations, warehouses, logistics, and
   <img alt="WCAG" src="https://img.shields.io/badge/WCAG-2.2%20AA-7C3AED?style=flat-square" />
 </p>
 
-<sub>Powered by **NESSO · NR Group** · Continuation of the FoodSign platform on a modern stack</sub>
+<sub>A personal end-to-end project by [Harshan Aiyappa](https://github.com/Kimosabey)</sub>
 
 </div>
 
@@ -374,23 +374,24 @@ Full breakdown → [`docs/plan/11-implementation-phases.md`](docs/plan/11-implem
 
 ## Contributing
 
-This is a **proprietary** project under NESSO · NR Group. Internal contributors:
+This is a **personal end-to-end project**. Workflow if you're working on it:
 
 1. Read [`docs/plan/README.md`](docs/plan/README.md) and the module spec you intend to touch.
 2. Branch from `main`: `feat/<scope>-<short-name>` or `fix/<scope>-<short-name>`.
 3. Open a PR; CI must pass (lint, typecheck, unit, e2e, i18n parity, a11y, perf budgets).
-4. Get one CODEOWNER review.
-5. Squash-merge.
+4. Squash-merge after self-review.
 
 Coding standards live in [`packages/config`](packages/config) once Phase 0 ships.
 
 <br />
 
-## Support
+## Maintainer
 
-- **Issues:** internal tracker (link TBD)
-- **Owner:** NESSO · NR Group
-- **Tech lead contact:** (set internally)
+- **Author:** Harshan Aiyappa
+- **GitHub:** [@Kimosabey](https://github.com/Kimosabey)
+- **Email:** harshan.aiyappa@gmail.com
+- **Repo:** [Kimosabey/nesso-farm-app-v1](https://github.com/Kimosabey/nesso-farm-app-v1)
+- **Issues:** [GitHub Issues](https://github.com/Kimosabey/nesso-farm-app-v1/issues)
 
 <br />
 
@@ -398,14 +399,14 @@ Coding standards live in [`packages/config`](packages/config) once Phase 0 ships
 
 <div align="center">
 
-<img src="docs/nesso___nr_group_logo.jpeg" alt="NR Group" width="80" />
+<img src="docs/nesso___nr_group_logo.jpeg" alt="Nesso" width="80" />
 
 <br />
 
-<sub><strong>NESSO · NR Group</strong> — building a transparent agricultural supply chain, one batch at a time.</sub>
+<sub><strong>Nesso</strong> — building a transparent agricultural supply chain, one batch at a time.</sub>
 
 <br />
 
-<sub>© 2026 NR Group. All rights reserved.</sub>
+<sub>© 2026 Harshan Aiyappa</sub>
 
 </div>

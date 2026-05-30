@@ -597,10 +597,10 @@ When this design ships:
 
 <br /><br />
 
-<img src="docs/nesso___nr_group_logo.jpeg" alt="NR Group" width="60" />
+<img src="docs/nesso___nr_group_logo.jpeg" alt="Nesso" width="60" />
 
 <br />
 
-<sub>NESSO · NR Group · © 2026</sub>
+<sub>Nesso · © 2026 Harshan Aiyappa</sub>
 
 </div>

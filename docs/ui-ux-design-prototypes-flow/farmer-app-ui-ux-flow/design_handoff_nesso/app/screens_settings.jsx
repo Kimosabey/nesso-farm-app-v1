@@ -220,14 +220,14 @@ function AboutScreen({ onBack }) {
         <div style={{ width: 84, height: 84, borderRadius: 24, background: '#fff', display: 'grid', placeItems: 'center', boxShadow: 'var(--shadow-md)' }}><img src="assets/nesso-logo.jpeg" alt="Nesso" style={{ width: 60, height: 60 }} /></div>
         <h2 className="display" style={{ fontSize: 24, fontWeight: 700, color: 'var(--fg)', marginTop: 18, letterSpacing: '0.04em' }}>NESSO</h2>
         <p style={{ fontSize: 14, color: 'var(--fg-muted)', marginTop: 4 }}>Farm to fork, verified</p>
-        <div className="mono" style={{ fontSize: 12.5, color: 'var(--fg-subtle)', marginTop: 12 }}>v1.0.0 · build 2026.05.29 · NR Group</div>
+        <div className="mono" style={{ fontSize: 12.5, color: 'var(--fg-subtle)', marginTop: 12 }}>v1.0.0 · build 2026.05.29 · Nesso</div>
         <div style={{ width: '100%', marginTop: 28, background: 'var(--bg-elevated)', borderRadius: 18, border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
           <ListRow icon="shield" label="Privacy policy" onClick={() => {}} />
           <ListRow icon="file" color="#0E7490" label="Terms of service" onClick={() => {}} />
           <ListRow icon="phone" color="var(--secondary-d)" label="Contact support" value="help@nesso.in" onClick={() => {}} />
           <ListRow icon="activity" color="#B6850A" label="Open-source licenses" onClick={() => {}} last />
         </div>
-        <p style={{ fontSize: 12, color: 'var(--fg-subtle)', marginTop: 24, textAlign: 'center' }}>© 2026 NR Group · Made for Indian horticulture</p>
+        <p style={{ fontSize: 12, color: 'var(--fg-subtle)', marginTop: 24, textAlign: 'center' }}>© 2026 Nesso · Made for Indian horticulture</p>
       </div>
     </div>
   );

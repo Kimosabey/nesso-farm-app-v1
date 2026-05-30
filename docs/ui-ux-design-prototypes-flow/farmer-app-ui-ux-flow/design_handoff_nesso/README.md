@@ -1,7 +1,7 @@
 # Handoff: Nesso — Farm-to-Fork Traceability Design System
 
 ## Overview
-Nesso is an offline-first farm-to-fork traceability platform for Indian horticulture (NR Group). This package is the **complete design system and high-fidelity prototype set** for three surfaces:
+Nesso is an offline-first farm-to-fork traceability platform for Indian horticulture (Nesso). This package is the **complete design system and high-fidelity prototype set** for three surfaces:
 - **Mobile app** — the field-officer tool (register farmers, map farms, log activities, scan GRNs, post-harvest).
 - **Web dashboard** — the admin/FPO back-office (approvals, farmers, farms, activities, quality, procurement, inventory, reports, settings).
 - **Public QR portal** — the consumer-facing trace page opened by scanning a batch QR.

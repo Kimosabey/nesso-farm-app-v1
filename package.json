@@ -2,7 +2,13 @@
   "name": "nesso",
   "version": "0.0.0",
   "private": true,
-  "description": "Nesso — Farm-to-fork traceability platform (NR Group)",
+  "description": "Nesso — Farm-to-fork traceability platform",
+  "author": "Harshan Aiyappa <harshan.aiyappa@gmail.com> (https://github.com/Kimosabey)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kimosabey/nesso-farm-app-v1.git"
+  },
+  "license": "UNLICENSED",
   "packageManager": "pnpm@11.4.0",
   "engines": {
     "node": ">=20.10.0",

@@ -228,7 +228,7 @@ function SettingsPage({ theme, onToast }) {
             <WCard>
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, paddingBottom: 18, borderBottom: '1px solid var(--border)' }}>
                 <div style={{ width: 60, height: 60, borderRadius: 16, background: '#fff', display: 'grid', placeItems: 'center', boxShadow: 'var(--shadow-sm)' }}><img src="assets/nesso-logo.jpeg" alt="" style={{ width: 42, height: 42 }} /></div>
-                <div><h3 className="display" style={{ fontSize: 19, fontWeight: 700, color: 'var(--fg)' }}>NR Group</h3><div style={{ fontSize: 13, color: 'var(--fg-muted)' }}>Hassan, Karnataka · Horticulture</div></div>
+                <div><h3 className="display" style={{ fontSize: 19, fontWeight: 700, color: 'var(--fg)' }}>Nesso</h3><div style={{ fontSize: 13, color: 'var(--fg-muted)' }}>Hassan, Karnataka · Horticulture</div></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18, paddingTop: 18 }}>
                 {[['Plan', 'Enterprise'], ['Members', '14'], ['Clusters', '3'], ['Since', 'Jan 2026']].map(([k, v]) => <div key={k}><div style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--fg-subtle)', textTransform: 'uppercase' }}>{k}</div><div style={{ fontSize: 16, fontWeight: 700, color: 'var(--fg)', marginTop: 3 }} className="display">{v}</div></div>)}

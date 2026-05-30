@@ -6,7 +6,7 @@ Driving values come from `design-system.tokens.json`. This doc covers layout, ke
 ## MOBILE (Expo + RN + NativeWind) — design canvas 392×850
 
 ### Splash
-Full-bleed radial green gradient (`#207647→#0D783C→#06401f`). White coin (108px) center; logomark blooms petal-by-petal (stagger 40ms, emphasized easing), golden drop swells last; wordmark "NESSO" (Montserrat 700, letter-spacing .16em, white) + tagline "Farm to fork, verified" rise in. Bottom: spinner + `v1.0 · NR Group`. Auto-advance ~2.6s or tap. Reduced-motion → static lockup.
+Full-bleed radial green gradient (`#207647→#0D783C→#06401f`). White coin (108px) center; logomark blooms petal-by-petal (stagger 40ms, emphasized easing), golden drop swells last; wordmark "NESSO" (Montserrat 700, letter-spacing .16em, white) + tagline "Farm to fork, verified" rise in. Bottom: spinner + `v1.0 · Nesso`. Auto-advance ~2.6s or tap. Reduced-motion → static lockup.
 
 ### Login
 Top: language chip ("🌐 EN") + theme toggle. Logo tile 60px. H1 "Welcome to Nesso" (Montserrat 700, 34px). Body copy. Field: "Mobile number", prefix `+91`, mono, 10-digit (regex `^[6-9]\d{9}$`), hint "Standard SMS rates may apply." Sticky bottom CTA "Send OTP" (disabled until valid) + Terms/Privacy line. 54px field height, 56px CTA.
