@@ -36,4 +36,13 @@ if (!config.resolver.assetExts.includes('wasm')) {
   config.resolver.assetExts = [...config.resolver.assetExts, 'wasm'];
 }
 
+// lucide-react-native v1.x ships ESM barrel exports as .mjs files.
+// Metro's default sourceExts doesn't include 'mjs', so it can't
+// resolve the per-icon chunks like ./icons/app-window-mac.mjs.
+// Adding mjs to sourceExts fixes the resolution whether we're on
+// v0.x (CJS, doesn't need this) or v1.x (ESM barrel, does need this).
+if (!config.resolver.sourceExts.includes('mjs')) {
+  config.resolver.sourceExts = [...config.resolver.sourceExts, 'mjs'];
+}
+
 module.exports = withNativeWind(config, { input: './global.css' });

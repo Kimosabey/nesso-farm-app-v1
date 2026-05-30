@@ -15,3 +15,9 @@ allowBuilds:
   protobufjs: true # firebase-admin / grpc
   sharp: true # Next.js image optimization native binary
   unrs-resolver: true # Turbo / Next.js resolver native binary
+
+# lucide-react-native v1.x ships ESM .mjs barrel exports that Metro
+# can't resolve without sourceExts: ['mjs'] — pin to the last CJS
+# version as a safety net alongside the metro.config.js fix.
+overrides:
+  lucide-react-native: '0.475.0'

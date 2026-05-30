@@ -4,15 +4,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { DashboardScreen } from '@/screens/DashboardScreen';
 import { FarmersScreen } from '@/screens/FarmersScreen';
 import { RegisterFarmerScreen } from '@/screens/RegisterFarmerScreen';
-import { VerifyScreen } from '@/screens/VerifyScreen';
-import { SyncScreen } from '@/screens/SyncScreen';
+import { FarmsPlaceholderScreen } from '@/screens/FarmsPlaceholderScreen';
+import { SettingsScreen } from '@/screens/SettingsScreen';
 
 export type MainTabParamList = {
   Dashboard: undefined;
   Farmers: undefined;
   Register: undefined;
-  Verify: undefined;
-  Sync: undefined;
+  Farms: undefined;
+  Settings: undefined;
 };
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -21,8 +21,8 @@ const ICONS: Record<keyof MainTabParamList, keyof typeof Ionicons.glyphMap> = {
   Dashboard: 'home-outline',
   Farmers: 'people-outline',
   Register: 'add',
-  Verify: 'checkmark-circle-outline',
-  Sync: 'sync-outline',
+  Farms: 'map-outline',
+  Settings: 'settings-outline',
 };
 
 export function MainTabs() {
@@ -32,8 +32,19 @@ export function MainTabs() {
         headerShown: false,
         tabBarActiveTintColor: '#0D783C',
         tabBarInactiveTintColor: '#7A8A82',
-        tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
-        tabBarStyle: { height: 62, paddingBottom: 8, paddingTop: 8 },
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: '600',
+          fontFamily: undefined, // uses system sans
+        },
+        tabBarStyle: {
+          height: 72,
+          paddingBottom: 10,
+          paddingTop: 8,
+          backgroundColor: undefined, // resolved via className below
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(0,0,0,0.08)',
+        },
         tabBarIcon: ({ color, size, focused }) => {
           if (route.name === 'Register') {
             return <FabIcon color={color} focused={focused} />;
@@ -49,8 +60,8 @@ export function MainTabs() {
         component={RegisterFarmerScreen}
         options={{ tabBarLabel: '' }}
       />
-      <Tab.Screen name="Verify" component={VerifyScreen} />
-      <Tab.Screen name="Sync" component={SyncScreen} />
+      <Tab.Screen name="Farms" component={FarmsPlaceholderScreen} />
+      <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );
 }
@@ -67,7 +78,7 @@ function FabIcon({ color: _color, focused }: { color: string; focused: boolean }
         borderColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 16, // lift above the tab bar
+        marginBottom: 16,
         shadowColor: '#0D783C',
         shadowOpacity: 0.25,
         shadowRadius: 8,

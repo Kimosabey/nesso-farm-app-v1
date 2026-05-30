@@ -292,4 +292,8 @@ export const api = {
   async logout(): Promise<void> {
     await clearSession();
   },
+
+  farmerById(id: string): Promise<Farmer> {
+    return request<Farmer>(`/farmers/${id}`);
+  },
 };

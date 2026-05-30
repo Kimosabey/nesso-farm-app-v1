@@ -8,6 +8,10 @@ import { SplashScreen } from '@/screens/SplashScreen';
 import { LoginScreen } from '@/screens/LoginScreen';
 import { DebugScreen } from '@/screens/DebugScreen';
 import { MainTabs } from '@/navigation/MainTabs';
+import { FarmerProfileScreen } from '@/screens/FarmerProfileScreen';
+import { LanguageScreen } from '@/screens/LanguageScreen';
+import { ThemeScreen } from '@/screens/ThemeScreen';
+import { AboutScreen } from '@/screens/AboutScreen';
 import { sync } from '@/sync/SyncManager';
 import { initSentry, sentry } from '@/sentry';
 
@@ -18,6 +22,10 @@ export type RootStackParamList = {
   Login: undefined;
   Main: undefined;
   Debug: undefined;
+  FarmerProfile: { farmerId: string };
+  LanguageSettings: undefined;
+  ThemeSettings: undefined;
+  About: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -41,6 +49,10 @@ function App() {
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Main" component={MainTabs} />
           <Stack.Screen name="Debug" component={DebugScreen} />
+          <Stack.Screen name="FarmerProfile" component={FarmerProfileScreen} />
+          <Stack.Screen name="LanguageSettings" component={LanguageScreen} />
+          <Stack.Screen name="ThemeSettings" component={ThemeScreen} />
+          <Stack.Screen name="About" component={AboutScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
