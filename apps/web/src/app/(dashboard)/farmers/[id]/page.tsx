@@ -1,7 +1,20 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { api, ApiError, readAccessToken } from '@/lib/api';
+import { MapPin, Phone } from 'lucide-react';
+import { api, ApiError, readAccessToken, type Farm } from '@/lib/api';
+import { Avatar } from '@/components/dashboard/Avatar';
+import { StatusPill } from '@/components/dashboard/StatusPill';
 import { ApprovalActions } from '../../approvals/ApprovalActions';
+import { ProfileTabs } from './ProfileTabs';
+
+const STATUS_PILL: Record<
+  'pending' | 'approved' | 'rejected',
+  { kind: 'pending' | 'approved' | 'rejected'; label: string }
+> = {
+  pending: { kind: 'pending', label: 'KYC in review' },
+  approved: { kind: 'approved', label: 'KYC verified' },
+  rejected: { kind: 'rejected', label: 'KYC failed' },
+};
 
 export default async function FarmerDetailPage({
   params,
@@ -19,117 +32,117 @@ export default async function FarmerDetailPage({
     throw err;
   }
 
+  let farms: Farm[] = [];
+  try {
+    const fr = await api.listFarms(token, { farmerId: f._id, pageSize: 50 });
+    farms = fr.data;
+  } catch {
+    farms = [];
+  }
+
+  const name = [f.firstName, f.lastName].filter(Boolean).join(' ').trim() || f.farmerId;
+  const pill = STATUS_PILL[f.approvalStatus];
+  const association = f.isFlowerAgent ? 'Flower agent' : f.groupAssociation.replace('_', ' ');
+  const totalArea = farms.reduce((sum, farm) => sum + (farm.farmArea ?? 0), 0);
+
   return (
-    <section className="mx-auto max-w-5xl px-6 py-8">
+    <section className="mx-auto max-w-6xl px-6 py-8">
       <div className="mb-2 text-sm text-fg-muted">
         <Link href="/farmers" className="hover:text-primary">
           ← Farmers
         </Link>
       </div>
 
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="font-display text-3xl tracking-tight text-fg">
-            {f.firstName} {f.lastName ?? ''}
-          </h1>
-          <p className="mt-1 font-mono text-sm text-fg-subtle">
-            {f.farmerId} · {f.mobileNumber}
-          </p>
-        </div>
-        <StatusBadge status={f.approvalStatus} />
-      </div>
-
-      {f.approvalStatus === 'pending' ? (
-        <div className="mt-6 rounded-2xl border border-warning/30 bg-warning/10 p-4">
-          <p className="text-sm font-medium text-warning">Awaiting approval</p>
-          <p className="mt-1 text-sm text-fg-muted">
-            Review the details below, then approve or reject.
-          </p>
-          <div className="mt-3">
-            <ApprovalActions farmerId={f._id} />
-          </div>
-        </div>
-      ) : f.approvalStatus === 'rejected' && f.rejectionReason ? (
-        <div className="mt-6 rounded-2xl border border-danger/30 bg-danger/10 p-4">
-          <p className="text-sm font-medium text-danger">Rejected</p>
-          <p className="mt-1 text-sm text-fg-muted">{f.rejectionReason}</p>
-        </div>
-      ) : null}
-
-      <div className="mt-8 grid gap-4 md:grid-cols-2">
-        <Card title="Personal">
-          <Row label="Gender" value={f.gender ?? '—'} />
-          <Row label="Production practice" value={f.productionPractice ?? '—'} />
-          <Row label="Association" value={f.isFlowerAgent ? 'Flower agent' : f.groupAssociation} />
-          <Row
-            label="Public trace consent"
-            value={f.publicTraceConsent ? 'Granted' : 'Not granted'}
-          />
-        </Card>
-
-        <Card title="Address">
-          <Row label="Village" value={f.address?.village ?? '—'} />
-          <Row label="Taluka" value={f.address?.taluka ?? '—'} />
-          <Row label="District" value={f.address?.district ?? '—'} />
-          <Row label="State" value={f.address?.state ?? '—'} />
-          <Row label="Pincode" value={f.address?.pincode ?? '—'} />
-        </Card>
-
-        <Card title="Crops">
-          {f.selectedCrops && f.selectedCrops.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {f.selectedCrops.map((c) => (
-                <span
-                  key={c}
-                  className="rounded-full border border-border-strong bg-bg-muted px-2.5 py-0.5 text-xs text-fg"
-                >
-                  {c}
-                </span>
-              ))}
+      <div className="grid items-start gap-5 lg:[grid-template-columns:360px_1fr]">
+        {/* left profile panel */}
+        <div className="self-start rounded-2xl border border-border bg-bg-elevated p-5 shadow-sm">
+          <div className="flex flex-col items-center border-b border-border pb-[18px] text-center">
+            <Avatar name={name} size={76} />
+            <h2 className="mt-3 font-display text-[19px] font-bold text-fg">{name}</h2>
+            <p className="mt-1 font-mono text-[12.5px] text-fg-subtle">{f.farmerId}</p>
+            <div className="mt-2">
+              <StatusPill kind={pill.kind}>{pill.label}</StatusPill>
             </div>
-          ) : (
-            <p className="text-sm text-fg-muted">No crops selected</p>
-          )}
-        </Card>
+            <div className="mt-2">
+              <span className="inline-flex rounded-full bg-secondary-50 px-2.5 py-0.5 text-xs font-semibold text-secondary-700">
+                {association}
+              </span>
+            </div>
+          </div>
 
-        <Card title="Registered">
-          <Row label="Created" value={new Date(f.createdAt).toLocaleString()} />
-          <Row label="Last updated" value={new Date(f.updatedAt).toLocaleString()} />
-          {f.approvedAt ? (
-            <Row label="Decision made" value={new Date(f.approvedAt).toLocaleString()} />
+          <div className="flex flex-col gap-3.5 border-b border-border py-[18px]">
+            <ContactRow icon={<Phone size={15} />} label="Mobile" value={f.mobileNumber} />
+            <ContactRow
+              icon={<MapPin size={15} />}
+              label="Village"
+              value={f.address?.village ?? '—'}
+            />
+            <ContactRow
+              icon={<MapPin size={15} />}
+              label="District"
+              value={f.address?.district ?? '—'}
+            />
+            <ContactRow
+              icon={<MapPin size={15} />}
+              label="Pincode"
+              value={f.address?.pincode ?? '—'}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 pt-[18px]">
+            <Stat label="Farms" value={String(farms.length)} />
+            <Stat label="Total area" value={`${totalArea.toFixed(1)} ha`} />
+            <Stat label="Active crops" value={String(f.selectedCrops?.length ?? 0)} />
+            <Stat label="Practice" value={f.productionPractice ?? '—'} />
+          </div>
+
+          {f.approvalStatus === 'pending' ? (
+            <div className="mt-[18px] border-t border-border pt-[18px]">
+              <p className="mb-3 text-[13px] font-medium text-warning">Awaiting KYC approval</p>
+              <ApprovalActions farmerId={f._id} />
+            </div>
+          ) : f.approvalStatus === 'rejected' && f.rejectionReason ? (
+            <div className="mt-[18px] rounded-xl border border-danger/30 bg-danger/10 p-3">
+              <p className="text-[13px] font-medium text-danger">Rejected</p>
+              <p className="mt-1 text-[13px] text-fg-muted">{f.rejectionReason}</p>
+            </div>
           ) : null}
-        </Card>
+        </div>
+
+        {/* right tabs */}
+        <ProfileTabs farmer={f} farms={farms} />
       </div>
     </section>
   );
 }
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+function ContactRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
   return (
-    <div className="rounded-2xl border border-border bg-bg-elevated p-5 shadow-sm">
-      <h2 className="text-xs uppercase tracking-wider text-fg-subtle">{title}</h2>
-      <div className="mt-3 space-y-2">{children}</div>
+    <div className="flex items-center justify-between gap-3">
+      <span className="flex items-center gap-2 text-[13px] text-fg-muted">
+        <span className="text-fg-subtle">{icon}</span>
+        {label}
+      </span>
+      <span className="truncate text-[13.5px] font-semibold text-fg">{value}</span>
     </div>
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-baseline justify-between gap-3">
-      <dt className="text-xs text-fg-subtle">{label}</dt>
-      <dd className="truncate text-sm text-fg">{value}</dd>
+    <div>
+      <div className="text-[11.5px] font-semibold uppercase tracking-[0.04em] text-fg-subtle">
+        {label}
+      </div>
+      <div className="mt-1 font-display text-lg font-bold text-fg">{value}</div>
     </div>
-  );
-}
-
-function StatusBadge({ status }: { status: 'pending' | 'approved' | 'rejected' }) {
-  const map = {
-    pending: { label: 'Pending', cls: 'bg-warning/10 text-warning border-warning/30' },
-    approved: { label: 'Approved', cls: 'bg-success/10 text-success border-success/30' },
-    rejected: { label: 'Rejected', cls: 'bg-danger/10 text-danger border-danger/30' },
-  } as const;
-  const v = map[status];
-  return (
-    <span className={`rounded-full border px-3 py-1 text-sm font-medium ${v.cls}`}>{v.label}</span>
   );
 }
