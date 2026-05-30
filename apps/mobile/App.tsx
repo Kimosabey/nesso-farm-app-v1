@@ -15,6 +15,8 @@ import { AboutScreen } from '@/screens/AboutScreen';
 import { AddFarmScreen } from '@/screens/AddFarmScreen';
 import { AddActivityScreen } from '@/screens/AddActivityScreen';
 import { AcceptGRNScreen } from '@/screens/AcceptGRNScreen';
+import { FarmDetailsScreen } from '@/screens/FarmDetailsScreen';
+import { AddCropScreen } from '@/screens/AddCropScreen';
 import { OtpScreen } from '@/screens/OtpScreen';
 import type { OtpConfirmation } from '@/firebase/auth';
 import { sync } from '@/sync/SyncManager';
@@ -34,6 +36,8 @@ export type RootStackParamList = {
   AddFarm: { farmerId?: string };
   AddActivity: { farmId?: string; farmerId?: string };
   AcceptGRN: undefined;
+  FarmDetails: { farmId: string };
+  AddCrop: { farmId?: string; farmerId?: string };
   Otp: { phone: string; confirmation: OtpConfirmation };
 };
 
@@ -65,6 +69,8 @@ function App() {
           <Stack.Screen name="AddFarm" component={AddFarmScreen} />
           <Stack.Screen name="AddActivity" component={AddActivityScreen} />
           <Stack.Screen name="AcceptGRN" component={AcceptGRNScreen} />
+          <Stack.Screen name="FarmDetails" component={FarmDetailsScreen} />
+          <Stack.Screen name="AddCrop" component={AddCropScreen} />
           <Stack.Screen name="Otp" component={OtpScreen} />
         </Stack.Navigator>
       </NavigationContainer>

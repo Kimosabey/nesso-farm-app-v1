@@ -119,6 +119,90 @@ export interface FarmerStats {
   total: number;
 }
 
+export interface FarmAddress {
+  state?: string;
+  district?: string;
+  taluka?: string;
+  hobli?: string;
+  city?: string;
+  village?: string;
+  pincode?: string;
+}
+
+export interface Farm {
+  _id: string;
+  farmId: string;
+  farmerId: string;
+  farmerName?: string;
+  farmName: string;
+  surveyNumber?: string;
+  farmArea: number; // acres
+  growingArea?: number;
+  organicStage?: 'Certified' | 'InTransition' | 'Conventional';
+  previousPractice?: string;
+  waterSource?: string;
+  soilType?: string;
+  ownership?: 'Own' | 'Lease' | 'Share';
+  fieldType?: 'Open' | 'Greenhouse' | 'ShadeNet';
+  location?: { type: 'Point'; coordinates: [number, number] };
+  polygonPoints?: Array<{ lat: number; lng: number }>;
+  address?: FarmAddress;
+  status?: 'active' | 'archived';
+  approvalStatus?: 'pending' | 'approved' | 'rejected';
+  createdAt?: string;
+}
+
+export interface Crop {
+  _id: string;
+  cropId: string;
+  farmId: string;
+  farmerId: string;
+  cropName: string;
+  cropVariety?: string;
+  cropType: 'Main' | 'Inter' | 'Border';
+  unit: string;
+  acre: number;
+  mappedAcre: number;
+  estHarvest: number;
+  waterType: 'RAINFED' | 'IRRIGATION';
+  method: 'SOWING' | 'PLANTING';
+  practice: 'CONVENTIONAL' | 'ORGANIC';
+  sowingDate?: string;
+  harvestDate?: string;
+  multipleHarvest: boolean;
+  season: string;
+  year?: number;
+  createdAt?: string;
+}
+
+export interface CreateCropInput {
+  farmId: string;
+  farmerId: string;
+  cropName: string;
+  cropVariety?: string;
+  cropType?: 'Main' | 'Inter' | 'Border';
+  unit?: 'kg' | 'quintal' | 'tonne' | 'nos';
+  acre?: number;
+  mappedAcre?: number;
+  estHarvest?: number;
+  waterType?: 'RAINFED' | 'IRRIGATION';
+  method?: 'SOWING' | 'PLANTING';
+  practice?: 'CONVENTIONAL' | 'ORGANIC';
+  sowingDate?: string;
+  harvestDate?: string;
+  multipleHarvest?: boolean;
+  season?: 'Kharif' | 'Rabi' | 'Summer' | 'Perennial' | 'Anytime' | 'All';
+  year?: number;
+}
+
+interface Paged<T> {
+  data: T[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
 export interface CreateFarmerInput {
   firstName: string;
   lastName?: string;
@@ -290,6 +374,57 @@ export const api = {
     polygonPoints?: Array<{ lat: number; lng: number }>;
   }): Promise<{ _id: string; farmId: string }> {
     return request('/farms', { method: 'POST', body: JSON.stringify(input) });
+  },
+
+  listFarms(params: { farmerId?: string; status?: string; page?: number; pageSize?: number } = {}) {
+    const qs = new URLSearchParams();
+    if (params.farmerId) qs.set('farmerId', params.farmerId);
+    if (params.status) qs.set('status', params.status);
+    if (params.page) qs.set('page', String(params.page));
+    if (params.pageSize) qs.set('pageSize', String(params.pageSize));
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return request<Paged<Farm>>(`/farms${suffix}`);
+  },
+
+  farmById(id: string): Promise<Farm> {
+    return request<Farm>(`/farms/${id}`);
+  },
+
+  listCrops(params: { farmId?: string; farmerId?: string; page?: number; pageSize?: number } = {}) {
+    const qs = new URLSearchParams();
+    if (params.farmId) qs.set('farmId', params.farmId);
+    if (params.farmerId) qs.set('farmerId', params.farmerId);
+    if (params.page) qs.set('page', String(params.page));
+    if (params.pageSize) qs.set('pageSize', String(params.pageSize));
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return request<Paged<Crop>>(`/crops${suffix}`);
+  },
+
+  /**
+   * Online → POST /crops immediately.
+   * Offline → enqueue in SQLite outbox; SyncManager will drain.
+   */
+  async createCrop(
+    input: CreateCropInput,
+  ): Promise<{ mode: 'online'; crop: Crop } | { mode: 'queued'; outboxId: string }> {
+    if (isOnline) {
+      try {
+        const crop = await request<Crop>('/crops', {
+          method: 'POST',
+          body: JSON.stringify(input),
+        });
+        return { mode: 'online', crop };
+      } catch (e) {
+        if (e instanceof ApiError && e.status >= 400 && e.status < 500) throw e;
+        // Network-ish error → fall through to queue
+      }
+    }
+    const outboxId = await outbox.enqueue({
+      endpoint: '/crops',
+      method: 'POST',
+      payload: input as unknown as Record<string, unknown>,
+    });
+    return { mode: 'queued', outboxId };
   },
 
   createActivity(input: {

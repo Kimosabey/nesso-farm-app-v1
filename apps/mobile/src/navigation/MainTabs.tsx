@@ -19,7 +19,7 @@ import { FarmersScreen } from '@/screens/FarmersScreen';
 import { RegisterFarmerScreen } from '@/screens/RegisterFarmerScreen';
 import { VerifyScreen } from '@/screens/VerifyScreen';
 import { SettingsScreen } from '@/screens/SettingsScreen';
-import { FarmsPlaceholderScreen } from '@/screens/FarmsPlaceholderScreen';
+import { FarmsListScreen } from '@/screens/FarmsListScreen';
 
 export type MainTabParamList = {
   Dashboard: undefined;
@@ -167,7 +167,7 @@ export function MainTabs() {
       <Tab.Screen name="Dashboard" component={DashboardScreen} />
       <Tab.Screen name="Farmers" component={FarmersScreen} />
       <Tab.Screen name="Verify" component={VerifyScreen} />
-      <Tab.Screen name="Farms" component={FarmsPlaceholderScreen} />
+      <Tab.Screen name="Farms" component={FarmsListScreen} />
       {/* Register is reached via the center FAB; not shown as a labelled tab */}
       <Tab.Screen name="Register" component={RegisterFarmerScreen} />
       {/* Settings is reached via the Dashboard avatar; not shown in the bar */}
