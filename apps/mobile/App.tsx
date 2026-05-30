@@ -17,6 +17,11 @@ import { AddActivityScreen } from '@/screens/AddActivityScreen';
 import { AcceptGRNScreen } from '@/screens/AcceptGRNScreen';
 import { FarmDetailsScreen } from '@/screens/FarmDetailsScreen';
 import { AddCropScreen } from '@/screens/AddCropScreen';
+import { WeatherScreen } from '@/screens/WeatherScreen';
+import { HarvestBoardScreen } from '@/screens/HarvestBoardScreen';
+import { ActivitiesScreen } from '@/screens/ActivitiesScreen';
+import { PreHarvestScreen } from '@/screens/PreHarvestScreen';
+import { NotificationsScreen } from '@/screens/NotificationsScreen';
 import { OtpScreen } from '@/screens/OtpScreen';
 import type { OtpConfirmation } from '@/firebase/auth';
 import { sync } from '@/sync/SyncManager';
@@ -38,6 +43,11 @@ export type RootStackParamList = {
   AcceptGRN: undefined;
   FarmDetails: { farmId: string };
   AddCrop: { farmId?: string; farmerId?: string };
+  Weather: undefined;
+  HarvestBoard: undefined;
+  Activities: undefined;
+  PreHarvest: undefined;
+  Notifications: undefined;
   Otp: { phone: string; confirmation: OtpConfirmation };
 };
 
@@ -71,6 +81,11 @@ function App() {
           <Stack.Screen name="AcceptGRN" component={AcceptGRNScreen} />
           <Stack.Screen name="FarmDetails" component={FarmDetailsScreen} />
           <Stack.Screen name="AddCrop" component={AddCropScreen} />
+          <Stack.Screen name="Weather" component={WeatherScreen} />
+          <Stack.Screen name="HarvestBoard" component={HarvestBoardScreen} />
+          <Stack.Screen name="Activities" component={ActivitiesScreen} />
+          <Stack.Screen name="PreHarvest" component={PreHarvestScreen} />
+          <Stack.Screen name="Notifications" component={NotificationsScreen} />
           <Stack.Screen name="Otp" component={OtpScreen} />
         </Stack.Navigator>
       </NavigationContainer>

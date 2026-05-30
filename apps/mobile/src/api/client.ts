@@ -203,6 +203,54 @@ interface Paged<T> {
   totalPages: number;
 }
 
+export interface ActivityInputRow {
+  kind: 'Chemical' | 'Organic' | 'Inventory' | 'Other';
+  itemId?: string;
+  name: string;
+  quantity: number;
+  unit?: string;
+  cost: number;
+}
+
+export interface ActivityRow {
+  _id: string;
+  farmId: string;
+  cropId?: string;
+  farmerId: string;
+  activity: string;
+  cropAge?: string;
+  scheduledOn?: string;
+  completedDate?: string;
+  enteredDate: string;
+  status: 'Pending' | 'Completed' | 'Overdue' | 'Cancelled';
+  popCompliance?: string;
+  inputs: ActivityInputRow[];
+  totalCost: number;
+  notes?: string;
+  photos: string[];
+  geoTag?: { lat?: number; lng?: number; accuracy?: number };
+  createdAt?: string;
+}
+
+export interface NotificationRow {
+  _id: string;
+  userId: string;
+  kind: 'weather' | 'activityReminder' | 'approval' | 'sync' | 'system';
+  title: string;
+  body: string;
+  data?: Record<string, unknown>;
+  status: 'queued' | 'sent' | 'delivered' | 'read' | 'failed';
+  channel: 'push' | 'inApp' | 'sms';
+  createdAt: string;
+  scheduledFor?: string;
+  deliveredAt?: string;
+  readAt?: string;
+}
+
+interface NotificationsPage extends Paged<NotificationRow> {
+  unread: number;
+}
+
 export interface CreateFarmerInput {
   firstName: string;
   lastName?: string;
@@ -438,6 +486,48 @@ export const api = {
     weather?: string;
   }): Promise<{ _id: string }> {
     return request('/activities', { method: 'POST', body: JSON.stringify(input) });
+  },
+
+  listActivities(
+    params: {
+      farmId?: string;
+      farmerId?: string;
+      cropId?: string;
+      status?: 'Pending' | 'Completed' | 'Overdue' | 'Cancelled';
+      from?: string;
+      to?: string;
+      page?: number;
+      pageSize?: number;
+    } = {},
+  ) {
+    const qs = new URLSearchParams();
+    if (params.farmId) qs.set('farmId', params.farmId);
+    if (params.farmerId) qs.set('farmerId', params.farmerId);
+    if (params.cropId) qs.set('cropId', params.cropId);
+    if (params.status) qs.set('status', params.status);
+    if (params.from) qs.set('from', params.from);
+    if (params.to) qs.set('to', params.to);
+    if (params.page) qs.set('page', String(params.page));
+    if (params.pageSize) qs.set('pageSize', String(params.pageSize));
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return request<Paged<ActivityRow>>(`/activities${suffix}`);
+  },
+
+  listNotifications(params: { status?: string; page?: number; pageSize?: number } = {}) {
+    const qs = new URLSearchParams();
+    if (params.status) qs.set('status', params.status);
+    if (params.page) qs.set('page', String(params.page));
+    if (params.pageSize) qs.set('pageSize', String(params.pageSize));
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return request<NotificationsPage>(`/notifications${suffix}`);
+  },
+
+  markNotificationRead(id: string): Promise<void> {
+    return request<void>(`/notifications/${id}/read`, { method: 'PATCH' });
+  },
+
+  markAllRead(): Promise<{ updated: number }> {
+    return request<{ updated: number }>('/notifications/read-all', { method: 'PATCH' });
   },
 
   acceptGRN(code: string): Promise<{ ok: boolean; message?: string }> {

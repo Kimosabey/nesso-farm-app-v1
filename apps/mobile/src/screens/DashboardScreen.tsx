@@ -606,6 +606,7 @@ export function DashboardScreen() {
           {/* Bell */}
           <Pressable
             accessibilityLabel="Notifications"
+            onPress={() => stackNav()?.navigate('Notifications')}
             style={{
               width: 42,
               height: 42,
@@ -673,9 +674,10 @@ export function DashboardScreen() {
         ) : null}
 
         {/* ---------------------------------------------------------------- */}
-        {/* 3. Weather card (gradient simulated with overlay)                 */}
+        {/* 3. Weather card (gradient simulated with overlay) → Weather       */}
         {/* ---------------------------------------------------------------- */}
-        <View
+        <Pressable
+          onPress={() => stackNav()?.navigate('Weather')}
           style={{
             marginHorizontal: 20,
             borderRadius: 22,
@@ -753,7 +755,7 @@ export function DashboardScreen() {
               </View>
             ))}
           </View>
-        </View>
+        </Pressable>
 
         {/* ---------------------------------------------------------------- */}
         {/* 4. This season header                                             */}
@@ -856,17 +858,17 @@ export function DashboardScreen() {
           <JumpPill
             icon={<Wheat size={16} color={C.primary} />}
             label="Harvest"
-            onPress={() => {}}
+            onPress={() => stackNav()?.navigate('HarvestBoard')}
           />
           <JumpPill
             icon={<Activity size={16} color={C.primary} />}
             label="Activities"
-            onPress={() => {}}
+            onPress={() => stackNav()?.navigate('Activities')}
           />
           <JumpPill
             icon={<Sprout size={16} color={C.primary} />}
             label="Pre-harvest"
-            onPress={() => {}}
+            onPress={() => stackNav()?.navigate('PreHarvest')}
           />
           <JumpPill
             icon={<Package size={16} color={C.primary} />}
