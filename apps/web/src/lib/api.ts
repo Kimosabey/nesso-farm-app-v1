@@ -434,6 +434,7 @@ export interface Audit {
   status: 'Pending' | 'Approved' | 'Rejected';
   auditDate: string;
   reviewedAt?: string;
+  attachments?: string[];
   rejectionReason?: string;
   rejectionTags?: string[];
   createdAt: string;

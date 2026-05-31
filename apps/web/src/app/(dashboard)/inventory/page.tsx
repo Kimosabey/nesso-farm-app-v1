@@ -1,9 +1,8 @@
-import Link from 'next/link';
+import { Boxes, Package, PackageCheck, Truck } from 'lucide-react';
 import { api, readAccessToken } from '@/lib/api';
-import {
-  StatusBadge,
-  toneForInventoryStatus,
-} from '@/components/dashboard/Badges';
+import { PageHeader } from '@/components/dashboard/PageHeader';
+import { MiniStat } from '@/components/dashboard/MiniStat';
+import { InventoryTable, toInventoryRow } from './InventoryTable';
 
 interface PageProps {
   searchParams: Promise<{ status?: string; page?: string }>;
@@ -12,99 +11,60 @@ interface PageProps {
 export default async function InventoryPage({ searchParams }: PageProps) {
   const { status, page } = await searchParams;
   const token = (await readAccessToken())!;
+
   const [result, stats] = await Promise.all([
-    api.listInventory(token, {
-      status,
-      page: page ? Number(page) : 1,
-      pageSize: 50,
-    }),
-    api.getInventoryStats(token),
+    api.listInventory(token, { status, page: page ? Number(page) : 1, pageSize: 50 }),
+    api
+      .getInventoryStats(token)
+      .catch(() => ({ total: 0, available: 0, processing: 0, sold: 0, transferred: 0 })),
   ]);
+
+  const rows = result.data.map(toInventoryRow);
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-8">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="font-display text-3xl tracking-tight text-fg">Inventory</h1>
-          <p className="mt-1 text-sm text-fg-muted">
-            {stats.total} {stats.total === 1 ? 'batch' : 'batches'} on record
-          </p>
-        </div>
-      </div>
-
-      <dl className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          { k: '', l: 'Total', v: stats.total },
-          { k: 'AVAILABLE', l: 'Available', v: stats.available, tone: 'success' },
-          { k: 'PROCESSING', l: 'Processing', v: stats.processing, tone: 'info' },
-          { k: 'SOLD', l: 'Sold', v: stats.sold, tone: 'accent' },
-        ].map((t) => (
-          <Link
-            key={t.k || 'total'}
-            href={t.k ? `/inventory?status=${t.k}` : '/inventory'}
-            className={`rounded-2xl border bg-bg-elevated p-5 shadow-sm transition hover:border-primary/50 ${
-              (status ?? '') === t.k ? 'border-primary' : 'border-border'
-            }`}
+      <PageHeader
+        title="Inventory"
+        sub="Batches, stock & stage movements across the cluster"
+        actions={
+          <button
+            type="button"
+            className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-fg shadow-sm transition hover:bg-primary-700"
           >
-            <dt className="text-xs uppercase tracking-wider text-fg-subtle">{t.l}</dt>
-            <dd
-              className={`mt-1 font-display text-3xl tabular-nums ${
-                t.tone === 'success'
-                  ? 'text-success'
-                  : t.tone === 'info'
-                    ? 'text-info'
-                    : t.tone === 'accent'
-                      ? 'text-fg'
-                      : 'text-fg'
-              }`}
-            >
-              {t.v}
-            </dd>
-          </Link>
-        ))}
-      </dl>
+            <PackageCheck size={16} /> Accept GRN
+          </button>
+        }
+      />
 
-      <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-bg-elevated">
-        {result.data.length === 0 ? (
-          <div className="px-5 py-12 text-center text-fg-muted">
-            {status ? `No ${status} batches.` : 'No inventory yet — accept a GRN to create the first batch.'}
-          </div>
-        ) : (
-          <table className="w-full text-sm">
-            <thead className="border-b border-border bg-bg-muted/50 text-left text-xs uppercase tracking-wider text-fg-subtle">
-              <tr>
-                <th className="px-4 py-3">Batch #</th>
-                <th className="px-4 py-3">Product</th>
-                <th className="hidden px-4 py-3 md:table-cell">Warehouse</th>
-                <th className="px-4 py-3">Stage</th>
-                <th className="px-4 py-3 text-right">Qty</th>
-                <th className="px-4 py-3">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {result.data.map((b) => (
-                <tr key={b._id} className="transition hover:bg-bg-muted/40">
-                  <td className="px-4 py-3 font-mono text-xs text-fg-subtle">{b.batchId}</td>
-                  <td className="px-4 py-3 font-medium text-fg">
-                    {b.productName}
-                    {b.variant ? <span className="text-fg-subtle"> · {b.variant}</span> : null}
-                  </td>
-                  <td className="hidden px-4 py-3 text-fg-muted md:table-cell">
-                    {b.warehouseName ?? '—'}
-                  </td>
-                  <td className="px-4 py-3 text-fg-muted">{b.currentStage}</td>
-                  <td className="px-4 py-3 text-right font-mono tabular-nums">
-                    {b.quantity} {b.unit}
-                  </td>
-                  <td className="px-4 py-3">
-                    <StatusBadge label={b.status} tone={toneForInventoryStatus(b.status)} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <MiniStat label="Total batches" value={stats.total} tone="muted" icon={<Boxes size={18} />} />
+        <MiniStat
+          label="Available"
+          value={stats.available}
+          tone="success"
+          icon={<Package size={18} />}
+        />
+        <MiniStat
+          label="Processing"
+          value={stats.processing}
+          tone="info"
+          icon={<Boxes size={18} />}
+        />
+        <MiniStat
+          label="Dispatched"
+          value={stats.sold + stats.transferred}
+          tone="primary"
+          icon={<Truck size={18} />}
+        />
       </div>
+
+      <InventoryTable
+        rows={rows}
+        total={result.total}
+        page={result.page}
+        totalPages={result.totalPages}
+        status={status}
+      />
     </section>
   );
 }

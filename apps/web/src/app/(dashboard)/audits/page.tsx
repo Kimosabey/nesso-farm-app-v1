@@ -1,88 +1,65 @@
+import { CheckCircle2, Clock, Layers, Plus, XCircle } from 'lucide-react';
 import { api, readAccessToken } from '@/lib/api';
-import { StatusBadge, toneForAuditStatus } from '@/components/dashboard/Badges';
+import { PageHeader } from '@/components/dashboard/PageHeader';
+import { MiniStat } from '@/components/dashboard/MiniStat';
+import { AuditsTable, toAuditRow } from './AuditsTable';
 
-export default async function AuditsPage() {
+interface PageProps {
+  searchParams: Promise<{ status?: string; page?: string }>;
+}
+
+export default async function AuditsPage({ searchParams }: PageProps) {
+  const { status, page } = await searchParams;
   const token = (await readAccessToken())!;
+
   const [result, stats] = await Promise.all([
-    api.listAudits(token, { pageSize: 100 }),
-    api.getAuditStats(token).catch(() => ({ Pending: 0, Approved: 0, Rejected: 0, total: 0 })),
+    api.listAudits(token, { status, page: page ? Number(page) : 1, pageSize: 50 }),
+    api
+      .getAuditStats(token)
+      .catch(() => ({ Pending: 0, Approved: 0, Rejected: 0, total: 0 }) as Record<string, number>),
   ]);
+
+  const rows = result.data.map(toAuditRow);
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-8">
-      <div>
-        <h1 className="font-display text-3xl tracking-tight text-fg">Audits</h1>
-        <p className="mt-1 text-sm text-fg-muted">
-          {stats.total} {stats.total === 1 ? 'audit' : 'audits'} on record
-        </p>
-      </div>
-
-      <dl className="mt-6 grid gap-3 sm:grid-cols-4">
-        {[
-          { l: 'Total', v: stats.total },
-          { l: 'Pending', v: stats.Pending ?? 0, tone: 'warning' },
-          { l: 'Approved', v: stats.Approved ?? 0, tone: 'success' },
-          { l: 'Rejected', v: stats.Rejected ?? 0, tone: 'danger' },
-        ].map((t) => (
-          <div
-            key={t.l}
-            className="rounded-2xl border border-border bg-bg-elevated p-5 shadow-sm"
+      <PageHeader
+        title="Audits"
+        sub="Compliance & field audits across the cluster"
+        actions={
+          <button
+            type="button"
+            className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-fg shadow-sm transition hover:bg-primary-700"
           >
-            <dt className="text-xs uppercase tracking-wider text-fg-subtle">{t.l}</dt>
-            <dd
-              className={`mt-1 font-display text-3xl tabular-nums ${
-                t.tone === 'warning'
-                  ? 'text-warning'
-                  : t.tone === 'success'
-                    ? 'text-success'
-                    : t.tone === 'danger'
-                      ? 'text-danger'
-                      : 'text-fg'
-              }`}
-            >
-              {t.v}
-            </dd>
-          </div>
-        ))}
-      </dl>
+            <Plus size={16} /> New audit
+          </button>
+        }
+      />
 
-      <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-bg-elevated">
-        {result.data.length === 0 ? (
-          <div className="px-5 py-12 text-center text-fg-muted">
-            No audits yet. Create one via{' '}
-            <code className="font-mono text-xs">POST /api/v1/audits</code>.
-          </div>
-        ) : (
-          <table className="w-full text-sm">
-            <thead className="border-b border-border bg-bg-muted/50 text-left text-xs uppercase tracking-wider text-fg-subtle">
-              <tr>
-                <th className="px-4 py-3">Type</th>
-                <th className="px-4 py-3">Description</th>
-                <th className="hidden px-4 py-3 md:table-cell">Farmer</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Date</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {result.data.map((a) => (
-                <tr key={a._id} className="transition hover:bg-bg-muted/40">
-                  <td className="px-4 py-3 text-fg-muted">{a.auditType}</td>
-                  <td className="px-4 py-3 font-medium text-fg">{a.description}</td>
-                  <td className="hidden px-4 py-3 text-fg-muted md:table-cell">
-                    {a.farmerName ?? '—'}
-                  </td>
-                  <td className="px-4 py-3">
-                    <StatusBadge label={a.status} tone={toneForAuditStatus(a.status)} />
-                  </td>
-                  <td className="px-4 py-3 text-fg-subtle">
-                    {new Date(a.auditDate).toLocaleDateString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <MiniStat label="Total" value={stats.total ?? 0} tone="muted" icon={<Layers size={18} />} />
+        <MiniStat label="Pending" value={stats.Pending ?? 0} tone="warning" icon={<Clock size={18} />} />
+        <MiniStat
+          label="Approved"
+          value={stats.Approved ?? 0}
+          tone="success"
+          icon={<CheckCircle2 size={18} />}
+        />
+        <MiniStat
+          label="Rejected"
+          value={stats.Rejected ?? 0}
+          tone="danger"
+          icon={<XCircle size={18} />}
+        />
       </div>
+
+      <AuditsTable
+        rows={rows}
+        total={result.total}
+        page={result.page}
+        totalPages={result.totalPages}
+        status={status}
+      />
     </section>
   );
 }

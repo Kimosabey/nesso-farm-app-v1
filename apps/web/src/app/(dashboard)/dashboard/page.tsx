@@ -5,7 +5,6 @@ import { PageHeader } from '@/components/dashboard/PageHeader';
 import {
   DashboardBento,
   FEED_COLORS,
-  FEED_ICONS,
   type FeedItem,
 } from '@/components/dashboard/DashboardBento';
 
@@ -68,7 +67,7 @@ function buildFeed(farmers: Farmer[]): FeedItem[] {
             ? 'KYC failed'
             : 'KYC pending';
       return {
-        icon: FEED_ICONS.Users,
+        icon: 'Users',
         color: FEED_COLORS.PRIMARY,
         title: `${name || f.farmerId} registered`,
         subtitle: `${place} · ${kyc}`,
@@ -79,28 +78,28 @@ function buildFeed(farmers: Farmer[]): FeedItem[] {
 
   return [
     {
-      icon: FEED_ICONS.Users,
+      icon: 'Users',
       color: FEED_COLORS.PRIMARY,
       title: 'Lakshmi Gowda registered',
       subtitle: 'Channarayapatna · KYC pending',
       time: '12m',
     },
     {
-      icon: FEED_ICONS.Activity,
+      icon: 'Activity',
       color: FEED_COLORS.INFO,
       title: 'Spraying logged · ₹1,240',
       subtitle: 'Farm FRM-2839 · Mancozeb',
       time: '1h',
     },
     {
-      icon: FEED_ICONS.MapPin,
+      icon: 'MapPin',
       color: FEED_COLORS.SECONDARY_D,
       title: '2.4 ha farm mapped',
       subtitle: 'Belur · 6 vertices',
       time: '3h',
     },
     {
-      icon: FEED_ICONS.Box,
+      icon: 'Box',
       color: FEED_COLORS.GRN,
       title: 'GRN accepted · 320 kg',
       subtitle: 'BATCH-TBR-0291 · Belur FPO',

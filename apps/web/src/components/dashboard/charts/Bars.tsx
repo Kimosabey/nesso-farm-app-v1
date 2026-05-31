@@ -21,7 +21,7 @@ interface BarsProps {
  */
 export function Bars({ data, color = '#0D783C', accent = '#F1D412', h = 200 }: BarsProps) {
   return (
-    <div style={{ height: h }}>
+    <div style={{ height: h, width: '100%', minWidth: 0, minHeight: 0 }}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 8, right: 4, bottom: 0, left: 4 }} barCategoryGap="28%">
           <XAxis

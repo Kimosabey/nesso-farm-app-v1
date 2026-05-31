@@ -1,9 +1,29 @@
 import Link from 'next/link';
 import { Download, Plus } from 'lucide-react';
-import { api, readAccessToken } from '@/lib/api';
+import { api, readAccessToken, type Farmer } from '@/lib/api';
 import { PageHeader } from '@/components/dashboard/PageHeader';
-import { FarmersTable, toFarmerRow } from './FarmersTable';
+import { FarmersTable, type FarmerRow } from './FarmersTable';
 
+function toFarmerRow(f: Farmer): FarmerRow {
+  const name = [f.firstName, f.lastName].filter(Boolean).join(' ').trim() || f.farmerId;
+  const kyc =
+    f.approvalStatus === 'approved'
+      ? 'Verified'
+      : f.approvalStatus === 'rejected'
+        ? 'Failed'
+        : 'In review';
+  return {
+    id: f._id,
+    farmerId: f.farmerId,
+    name,
+    village: f.address?.village ?? '—',
+    district: f.address?.district ?? '—',
+    crop: f.selectedCrops?.[0] ?? '—',
+    area: f.selectedCrops && f.selectedCrops.length > 1 ? `${f.selectedCrops.length} crops` : '—',
+    status: f.approvalStatus,
+    kyc,
+  };
+}
 interface PageProps {
   searchParams: Promise<{
     page?: string;

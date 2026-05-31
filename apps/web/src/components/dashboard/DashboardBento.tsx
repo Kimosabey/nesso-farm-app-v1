@@ -26,7 +26,7 @@ const DANGER = '#B42318';
 const GRN = '#B6850A';
 
 export interface FeedItem {
-  icon: LucideIcon;
+  icon: keyof typeof FEED_ICONS;
   color: string;
   title: string;
   subtitle: string;
@@ -208,7 +208,8 @@ export function DashboardBento({ farmersTotal, pendingTotal, feed }: DashboardBe
 }
 
 function FeedRow({ item, last }: { item: FeedItem; last: boolean }) {
-  const { icon: Icon, color, title, subtitle, time } = item;
+  const { icon, color, title, subtitle, time } = item;
+  const Icon = FEED_ICONS[icon];
   return (
     <div
       className={`flex items-center gap-3 py-[11px] ${last ? '' : 'border-b border-border'}`}
@@ -217,7 +218,7 @@ function FeedRow({ item, last }: { item: FeedItem; last: boolean }) {
         className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-[10px]"
         style={{ background: `color-mix(in oklab, ${color} 14%, transparent)`, color }}
       >
-        <Icon size={16} strokeWidth={2} />
+        {Icon && <Icon size={16} strokeWidth={2} />}
       </span>
       <div className="min-w-0 flex-1">
         <div className="truncate text-[13.5px] font-semibold text-fg">{title}</div>

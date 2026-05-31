@@ -10,7 +10,6 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { CheckCircle2, ChevronRight, Download, Plus, Search, X } from 'lucide-react';
-import type { Farmer } from '@/lib/api';
 import { Avatar } from '@/components/dashboard/Avatar';
 import { StatusPill } from '@/components/dashboard/StatusPill';
 
@@ -24,27 +23,6 @@ export interface FarmerRow {
   area: string;
   status: 'pending' | 'approved' | 'rejected';
   kyc: string;
-}
-
-export function toFarmerRow(f: Farmer): FarmerRow {
-  const name = [f.firstName, f.lastName].filter(Boolean).join(' ').trim() || f.farmerId;
-  const kyc =
-    f.approvalStatus === 'approved'
-      ? 'Verified'
-      : f.approvalStatus === 'rejected'
-        ? 'Failed'
-        : 'In review';
-  return {
-    id: f._id,
-    farmerId: f.farmerId,
-    name,
-    village: f.address?.village ?? '—',
-    district: f.address?.district ?? '—',
-    crop: f.selectedCrops?.[0] ?? '—',
-    area: f.selectedCrops && f.selectedCrops.length > 1 ? `${f.selectedCrops.length} crops` : '—',
-    status: f.approvalStatus,
-    kyc,
-  };
 }
 
 const STATUS_LABEL: Record<FarmerRow['status'], string> = {
