@@ -133,10 +133,10 @@ export function LoginScreen({ navigation }: Props) {
           </Pressable>
         </View>
 
-        {/* Everything scrolls; the CTA is pushed to the bottom by a flex
-            spacer, so it's always reachable even with the keyboard up. */}
+        {/* Fields scroll; the primary CTA lives in a fixed footer below
+            (outside the scroll) so it is ALWAYS visible on screen. */}
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 26, paddingBottom: 24 }}
+          contentContainerStyle={{ paddingHorizontal: 26, paddingBottom: 16 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -270,10 +270,47 @@ export function LoginScreen({ navigation }: Props) {
             </View>
           ) : null}
 
-          {/* Flex spacer pushes the CTA to the bottom of the viewport */}
-          <View style={{ flex: 1, minHeight: 28 }} />
+          {/* Mode toggle + help live in the scroll, under the fields */}
+          <Pressable
+            onPress={() => {
+              setError(null);
+              setShowPasswordMode((m) => !m);
+            }}
+            style={{ marginTop: 20, alignSelf: 'center' }}
+          >
+            <Text style={{ fontSize: 13, color: C.primary, fontWeight: '600' }}>
+              {showPasswordMode ? t('auth.login.useOtp') : t('auth.login.usePassword')}
+            </Text>
+          </Pressable>
 
-          {/* Primary CTA — inside the scroll, always reachable */}
+          {!otpAvailable && showPasswordMode ? (
+            <Text style={{ textAlign: 'center', fontSize: 11, color: C.fgSubtle, marginTop: 8 }}>
+              Phone OTP needs a dev build · password works in Expo Go
+            </Text>
+          ) : null}
+
+          <Pressable
+            onPress={() => navigation.navigate('Support')}
+            style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'center', gap: 6, marginTop: 16 }}
+          >
+            <HelpCircle size={15} color={C.fgMuted} />
+            <Text style={{ fontSize: 13, color: C.fgMuted, fontWeight: '500' }}>
+              {t('auth.login.needHelp')}
+            </Text>
+          </Pressable>
+        </ScrollView>
+
+        {/* ── Fixed footer — primary CTA is ALWAYS visible here ───────────── */}
+        <View
+          style={{
+            paddingHorizontal: 26,
+            paddingTop: 12,
+            paddingBottom: Platform.OS === 'ios' ? 34 : 18,
+            borderTopWidth: 1,
+            borderTopColor: C.border,
+            backgroundColor: C.bg,
+          }}
+        >
           <Pressable
             onPress={showPasswordMode ? handlePasswordLogin : handleSendOtp}
             disabled={busy || !canSubmit}
@@ -300,51 +337,10 @@ export function LoginScreen({ navigation }: Props) {
             )}
           </Pressable>
 
-          {/* Mode hint + toggle to switch between OTP and password */}
-          <Pressable
-            onPress={() => {
-              setError(null);
-              setShowPasswordMode((m) => !m);
-            }}
-            style={{ marginTop: 14, alignSelf: 'center' }}
-          >
-            <Text style={{ fontSize: 13, color: C.primary, fontWeight: '600' }}>
-              {showPasswordMode ? t('auth.login.useOtp') : t('auth.login.usePassword')}
-            </Text>
-          </Pressable>
-
-          {!otpAvailable && showPasswordMode ? (
-            <Text style={{ textAlign: 'center', fontSize: 11, color: C.fgSubtle, marginTop: 8 }}>
-              Phone OTP needs a dev build · password works in Expo Go
-            </Text>
-          ) : null}
-
-          <Text style={{ textAlign: 'center', fontSize: 12, color: C.fgSubtle, marginTop: 14, lineHeight: 18 }}>
+          <Text style={{ textAlign: 'center', fontSize: 11, color: C.fgSubtle, marginTop: 10, lineHeight: 16 }}>
             {t('auth.login.terms')}
           </Text>
-
-          {/* Need help — opens the in-app support screen */}
-          <Pressable
-            onPress={() => navigation.navigate('Support')}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              alignSelf: 'center',
-              gap: 6,
-              marginTop: 16,
-            }}
-          >
-            <HelpCircle size={15} color={C.fgMuted} />
-            <Text style={{ fontSize: 13, color: C.fgMuted, fontWeight: '500' }}>
-              {t('auth.login.needHelp')}
-            </Text>
-          </Pressable>
-
-          {/* Version footer */}
-          <Text style={{ textAlign: 'center', fontSize: 11, color: C.fgSubtle, marginTop: 14 }}>
-            Nesso v1.0.0 · NR Group
-          </Text>
-        </ScrollView>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
