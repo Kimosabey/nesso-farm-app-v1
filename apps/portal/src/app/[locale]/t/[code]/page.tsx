@@ -1,69 +1,15 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ShieldCheck, Leaf, FileJson, ArrowRight } from 'lucide-react';
-import { JourneyTimeline, type JourneyStage } from '@/components/JourneyTimeline';
+import { JourneyTimeline } from '@/components/JourneyTimeline';
 import { FarmMap } from '@/components/FarmMap';
-
-interface TracePayload {
-  code: string;
-  product?: { name: string; variant?: string; grade?: string };
-  batch?: { batchId: string; harvestDate?: string; expiryDate?: string };
-  farmer?: {
-    farmerId?: string;
-    displayName?: string;
-    village?: string;
-    district?: string;
-    state?: string;
-    enrolledYear?: number;
-    association?: string;
-  };
-  farm?: { farmId?: string; name?: string; areaAcres?: number; practice?: string; soil?: string };
-  crop?: { name?: string; variety?: string; sowingDate?: string; harvestDate?: string };
-  timeline: JourneyStage[];
-  certifications: Array<{ kind: string; agency?: string; validUntil?: string }>;
-  warehouse?: { name?: string; type?: string; certificationStatus?: string };
-  generatedAt?: string;
-  scanCount?: number;
-}
+import { fetchTrace, formatDate, initials } from '@/lib/trace';
 
 interface TracePageProps {
   params: Promise<{ locale: string; code: string }>;
 }
 
 export const revalidate = 300; // 5 min ISR
-
-async function fetchTrace(code: string): Promise<TracePayload | null> {
-  const base =
-    process.env.API_URL ??
-    process.env.NEXT_PUBLIC_API_URL ??
-    'http://localhost:4000/api/v1';
-  try {
-    const res = await fetch(`${base}/public/trace/${encodeURIComponent(code)}`, {
-      next: { revalidate: 300 },
-    });
-    if (!res.ok) return null;
-    return (await res.json()) as TracePayload;
-  } catch {
-    return null;
-  }
-}
-
-function formatDate(value?: string): string | null {
-  if (!value) return null;
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
-function initials(name?: string): string {
-  if (!name) return '··';
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? '')
-    .join('');
-}
 
 export default async function TracePage({ params }: TracePageProps) {
   const { code, locale } = await params;
@@ -134,7 +80,7 @@ export default async function TracePage({ params }: TracePageProps) {
           Grown by
         </h2>
         <Link
-          href={`/${locale}/farmer/${trace.farmer?.farmerId ?? ''}`}
+          href={`/${locale}/farmer/${trace.farmer?.farmerId ?? 'profile'}?code=${encodeURIComponent(trace.code)}`}
           className="flex items-center gap-3.5 rounded-[20px] border border-border bg-bg-elevated p-5 shadow-sm transition hover:border-border-strong"
         >
           <span className="grid size-14 shrink-0 place-items-center rounded-full bg-primary/[0.16] font-display text-xl font-bold text-primary ring-2 ring-inset ring-primary/[0.26]">
@@ -160,7 +106,7 @@ export default async function TracePage({ params }: TracePageProps) {
           Where it grew
         </h2>
         <Link
-          href={`/${locale}/farm/${trace.farm?.farmId ?? ''}`}
+          href={`/${locale}/farm/${trace.farm?.farmId ?? 'plot'}?code=${encodeURIComponent(trace.code)}`}
           className="block rounded-[20px] border border-border bg-bg-elevated p-5 shadow-sm transition hover:border-border-strong"
         >
           <FarmMap />

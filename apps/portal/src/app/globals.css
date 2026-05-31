@@ -27,6 +27,52 @@
     border: 1px solid rgb(var(--glass-border) / var(--glass-border-alpha));
   }
 
+  /* Aurora hero blobs — three animated radial blurs behind the landing content. */
+  .aurora-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    will-change: transform;
+    pointer-events: none;
+  }
+  .aurora-blob-1 {
+    width: 58vw;
+    height: 58vw;
+    top: -20vw;
+    left: -10vw;
+    background: radial-gradient(
+      circle,
+      color-mix(in oklab, #0d783c 42%, transparent),
+      transparent 70%
+    );
+    animation: aurora-float-1 19s ease-in-out infinite alternate;
+  }
+  .aurora-blob-2 {
+    width: 48vw;
+    height: 48vw;
+    bottom: -20vw;
+    right: -10vw;
+    background: radial-gradient(
+      circle,
+      color-mix(in oklab, #f1d412 30%, transparent),
+      transparent 70%
+    );
+    animation: aurora-float-2 24s ease-in-out infinite alternate;
+  }
+  .aurora-blob-3 {
+    width: 42vw;
+    height: 42vw;
+    top: 24vh;
+    left: 36vw;
+    opacity: 0.55;
+    background: radial-gradient(
+      circle,
+      color-mix(in oklab, #518e6d 38%, transparent),
+      transparent 70%
+    );
+    animation: aurora-float-3 28s ease-in-out infinite alternate;
+  }
+
   /* Hero striped pattern + diagonal legibility overlay (matches design handoff) */
   .hero-photo {
     background:
@@ -75,6 +121,31 @@
   }
 }
 
+@keyframes aurora-float-1 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(60px, 40px) scale(1.12);
+  }
+}
+@keyframes aurora-float-2 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(-50px, -30px) scale(1.1);
+  }
+}
+@keyframes aurora-float-3 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(40px, -36px) scale(1.16);
+  }
+}
+
 @keyframes polygon-draw {
   from {
     stroke-dashoffset: 320;
@@ -91,6 +162,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .holo-shimmer::after {
+    animation: none;
+  }
+  .aurora-blob {
     animation: none;
   }
   .polygon-draw {
