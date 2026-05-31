@@ -15,6 +15,7 @@
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, FlatList, Pressable, RefreshControl, TextInput } from 'react-native';
+import { listPerf } from '../components/listPerf';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -189,6 +190,7 @@ export function FarmsListScreen() {
       <FlatList
         data={list}
         keyExtractor={(item) => item._id}
+        {...listPerf}
         contentContainerStyle={{ paddingBottom: 110 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} />

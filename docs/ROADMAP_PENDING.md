@@ -41,13 +41,14 @@ Last updated: 2026-05-31
 - [ ] **Web: react-hook-form** — upgrade the 3 sectioned forms to RHF + zod resolver for richer validation
 
 ### P2 · Performance & optimization — see `PERFORMANCE.md`
-- [ ] **Mongo indexes** on hot fields (farmers.approvalStatus, farms.farmerId, crops.farmId, activities.{farmId,scheduledOn}, procurement.paymentStatus, inventory.status) — audit + fill gaps
-- [ ] **`.lean()`** on all read-only API list queries
-- [ ] **Projections** (`.select()`) — trim list payloads; keep heavy subdocs on detail only
-- [ ] **Stats via `$group` aggregation** (not N countDocuments)
-- [ ] **Web**: `dynamic()` import recharts cards; verify First-Load-JS < 200KB/route
-- [ ] **Portal**: ISR (`revalidate`) on trace pages + `generateMetadata` (OG tags) for shareable QR
-- [ ] **Mobile**: FlatList tuning (getItemLayout, windowSize, removeClippedSubviews); migrate count-up setInterval → reanimated withTiming
+- [x] **Mongo indexes** on hot fields — audited; all compound hot-path indexes present (farmers.approvalStatus+isDeleted, farms.farmerId+isDeleted, crops.farmId+isDeleted & farmerId+year, activities.farmId+scheduledOn & status+scheduledOn, procurement.status+date & paymentStatus, inventory.status+date, samples/audits/notifications compound). No gaps.
+- [x] **`.lean()`** on all read-only API list queries — verified present in every service `list()` + reports.
+- [x] **Stats via `$group` aggregation** (not N countDocuments) — farmers/activities/procurement/samples/inventory all aggregate.
+- [x] **Web**: `dynamic()` import recharts Bars+Donut — recharts now a lazy chunk; dashboard route own-JS 6.21 kB (charts stream in behind a sized shimmer, no CLS).
+- [x] **Portal**: ISR `revalidate=300` on all trace pages + `generateMetadata` OG/Twitter tags on `t/[code]` (rich WhatsApp/Twitter previews for shared QR links; fetchTrace is request-deduped so no extra round-trip).
+- [x] **Mobile**: FlatList tuning — shared `listPerf` props (removeClippedSubviews[android], initialNumToRender, maxToRenderPerBatch, windowSize) spread into all 9 long-list screens.
+- [ ] ~~**Projections** (`.select()`)~~ — **deliberately deferred**: trimming list payloads risks breaking UIs that read full objects (district/amounts/subdocs) for marginal gain at demo-data scale. Revisit only if a list grows large in prod.
+- [ ] **Mobile**: migrate count-up setInterval → reanimated `withTiming` (minor; current setInterval works)
 - [ ] **Redis caching** (Phase 6): catalog + weather proxy
 - [ ] **Turbo/EAS build caching**
 

@@ -18,8 +18,7 @@ function toFarmerRow(f: Farmer): FarmerRow {
     name,
     village: f.address?.village ?? '—',
     district: f.address?.district ?? '—',
-    crop: f.selectedCrops?.[0] ?? '—',
-    area: f.selectedCrops && f.selectedCrops.length > 1 ? `${f.selectedCrops.length} crops` : '—',
+    crop: f.selectedCrops?.length ? f.selectedCrops.join(', ') : '—',
     status: f.approvalStatus,
     kyc,
   };

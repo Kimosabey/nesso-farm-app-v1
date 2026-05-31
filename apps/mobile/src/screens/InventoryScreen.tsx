@@ -27,6 +27,7 @@ import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft, Box, ChevronRight, X, Check, PackageOpen } from 'lucide-react-native';
 import { api, ApiError, type InventoryBatch } from '@/api/client';
 import { EmptyState } from '@/components/EmptyState';
+import { listPerf } from '@/components/listPerf';
 import { ListSkeleton } from '@/components/Skeleton';
 import { useTheme } from '@/theme';
 
@@ -159,6 +160,7 @@ export function InventoryScreen() {
       <FlatList
         data={batches}
         keyExtractor={(item) => item._id}
+        {...listPerf}
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 10 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} />

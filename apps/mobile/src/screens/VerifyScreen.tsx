@@ -26,6 +26,7 @@ import { Check, X, ShieldCheck } from 'lucide-react-native';
 import { api, type Farmer } from '@/api/client';
 import { sync, type SyncStatus } from '@/sync/SyncManager';
 import { OfflineBanner } from '@/components/OfflineBanner';
+import { listPerf } from '@/components/listPerf';
 import { useTheme } from '@/theme';
 import { useToast } from '@/components/Toast';
 
@@ -232,6 +233,7 @@ export function VerifyScreen() {
       <FlatList
         data={farmers}
         keyExtractor={(item) => item._id}
+        {...listPerf}
         contentContainerStyle={{ paddingBottom: 24 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} />

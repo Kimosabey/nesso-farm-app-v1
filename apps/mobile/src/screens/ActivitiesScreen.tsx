@@ -10,6 +10,7 @@
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, FlatList, Pressable, RefreshControl } from 'react-native';
+import { listPerf } from '../components/listPerf';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import {
@@ -134,6 +135,7 @@ export function ActivitiesScreen() {
       <FlatList
         data={list}
         keyExtractor={(item) => item._id}
+        {...listPerf}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 10 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} />

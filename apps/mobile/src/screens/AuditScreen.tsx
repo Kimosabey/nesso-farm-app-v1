@@ -12,6 +12,7 @@
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, FlatList, Pressable, RefreshControl } from 'react-native';
+import { listPerf } from '../components/listPerf';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft, X, Check, ClipboardCheck } from 'lucide-react-native';
@@ -159,6 +160,7 @@ export function AuditScreen() {
       <FlatList
         data={list}
         keyExtractor={(item) => item._id}
+        {...listPerf}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 12 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} />

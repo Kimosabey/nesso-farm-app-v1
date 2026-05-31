@@ -12,10 +12,28 @@ import {
   Activity as ActivityIcon,
   type LucideIcon,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { KpiW } from './KpiW';
-import { Donut } from './charts/Donut';
-import { Bars } from './charts/Bars';
 import { MiniMap } from './charts/MiniMap';
+
+// Code-split recharts (~90KB gzip) out of the initial dashboard bundle.
+// Charts are below the fold / client-only; a sized shimmer holds layout
+// so there's no CLS while the chunk streams in.
+const ChartShimmer = ({ h = 168 }: { h?: number }) => (
+  <div
+    className="w-full animate-pulse rounded-xl bg-surface-muted"
+    style={{ height: h }}
+    aria-hidden
+  />
+);
+const Donut = dynamic(() => import('./charts/Donut').then((m) => m.Donut), {
+  ssr: false,
+  loading: () => <ChartShimmer h={168} />,
+});
+const Bars = dynamic(() => import('./charts/Bars').then((m) => m.Bars), {
+  ssr: false,
+  loading: () => <ChartShimmer h={200} />,
+});
 
 const PRIMARY = '#0D783C';
 const SECONDARY_D = '#3C6B51';

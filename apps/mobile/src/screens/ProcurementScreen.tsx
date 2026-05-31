@@ -15,6 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft, Plus, ReceiptText } from 'lucide-react-native';
 import { api, type ProcurementRow } from '@/api/client';
 import { EmptyState } from '@/components/EmptyState';
+import { listPerf } from '@/components/listPerf';
 import { ListSkeleton } from '@/components/Skeleton';
 import { useTheme } from '@/theme';
 
@@ -162,6 +163,7 @@ export function ProcurementScreen() {
       <FlatList
         data={list}
         keyExtractor={(item) => item._id}
+        {...listPerf}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 10 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} />

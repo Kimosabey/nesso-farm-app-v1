@@ -18,6 +18,7 @@ import { Search, SlidersHorizontal, MapPin, Sprout, ChevronRight, Users } from '
 import { api, type Farmer } from '@/api/client';
 import { sync, type SyncStatus } from '@/sync/SyncManager';
 import { OfflineBanner } from '@/components/OfflineBanner';
+import { listPerf } from '@/components/listPerf';
 import { EmptyState } from '@/components/EmptyState';
 import { ListSkeleton } from '@/components/Skeleton';
 import { useTheme } from '@/theme';
@@ -141,6 +142,7 @@ export function FarmersScreen() {
       <FlatList
         data={list}
         keyExtractor={(item) => item._id}
+        {...listPerf}
         contentContainerStyle={{ paddingBottom: 24 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} />

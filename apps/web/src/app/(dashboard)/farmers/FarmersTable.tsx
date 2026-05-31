@@ -4,12 +4,11 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   type ColumnDef,
-  type RowSelectionState,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { CheckCircle2, ChevronRight, Download, Plus, Search, Users, X } from 'lucide-react';
+import { ChevronRight, Plus, Search, Users, X } from 'lucide-react';
 import { Avatar } from '@/components/dashboard/Avatar';
 import { EmptyState } from '@/components/dashboard/EmptyState';
 import { StatusPill } from '@/components/dashboard/StatusPill';
@@ -21,7 +20,6 @@ export interface FarmerRow {
   village: string;
   district: string;
   crop: string;
-  area: string;
   status: 'pending' | 'approved' | 'rejected';
   kyc: string;
 }
@@ -44,7 +42,6 @@ interface Props {
 
 export function FarmersTable({ rows, total, page, totalPages, query, status, association }: Props) {
   const router = useRouter();
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [q, setQ] = useState(query ?? '');
 
   const filtered = useMemo(() => {
@@ -60,32 +57,6 @@ export function FarmersTable({ rows, total, page, totalPages, query, status, ass
 
   const columns = useMemo<ColumnDef<FarmerRow>[]>(
     () => [
-      {
-        id: 'select',
-        size: 50,
-        header: ({ table }) => (
-          <input
-            type="checkbox"
-            aria-label="Select all"
-            className="h-4 w-4 accent-primary"
-            checked={table.getIsAllRowsSelected()}
-            ref={(el) => {
-              if (el) el.indeterminate = table.getIsSomeRowsSelected();
-            }}
-            onChange={table.getToggleAllRowsSelectedHandler()}
-          />
-        ),
-        cell: ({ row }) => (
-          <input
-            type="checkbox"
-            aria-label={`Select ${row.original.name}`}
-            className="h-4 w-4 accent-primary"
-            checked={row.getIsSelected()}
-            onChange={row.getToggleSelectedHandler()}
-            onClick={(e) => e.stopPropagation()}
-          />
-        ),
-      },
       {
         id: 'farmer',
         header: 'Farmer',
@@ -108,23 +79,22 @@ export function FarmersTable({ rows, total, page, totalPages, query, status, ass
       },
       {
         id: 'crop',
-        header: 'Crop',
+        header: 'Crops',
         cell: ({ row }) =>
           row.original.crop === '—' ? (
             <span className="text-sm text-fg-subtle">—</span>
           ) : (
-            <span className="inline-flex rounded-full bg-secondary-50 px-2.5 py-0.5 text-xs font-semibold text-secondary-700">
-              {row.original.crop}
-            </span>
+            <div className="flex flex-wrap gap-1">
+              {row.original.crop.split(', ').map((c) => (
+                <span
+                  key={c}
+                  className="inline-flex rounded-full bg-secondary-50 px-2.5 py-0.5 text-xs font-semibold text-secondary-700"
+                >
+                  {c}
+                </span>
+              ))}
+            </div>
           ),
-      },
-      {
-        id: 'area',
-        header: 'Area',
-        size: 90,
-        cell: ({ row }) => (
-          <span className="font-mono text-[13.5px] text-fg">{row.original.area}</span>
-        ),
       },
       {
         id: 'status',
@@ -157,14 +127,9 @@ export function FarmersTable({ rows, total, page, totalPages, query, status, ass
   const table = useReactTable({
     data: filtered,
     columns,
-    state: { rowSelection },
     getRowId: (row) => row.id,
-    onRowSelectionChange: setRowSelection,
-    enableRowSelection: true,
     getCoreRowModel: getCoreRowModel(),
   });
-
-  const selectedCount = Object.keys(rowSelection).length;
 
   function goToPage(next: number) {
     const qs = new URLSearchParams();
@@ -196,33 +161,6 @@ export function FarmersTable({ rows, total, page, totalPages, query, status, ass
           <Plus size={15} /> Add filter
         </button>
       </div>
-
-      {/* bulk bar */}
-      {selectedCount > 0 && (
-        <div className="mb-3.5 flex items-center gap-3 rounded-xl border border-primary/25 bg-primary/10 px-4 py-2.5">
-          <span className="text-[13.5px] font-semibold text-primary">{selectedCount} selected</span>
-          <div className="flex-1" />
-          <button
-            type="button"
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border-strong bg-bg-elevated px-3 text-[13px] font-medium text-fg transition hover:bg-bg-muted"
-          >
-            <CheckCircle2 size={15} /> Approve
-          </button>
-          <button
-            type="button"
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border-strong bg-bg-elevated px-3 text-[13px] font-medium text-fg transition hover:bg-bg-muted"
-          >
-            <Download size={15} /> Export
-          </button>
-          <button
-            type="button"
-            onClick={() => setRowSelection({})}
-            className="text-[13px] font-semibold text-fg-muted transition hover:text-fg"
-          >
-            Clear
-          </button>
-        </div>
-      )}
 
       {/* table */}
       <div className="overflow-hidden rounded-2xl border border-border bg-bg-elevated shadow-sm">
@@ -261,9 +199,7 @@ export function FarmersTable({ rows, total, page, totalPages, query, status, ass
                   <tr
                     key={row.id}
                     onClick={() => router.push(`/farmers/${row.original.id}`)}
-                    className={`cursor-pointer border-b border-l-2 border-border border-l-transparent transition-colors hover:border-l-primary hover:bg-bg-muted/60 ${
-                      row.getIsSelected() ? 'bg-primary/10' : ''
-                    }`}
+                    className="cursor-pointer border-b border-l-2 border-border border-l-transparent transition-colors hover:border-l-primary hover:bg-bg-muted/60"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td key={cell.id} className="px-3.5 py-3 align-middle">

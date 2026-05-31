@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import { ShieldCheck, Leaf, FileJson, ArrowRight } from 'lucide-react';
 import { JourneyTimeline } from '@/components/JourneyTimeline';
 import { FarmMap } from '@/components/FarmMap';
@@ -10,6 +11,42 @@ interface TracePageProps {
 }
 
 export const revalidate = 300; // 5 min ISR
+
+// Rich link previews for shared QR trace links (WhatsApp / Twitter / iMessage).
+// fetchTrace is request-deduped + ISR-cached, so this adds no extra round-trip.
+export async function generateMetadata({ params }: TracePageProps): Promise<Metadata> {
+  const { code, locale } = await params;
+  const trace = await fetchTrace(code);
+  if (!trace) return { title: `Trace · ${code}` };
+
+  const cropName = trace.crop?.name ?? trace.product?.name ?? 'Batch';
+  const place = [trace.farmer?.village, trace.farmer?.district, trace.farmer?.state]
+    .filter(Boolean)
+    .join(', ');
+  const farmerName = trace.farmer?.displayName;
+  const title = `${cropName} · Verified by Nesso`;
+  const description = [
+    farmerName ? `Grown by ${farmerName}` : 'Farm-to-shelf traceability',
+    place || null,
+    `Batch ${trace.code} — tamper-evident journey to source.`,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  const url = `/${locale}/t/${code}`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url,
+      siteName: 'Nesso Traceability',
+      type: 'website',
+    },
+    twitter: { card: 'summary_large_image', title, description },
+  };
+}
 
 export default async function TracePage({ params }: TracePageProps) {
   const { code, locale } = await params;
