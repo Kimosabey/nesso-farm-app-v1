@@ -450,6 +450,8 @@ export function DashboardScreen() {
 
   const [me, setMe] = useState<MeResponse | null>(null);
   const [stats, setStats] = useState<FarmerStats | null>(null);
+  const [farmsCount, setFarmsCount] = useState(0);
+  const [cropsCount, setCropsCount] = useState(0);
   const [recentFarmers, setRecentFarmers] = useState<Farmer[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -458,14 +460,18 @@ export function DashboardScreen() {
   const load = useCallback(async () => {
     setError(null);
     try {
-      const [m, s, r] = await Promise.all([
+      const [m, s, r, farms, crops] = await Promise.all([
         api.me(),
         api.farmerStats(),
         api.listFarmers({ pageSize: 4 }),
+        api.listFarms({ pageSize: 1 }),
+        api.listCrops({ pageSize: 1 }),
       ]);
       setMe(m);
       setStats(s);
       setRecentFarmers(r.data);
+      setFarmsCount(farms.total);
+      setCropsCount(crops.total);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load');
     }
@@ -783,7 +789,7 @@ export function DashboardScreen() {
             />
             <KpiCard
               label="Farms mapped"
-              value={942}
+              value={farmsCount}
               delta={8}
               icon={<MapPin size={18} color={C.secondaryD} strokeWidth={2} />}
               color={C.secondaryD}
@@ -793,7 +799,7 @@ export function DashboardScreen() {
           <View style={{ flexDirection: 'row', gap: 12 }}>
             <KpiCard
               label="Active crops"
-              value={376}
+              value={cropsCount}
               delta={5}
               icon={<Sprout size={18} color={C.info} strokeWidth={2} />}
               color={C.info}
