@@ -32,6 +32,7 @@ import {
 import { api, clearSession, type MeResponse } from '@/api/client';
 import { sync, type SyncStatus } from '@/sync/SyncManager';
 import { useTheme, type ThemeTokens } from '@/theme';
+import { useT } from '@/i18n';
 
 // Local nav param list — these routes are registered by the parent navigator
 // (some, e.g. Sync / OfflineMaps / LocationPicker, may be wired later). Declared
@@ -66,6 +67,7 @@ function roleLabel(role?: string): string {
 
 export function SettingsScreen() {
   const C = useTheme().c;
+  const { t } = useT();
   const navigation = useNavigation<Nav>();
   const [me, setMe] = useState<MeResponse | null>(null);
   const [status, setStatus] = useState<SyncStatus | null>(null);
@@ -172,7 +174,7 @@ export function SettingsScreen() {
         </View>
 
         {/* Account */}
-        <Group title="Account">
+        <Group title={t('settings.account')}>
           <Row
             icon={<Users size={18} color={C.primary} />}
             tintColor={C.primary}
@@ -191,54 +193,54 @@ export function SettingsScreen() {
         </Group>
 
         {/* App */}
-        <Group title="App">
+        <Group title={t('settings.app')}>
           <Row
             icon={<Globe size={18} color={C.info} />}
             tintColor={C.info}
-            label="Language"
+            label={t('settings.language')}
             value="English"
             onPress={() => navigation.navigate('LanguageSettings')}
           />
           <Row
             icon={<Sun size={18} color={C.warning} />}
             tintColor={C.warning}
-            label="Theme & display"
+            label={t('settings.theme')}
             onPress={() => navigation.navigate('ThemeSettings')}
           />
           <Row
             icon={<Bell size={18} color={C.primary} />}
             tintColor={C.primary}
-            label="Notifications"
+            label={t('settings.notifications')}
             onPress={() => navigation.navigate('Notifications')}
           />
           <Row
             icon={<RefreshCw size={18} color={C.secondaryD} />}
             tintColor={C.secondaryD}
-            label="Sync health"
+            label={t('settings.syncHealth')}
             value={`${queued} queued`}
             onPress={() => navigation.navigate('Sync')}
           />
           <Row
             icon={<Download size={18} color={C.info} />}
             tintColor={C.info}
-            label="Offline maps"
+            label={t('settings.offlineMaps')}
             onPress={() => navigation.navigate('OfflineMaps')}
             last
           />
         </Group>
 
         {/* Support */}
-        <Group title="Support">
+        <Group title={t('settings.support')}>
           <Row
             icon={<HelpCircle size={18} color={C.secondaryD} />}
             tintColor={C.secondaryD}
-            label="Help & docs"
+            label={t('settings.help')}
             onPress={() => Alert.alert('Help', 'Opening help & docs.')}
           />
           <Row
             icon={<Shield size={18} color={C.primary} />}
             tintColor={C.primary}
-            label="About Nesso"
+            label={t('settings.about')}
             value="v1.0"
             onPress={() => navigation.navigate('About')}
             last
@@ -251,7 +253,7 @@ export function SettingsScreen() {
             icon={<LogOut size={18} color={C.danger} />}
             tintColor={C.danger}
             danger
-            label="Log out"
+            label={t('settings.logout')}
             onPress={handleLogout}
             last
           />

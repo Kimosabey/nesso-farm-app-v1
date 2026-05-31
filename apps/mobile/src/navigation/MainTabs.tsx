@@ -21,6 +21,7 @@ import { VerifyScreen } from '@/screens/VerifyScreen';
 import { SettingsScreen } from '@/screens/SettingsScreen';
 import { FarmsListScreen } from '@/screens/FarmsListScreen';
 import { useTheme } from '@/theme';
+import { useT } from '@/i18n';
 
 export type MainTabParamList = {
   Dashboard: undefined;
@@ -34,11 +35,11 @@ export type MainTabParamList = {
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 // Visible tabs (left pair + right pair). Register sits in the center as a FAB.
-const VISIBLE: { name: keyof MainTabParamList; label: string; Icon: typeof Home }[] = [
-  { name: 'Dashboard', label: 'Home', Icon: Home },
-  { name: 'Farmers', label: 'Farmers', Icon: Users },
-  { name: 'Verify', label: 'Verify', Icon: ShieldCheck },
-  { name: 'Farms', label: 'Farms', Icon: MapPin },
+const VISIBLE: { name: keyof MainTabParamList; labelKey: string; Icon: typeof Home }[] = [
+  { name: 'Dashboard', labelKey: 'common.tabs.home', Icon: Home },
+  { name: 'Farmers', labelKey: 'common.tabs.farmers', Icon: Users },
+  { name: 'Verify', labelKey: 'common.tabs.verify', Icon: ShieldCheck },
+  { name: 'Farms', labelKey: 'common.tabs.farms', Icon: MapPin },
 ];
 
 function PulsingFab({ onPress }: { onPress: () => void }) {
@@ -86,6 +87,7 @@ function PulsingFab({ onPress }: { onPress: () => void }) {
 
 function CustomTabBar({ state, navigation }: BottomTabBarProps) {
   const C = useTheme().c;
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const activeName = state.routes[state.index]?.name;
 
@@ -117,7 +119,7 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
             color: on ? C.primary : C.fgSubtle,
           }}
         >
-          {cfg.label}
+          {t(cfg.labelKey)}
         </Text>
       </Pressable>
     );

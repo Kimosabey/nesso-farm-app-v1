@@ -40,6 +40,7 @@ type TranslationTree = { [key: string]: string | TranslationTree };
 const en: TranslationTree = {
   common: {
     app: { name: 'Nesso', tagline: 'Farm-to-fork traceability' },
+    search: 'Search',
     actions: {
       save: 'Save',
       cancel: 'Cancel',
@@ -86,11 +87,54 @@ const en: TranslationTree = {
       resend: 'Resend code',
     },
   },
+  dashboard: {
+    greetingMorning: 'Good morning',
+    greetingAfternoon: 'Good afternoon',
+    greetingEvening: 'Good evening',
+    thisSeason: 'This season',
+    quickActions: 'Quick actions',
+    jumpTo: 'Jump to',
+    recentActivity: 'Recent activity',
+    seeAll: 'See all',
+    allSynced: 'All synced',
+    qa: {
+      register: 'Register',
+      addFarm: 'Add farm',
+      activity: 'Activity',
+      scanGrn: 'Scan GRN',
+    },
+  },
+  farmers: {
+    title: 'Farmers',
+    inCluster: '{{count}} in your cluster',
+    searchPlaceholder: 'Search name or village',
+    noMatch: 'No farmers match.',
+  },
+  filters: {
+    all: 'All',
+    approved: 'Approved',
+    pending: 'Pending',
+    rejected: 'Rejected',
+  },
+  settings: {
+    account: 'Account',
+    app: 'App',
+    support: 'Support',
+    language: 'Language',
+    theme: 'Theme & display',
+    notifications: 'Notifications',
+    syncHealth: 'Sync health',
+    offlineMaps: 'Offline maps',
+    help: 'Help & docs',
+    about: 'About Nesso',
+    logout: 'Log out',
+  },
 };
 
 const hi: TranslationTree = {
   common: {
     app: { name: 'Nesso', tagline: 'खेत से थाली तक ट्रेसबिलिटी' },
+    search: 'खोजें',
     actions: {
       save: 'सहेजें',
       cancel: 'रद्द करें',
@@ -137,11 +181,54 @@ const hi: TranslationTree = {
       resend: 'कोड पुनः भेजें',
     },
   },
+  dashboard: {
+    greetingMorning: 'सुप्रभात',
+    greetingAfternoon: 'नमस्कार',
+    greetingEvening: 'शुभ संध्या',
+    thisSeason: 'इस मौसम',
+    quickActions: 'त्वरित कार्य',
+    jumpTo: 'यहाँ जाएँ',
+    recentActivity: 'हाल की गतिविधि',
+    seeAll: 'सभी देखें',
+    allSynced: 'सब सिंक हो गया',
+    qa: {
+      register: 'पंजीकरण',
+      addFarm: 'खेत जोड़ें',
+      activity: 'गतिविधि',
+      scanGrn: 'GRN स्कैन',
+    },
+  },
+  farmers: {
+    title: 'किसान',
+    inCluster: 'आपके क्लस्टर में {{count}}',
+    searchPlaceholder: 'नाम या गाँव खोजें',
+    noMatch: 'कोई किसान नहीं मिला।',
+  },
+  filters: {
+    all: 'सभी',
+    approved: 'स्वीकृत',
+    pending: 'लंबित',
+    rejected: 'अस्वीकृत',
+  },
+  settings: {
+    account: 'खाता',
+    app: 'ऐप',
+    support: 'सहायता',
+    language: 'भाषा',
+    theme: 'थीम और प्रदर्शन',
+    notifications: 'सूचनाएँ',
+    syncHealth: 'सिंक स्थिति',
+    offlineMaps: 'ऑफ़लाइन नक्शे',
+    help: 'सहायता और दस्तावेज़',
+    about: 'Nesso के बारे में',
+    logout: 'लॉग आउट',
+  },
 };
 
 const kn: TranslationTree = {
   common: {
     app: { name: 'Nesso', tagline: 'ಹೊಲದಿಂದ ತಟ್ಟೆಗೆ ಪತ್ತೆಹಚ್ಚುವಿಕೆ' },
+    search: 'ಹುಡುಕಿ',
     actions: {
       save: 'ಉಳಿಸಿ',
       cancel: 'ರದ್ದುಮಾಡಿ',
@@ -187,6 +274,48 @@ const kn: TranslationTree = {
       verify: 'ಪರಿಶೀಲಿಸಿ ಮುಂದುವರಿಯಿರಿ',
       resend: 'ಕೋಡ್ ಮತ್ತೆ ಕಳುಹಿಸಿ',
     },
+  },
+  dashboard: {
+    greetingMorning: 'ಶುಭೋದಯ',
+    greetingAfternoon: 'ಶುಭ ಮಧ್ಯಾಹ್ನ',
+    greetingEvening: 'ಶುಭ ಸಂಜೆ',
+    thisSeason: 'ಈ ಋತು',
+    quickActions: 'ತ್ವರಿತ ಕ್ರಿಯೆಗಳು',
+    jumpTo: 'ಇಲ್ಲಿಗೆ ಹೋಗಿ',
+    recentActivity: 'ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆ',
+    seeAll: 'ಎಲ್ಲವನ್ನೂ ನೋಡಿ',
+    allSynced: 'ಎಲ್ಲಾ ಸಿಂಕ್ ಆಗಿದೆ',
+    qa: {
+      register: 'ನೋಂದಣಿ',
+      addFarm: 'ಹೊಲ ಸೇರಿಸಿ',
+      activity: 'ಚಟುವಟಿಕೆ',
+      scanGrn: 'GRN ಸ್ಕ್ಯಾನ್',
+    },
+  },
+  farmers: {
+    title: 'ರೈತರು',
+    inCluster: 'ನಿಮ್ಮ ಕ್ಲಸ್ಟರ್‌ನಲ್ಲಿ {{count}}',
+    searchPlaceholder: 'ಹೆಸರು ಅಥವಾ ಗ್ರಾಮ ಹುಡುಕಿ',
+    noMatch: 'ಯಾವುದೇ ರೈತರು ಹೊಂದಿಕೆಯಾಗಲಿಲ್ಲ.',
+  },
+  filters: {
+    all: 'ಎಲ್ಲಾ',
+    approved: 'ಅನುಮೋದಿತ',
+    pending: 'ಬಾಕಿ',
+    rejected: 'ತಿರಸ್ಕೃತ',
+  },
+  settings: {
+    account: 'ಖಾತೆ',
+    app: 'ಆ್ಯಪ್',
+    support: 'ಬೆಂಬಲ',
+    language: 'ಭಾಷೆ',
+    theme: 'ಥೀಮ್ ಮತ್ತು ಪ್ರದರ್ಶನ',
+    notifications: 'ಅಧಿಸೂಚನೆಗಳು',
+    syncHealth: 'ಸಿಂಕ್ ಆರೋಗ್ಯ',
+    offlineMaps: 'ಆಫ್‌ಲೈನ್ ನಕ್ಷೆಗಳು',
+    help: 'ಸಹಾಯ ಮತ್ತು ದಾಖಲೆಗಳು',
+    about: 'Nesso ಬಗ್ಗೆ',
+    logout: 'ಲಾಗ್ ಔಟ್',
   },
 };
 

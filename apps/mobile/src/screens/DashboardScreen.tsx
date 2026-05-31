@@ -31,6 +31,7 @@ import { sync, type SyncStatus } from '@/sync/SyncManager';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import type { MainTabParamList } from '@/navigation/MainTabs';
 import { useTheme, type ThemeTokens } from '@/theme';
+import { useT } from '@/i18n';
 import type { RootStackParamList } from '../../App';
 
 const shadowSm: ViewStyle = {
@@ -444,6 +445,7 @@ const FORECAST: Array<[string, string, number]> = [
 // ---------------------------------------------------------------------------
 export function DashboardScreen() {
   const { c: C, toggle, isDark } = useTheme();
+  const { t } = useT();
   const navigation = useNavigation<BottomTabNavigationProp<MainTabParamList>>();
 
   const [me, setMe] = useState<MeResponse | null>(null);
@@ -499,18 +501,22 @@ export function DashboardScreen() {
       : 'Welcome';
   const greeting = (() => {
     const hour = new Date().getHours();
-    return hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    return hour < 12
+      ? t('dashboard.greetingMorning')
+      : hour < 17
+        ? t('dashboard.greetingAfternoon')
+        : t('dashboard.greetingEvening');
   })();
 
   // Sync chip content
   const syncQueued = syncStatus ? syncStatus.pending + syncStatus.failed : 0;
   const syncLabel = !syncStatus
-    ? 'All synced · just now'
+    ? `${t('dashboard.allSynced')} · just now`
     : syncStatus.draining
       ? 'Syncing…'
       : syncQueued > 0
         ? `${syncQueued} queued`
-        : 'All synced · just now';
+        : `${t('dashboard.allSynced')} · just now`;
 
   // Feed: real farmers, else placeholder
   const feed: FeedItem[] =
@@ -758,7 +764,7 @@ export function DashboardScreen() {
             paddingHorizontal: 20,
           }}
         >
-          <Text style={{ fontSize: 17, fontWeight: '700', color: C.fg }}>This season</Text>
+          <Text style={{ fontSize: 17, fontWeight: '700', color: C.fg }}>{t('dashboard.thisSeason')}</Text>
           <Text style={{ fontSize: 12.5, color: C.primary, fontWeight: '600' }}>2025–26 ▾</Text>
         </View>
 
@@ -807,29 +813,29 @@ export function DashboardScreen() {
         {/* ---------------------------------------------------------------- */}
         {/* 6. Quick actions                                                  */}
         {/* ---------------------------------------------------------------- */}
-        <SectionHeader title="Quick actions" paddingTop={24} />
+        <SectionHeader title={t('dashboard.quickActions')} paddingTop={24} />
         <View style={{ flexDirection: 'row', gap: 10, paddingTop: 12, paddingHorizontal: 20 }}>
           <QuickAction
             icon={<Users size={22} color={C.primary} strokeWidth={1.9} />}
-            label="Register"
+            label={t('dashboard.qa.register')}
             color={C.primary}
             onPress={() => navigation.navigate('Register')}
           />
           <QuickAction
             icon={<MapPin size={22} color={C.secondaryD} strokeWidth={1.9} />}
-            label="Add farm"
+            label={t('dashboard.qa.addFarm')}
             color={C.secondaryD}
             onPress={() => stackNav()?.navigate('AddFarm', {})}
           />
           <QuickAction
             icon={<Activity size={22} color={C.info} strokeWidth={1.9} />}
-            label="Activity"
+            label={t('dashboard.qa.activity')}
             color={C.info}
             onPress={() => stackNav()?.navigate('AddActivity', {})}
           />
           <QuickAction
             icon={<ScanLine size={22} color="#B6850A" strokeWidth={1.9} />}
-            label="Scan GRN"
+            label={t('dashboard.qa.scanGrn')}
             color="#B6850A"
             onPress={() => stackNav()?.navigate('AcceptGRN')}
           />
@@ -838,7 +844,7 @@ export function DashboardScreen() {
         {/* ---------------------------------------------------------------- */}
         {/* 7. Jump to                                                        */}
         {/* ---------------------------------------------------------------- */}
-        <SectionHeader title="Jump to" paddingTop={26} />
+        <SectionHeader title={t('dashboard.jumpTo')} paddingTop={26} />
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -880,8 +886,8 @@ export function DashboardScreen() {
         {/* 8. Recent activity                                                */}
         {/* ---------------------------------------------------------------- */}
         <SectionHeader
-          title="Recent activity"
-          action="See all"
+          title={t('dashboard.recentActivity')}
+          action={t('dashboard.seeAll')}
           onAction={() => navigation.navigate('Farmers')}
           paddingTop={26}
         />

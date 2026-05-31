@@ -19,10 +19,18 @@ import { api, type Farmer } from '@/api/client';
 import { sync, type SyncStatus } from '@/sync/SyncManager';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import { useTheme } from '@/theme';
+import { useT } from '@/i18n';
 import type { RootStackParamList } from '../../App';
 
 const CHIPS = ['All', 'Approved', 'Pending', 'Rejected'] as const;
 type Chip = (typeof CHIPS)[number];
+
+const CHIP_KEYS: Record<Chip, string> = {
+  All: 'filters.all',
+  Approved: 'filters.approved',
+  Pending: 'filters.pending',
+  Rejected: 'filters.rejected',
+};
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -70,6 +78,7 @@ function StatusChip({ status }: { status: Farmer['approvalStatus'] }) {
 
 export function FarmersScreen() {
   const C = useTheme().c;
+  const { t } = useT();
   const navigation = useNavigation<Nav>();
   const [farmers, setFarmers] = useState<Farmer[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -136,10 +145,10 @@ export function FarmersScreen() {
             {/* PageTop */}
             <View style={{ paddingTop: 12, paddingHorizontal: 20, paddingBottom: 8 }}>
               <Text style={{ fontSize: 28, fontWeight: '700', color: C.fg, letterSpacing: -0.6 }}>
-                Farmers
+                {t('farmers.title')}
               </Text>
               <Text style={{ fontSize: 14, color: C.fgMuted, marginTop: 3 }}>
-                {farmers.length} in your cluster
+                {t('farmers.inCluster', { count: farmers.length })}
               </Text>
             </View>
 
@@ -162,7 +171,7 @@ export function FarmersScreen() {
                 <TextInput
                   value={q}
                   onChangeText={setQ}
-                  placeholder="Search name or village"
+                  placeholder={t('farmers.searchPlaceholder')}
                   placeholderTextColor={C.fgSubtle}
                   style={{ flex: 1, fontSize: 15, color: C.fg }}
                 />
@@ -192,7 +201,7 @@ export function FarmersScreen() {
                     }}
                   >
                     <Text style={{ fontSize: 13, fontWeight: '600', color: on ? C.onPrimary : C.fgMuted }}>
-                      {item}
+                      {t(CHIP_KEYS[item])}
                     </Text>
                   </Pressable>
                 );
@@ -270,7 +279,7 @@ export function FarmersScreen() {
         )}
         ListEmptyComponent={
           <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-            <Text style={{ fontSize: 14, color: C.fgSubtle }}>No farmers match.</Text>
+            <Text style={{ fontSize: 14, color: C.fgSubtle }}>{t('farmers.noMatch')}</Text>
           </View>
         }
       />
