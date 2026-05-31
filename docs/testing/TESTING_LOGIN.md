@@ -48,9 +48,22 @@ pnpm --filter @nesso/api seed:all
 
 By default, the backend bypasses Firebase OTP during local development, allowing you to log into the Web Dashboard using just the password. However, if you want to test the actual SMS/OTP flow on the **Mobile App**, you must configure Firebase.
 
+### Configured Firebase Testing Numbers (Max 10)
+Due to Firebase project limits, only the following 10 numbers are registered as "testing numbers" in the Firebase console. For all of them, the static Verification Code is **`123456`**:
+- `+91 90000 00001` (Admin)
+- `+91 90000 00002` (Org MD)
+- `+91 90000 00003` (Org NESSO)
+- `+91 90000 00004` (Tech Support)
+- `+91 90000 00005` (Org Field Officer)
+- `+91 90000 00008` (Field Officer)
+- `+91 90000 00010` (FPO)
+- `+91 90000 00014` (Farmer)
+- `+91 90000 00016` (Procurement Manager)
+- `+91 90000 00018` (Quality Auditor)
+
 ### What to add to Firebase Console
 1. **Enable Phone Auth**: Go to `Authentication > Sign-in Method` and enable Phone Authentication.
-2. **Add Testing Numbers**: In that same section, add the phone numbers you want to test with (e.g., `+91 9066666481` or `+91 9000000001`) and assign a static verification code (e.g., `123456`). This prevents Firebase from sending a real SMS and burning your quota during testing.
+2. **Add Testing Numbers**: In that same section, add the phone numbers you want to test with. (Note: The project is currently at its 10-number limit as documented above. If you need to test a different role, you must delete one of the existing numbers from Firebase first).
 
 ### What to add to the Codebase
 Firebase requires security keys to allow the mobile app to request the OTP, and the backend to verify the token.
