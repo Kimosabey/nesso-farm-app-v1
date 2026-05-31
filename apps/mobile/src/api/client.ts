@@ -55,6 +55,9 @@ function resolveApiBase(): string {
 
 const API_BASE = resolveApiBase();
 
+/** Exposed so the login screen can show which API it will hit (diagnostics). */
+export const apiBaseUrl = API_BASE;
+
 let accessToken: string | null = null;
 let isOnline = true;
 
@@ -330,6 +333,69 @@ export interface AuditRow {
   rejectionReason?: string;
   rejectionTags?: string[];
   createdAt?: string;
+}
+
+// --- Weather (GET /weather, GET /weather/farm/:id — Open-Meteo proxy) ---
+
+export interface WeatherSnapshot {
+  fetchedAt: string;
+  location: { latitude: number; longitude: number; sourceFarmId?: string };
+  current: {
+    tempC: number;
+    feelsLikeC?: number;
+    humidity?: number;
+    windKmh?: number;
+    code?: number;
+    description?: string;
+  };
+  daily: Array<{
+    date: string;
+    minC: number;
+    maxC: number;
+    precipMm?: number;
+    precipProbability?: number;
+    code?: number;
+    description?: string;
+  }>;
+  advisories: string[];
+}
+
+// --- Pre-harvest report (GET /reports/pre-harvest) ---
+
+export interface PreHarvestActivityRollup {
+  pending: number;
+  completed: number;
+  overdue: number;
+  cancelled?: number;
+  total: number;
+  lastDate: string | null;
+}
+
+export interface PreHarvestRow {
+  farmer: {
+    id: string;
+    farmerId?: string;
+    name: string;
+    association?: string;
+    district?: string;
+  };
+  farm: { id: string; farmId?: string; name: string; areaAcres?: number } | null;
+  crop: { id: string; cropId?: string; name: string; variety?: string } | null;
+  activityRollup: PreHarvestActivityRollup;
+}
+
+export interface PreHarvestReport {
+  generatedAt: string;
+  ms: number;
+  filters: Record<string, unknown>;
+  totals: {
+    farmersAll: number;
+    farmersInScope: number;
+    farmersMissingFarm: number;
+    farms: number;
+    crops: number;
+  };
+  rows: PreHarvestRow[];
 }
 
 export interface CreateFarmerInput {
@@ -721,6 +787,32 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ approved, reason, tags }),
     });
+  },
+
+  // --- Weather (GET /weather?lat=&lng= , GET /weather/farm/:farmId) ---
+  getWeather(lat: number, lng: number): Promise<WeatherSnapshot> {
+    const qs = new URLSearchParams({ lat: String(lat), lng: String(lng) });
+    return request<WeatherSnapshot>(`/weather?${qs.toString()}`);
+  },
+
+  getFarmWeather(farmId: string): Promise<WeatherSnapshot> {
+    return request<WeatherSnapshot>(`/weather/farm/${farmId}`);
+  },
+
+  // --- Pre-harvest report (GET /reports/pre-harvest) ---
+  preHarvestReport(
+    params: {
+      approvalStatus?: string;
+      includeFlowerAgents?: boolean;
+      includeMissingFarm?: boolean;
+    } = {},
+  ): Promise<PreHarvestReport> {
+    const qs = new URLSearchParams();
+    if (params.approvalStatus) qs.set('approvalStatus', params.approvalStatus);
+    if (params.includeFlowerAgents === false) qs.set('includeFlowerAgents', 'false');
+    if (params.includeMissingFarm) qs.set('includeMissingFarm', 'true');
+    const suffix = qs.toString() ? `?${qs.toString()}` : '';
+    return request<PreHarvestReport>(`/reports/pre-harvest${suffix}`);
   },
 
   /**

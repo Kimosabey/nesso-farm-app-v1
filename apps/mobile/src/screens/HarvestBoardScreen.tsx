@@ -1,53 +1,111 @@
 /**
- * Harvest Board — 100% spec parity with design handoff.
+ * Harvest Board — wired to real DB data.
  *
  * Spec source: docs/.../design_handoff_nesso/app/screens_feature.jsx — HarvestBoardScreen
  *   - PageTop "Harvest Board" + back header
  *   - Groups Today / Tomorrow / Planned, each with a count chip
  *   - Cards: wheat icon, farm name, "farmer · crop", expected kg, distance, Navigate button
- * Static realistic data (tuberose/jasmine harvests around Hassan). Expo Go safe.
+ *
+ * Data: fetches crops with a near-future harvestDate (api.listCrops) and the
+ * farms they belong to (api.listFarms), then groups by harvestDate into
+ * Today / Tomorrow / Planned. Empty state when nothing matches. Offline-safe:
+ * a failed fetch falls back to an empty board, never crashes.
  */
-import { View, Text, Pressable, ScrollView } from 'react-native';
+import { useEffect, useState } from 'react';
+import { View, Text, Pressable, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft, Wheat, MapPin, Navigation } from 'lucide-react-native';
+import { api, type Crop, type Farm } from '@/api/client';
 import { useTheme } from '@/theme';
 
 type Nav = { goBack: () => void };
 
 interface HarvestItem {
-  name: string;
+  id: string;
+  name: string; // farm name
   farmer: string;
   crop: string;
   kg: number;
-  dist: string;
+  harvestDate?: string;
 }
 
-const GROUPS: Array<{ g: string; items: HarvestItem[] }> = [
-  {
-    g: 'Today',
-    items: [
-      { name: 'North Plot', farmer: 'Lakshmi Gowda', crop: 'Tuberose', kg: 320, dist: '2.4 km' },
-      { name: 'Rao Garden', farmer: 'Geetha Rao', crop: 'Jasmine', kg: 180, dist: '5.1 km' },
-    ],
-  },
-  {
-    g: 'Tomorrow',
-    items: [
-      { name: 'Belur Estate', farmer: 'Anjali Hegde', crop: 'Marigold', kg: 540, dist: '8.0 km' },
-    ],
-  },
-  {
-    g: 'Planned',
-    items: [
-      { name: 'East Field', farmer: 'Prakash Naik', crop: 'Tuberose', kg: 420, dist: '3.7 km' },
-    ],
-  },
-];
+type GroupKey = 'Today' | 'Tomorrow' | 'Planned';
+
+/** Days from now (calendar, local) for an ISO date string; null if invalid. */
+function daysUntil(iso?: string): number | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  const startOfDay = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const diffMs = startOfDay(d) - startOfDay(new Date());
+  return Math.round(diffMs / 86400000);
+}
+
+function groupFor(days: number): GroupKey {
+  if (days <= 0) return 'Today';
+  if (days === 1) return 'Tomorrow';
+  return 'Planned';
+}
+
+/** Only crops harvesting within this many days appear on the board. */
+const HORIZON_DAYS = 30;
 
 export function HarvestBoardScreen() {
   const C = useTheme().c;
   const navigation = useNavigation<Nav>();
+
+  const [groups, setGroups] = useState<Array<{ g: GroupKey; items: HarvestItem[] }>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const [cropPage, farmPage] = await Promise.all([
+          api.listCrops({ pageSize: 200 }),
+          api.listFarms({ pageSize: 200 }),
+        ]);
+        const farmById = new Map<string, Farm>();
+        for (const f of farmPage.data) farmById.set(f._id, f);
+
+        const buckets: Record<GroupKey, HarvestItem[]> = { Today: [], Tomorrow: [], Planned: [] };
+        for (const c of cropPage.data as Crop[]) {
+          const days = daysUntil(c.harvestDate);
+          if (days === null || days > HORIZON_DAYS) continue;
+          const farm = farmById.get(c.farmId);
+          buckets[groupFor(days)].push({
+            id: c._id,
+            name: farm?.farmName ?? 'Farm',
+            farmer: farm?.farmerName ?? '—',
+            crop: [c.cropName, c.cropVariety].filter(Boolean).join(' '),
+            kg: Math.round(c.estHarvest ?? 0),
+            harvestDate: c.harvestDate,
+          });
+        }
+
+        // Sort each bucket by soonest harvest first.
+        const order: GroupKey[] = ['Today', 'Tomorrow', 'Planned'];
+        const next = order
+          .map((g) => ({
+            g,
+            items: buckets[g].sort(
+              (a, b) => (daysUntil(a.harvestDate) ?? 0) - (daysUntil(b.harvestDate) ?? 0),
+            ),
+          }))
+          .filter((grp) => grp.items.length > 0);
+
+        if (!cancelled) setGroups(next);
+      } catch {
+        if (!cancelled) setGroups([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }} edges={['top']}>
@@ -80,117 +138,133 @@ export function HarvestBoardScreen() {
           </Text>
         </View>
 
-        {GROUPS.map((grp) => (
-          <View key={grp.g} style={{ marginBottom: 18 }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 8,
-                paddingHorizontal: 4,
-                paddingBottom: 10,
-              }}
-            >
-              <Text style={{ fontSize: 13, fontWeight: '700', color: C.fg }}>{grp.g}</Text>
+        {loading ? (
+          <View style={{ paddingVertical: 60, alignItems: 'center' }}>
+            <ActivityIndicator color={C.primary} />
+          </View>
+        ) : groups.length === 0 ? (
+          <View style={{ alignItems: 'center', paddingVertical: 56, gap: 12 }}>
+            <Wheat size={36} color="rgba(13,120,60,0.4)" />
+            <Text style={{ fontSize: 14, color: C.fgSubtle }}>No upcoming harvests</Text>
+          </View>
+        ) : (
+          groups.map((grp) => (
+            <View key={grp.g} style={{ marginBottom: 18 }}>
               <View
                 style={{
-                  backgroundColor: 'rgba(13,120,60,0.10)',
-                  borderRadius: 999,
-                  paddingHorizontal: 8,
-                  paddingVertical: 1,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 8,
+                  paddingHorizontal: 4,
+                  paddingBottom: 10,
                 }}
               >
-                <Text style={{ fontSize: 11.5, fontWeight: '600', color: C.primary }}>
-                  {grp.items.length}
-                </Text>
-              </View>
-            </View>
-
-            <View style={{ gap: 10 }}>
-              {grp.items.map((it) => (
+                <Text style={{ fontSize: 13, fontWeight: '700', color: C.fg }}>{grp.g}</Text>
                 <View
-                  key={it.name}
                   style={{
-                    backgroundColor: C.bgElevated,
-                    borderRadius: 16,
-                    borderWidth: 1,
-                    borderColor: C.border,
-                    padding: 15,
+                    backgroundColor: 'rgba(13,120,60,0.10)',
+                    borderRadius: 999,
+                    paddingHorizontal: 8,
+                    paddingVertical: 1,
                   }}
                 >
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                    <View
-                      style={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: 12,
-                        backgroundColor: 'rgba(13,120,60,0.10)',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <Wheat size={22} color={C.primary} />
-                    </View>
-                    <View style={{ flex: 1, minWidth: 0 }}>
-                      <Text style={{ fontSize: 15, fontWeight: '600', color: C.fg }}>
-                        {it.name}
-                      </Text>
-                      <Text style={{ fontSize: 12.5, color: C.fgMuted }}>
-                        {it.farmer} · {it.crop}
-                      </Text>
-                    </View>
-                    <View style={{ alignItems: 'flex-end' }}>
-                      <Text
-                        style={{
-                          fontSize: 18,
-                          fontWeight: '700',
-                          color: C.fg,
-                          fontFamily: 'monospace',
-                        }}
-                      >
-                        {it.kg}kg
-                      </Text>
-                      <Text style={{ fontSize: 11.5, color: C.fgSubtle }}>expected</Text>
-                    </View>
-                  </View>
+                  <Text style={{ fontSize: 11.5, fontWeight: '600', color: C.primary }}>
+                    {grp.items.length}
+                  </Text>
+                </View>
+              </View>
 
+              <View style={{ gap: 10 }}>
+                {grp.items.map((it) => (
                   <View
+                    key={it.id}
                     style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 10,
-                      marginTop: 13,
+                      backgroundColor: C.bgElevated,
+                      borderRadius: 16,
+                      borderWidth: 1,
+                      borderColor: C.border,
+                      padding: 15,
                     }}
                   >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-                      <MapPin size={14} color={C.secondaryD} />
-                      <Text style={{ fontSize: 12.5, color: C.fgMuted, fontWeight: '500' }}>
-                        {it.dist} away
-                      </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                      <View
+                        style={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: 12,
+                          backgroundColor: 'rgba(13,120,60,0.10)',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Wheat size={22} color={C.primary} />
+                      </View>
+                      <View style={{ flex: 1, minWidth: 0 }}>
+                        <Text style={{ fontSize: 15, fontWeight: '600', color: C.fg }}>
+                          {it.name}
+                        </Text>
+                        <Text style={{ fontSize: 12.5, color: C.fgMuted }}>
+                          {it.farmer} · {it.crop}
+                        </Text>
+                      </View>
+                      <View style={{ alignItems: 'flex-end' }}>
+                        <Text
+                          style={{
+                            fontSize: 18,
+                            fontWeight: '700',
+                            color: C.fg,
+                            fontFamily: 'monospace',
+                          }}
+                        >
+                          {it.kg}kg
+                        </Text>
+                        <Text style={{ fontSize: 11.5, color: C.fgSubtle }}>expected</Text>
+                      </View>
                     </View>
-                    <View style={{ flex: 1 }} />
-                    <Pressable
+
+                    <View
                       style={{
                         flexDirection: 'row',
                         alignItems: 'center',
-                        gap: 6,
-                        backgroundColor: 'rgba(13,120,60,0.10)',
-                        borderRadius: 999,
-                        paddingHorizontal: 12,
-                        paddingVertical: 7,
+                        gap: 10,
+                        marginTop: 13,
                       }}
                     >
-                      <Navigation size={14} color={C.primary} />
-                      <Text style={{ fontSize: 12.5, fontWeight: '600', color: C.primary }}>
-                        Navigate
-                      </Text>
-                    </Pressable>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                        <MapPin size={14} color={C.secondaryD} />
+                        <Text style={{ fontSize: 12.5, color: C.fgMuted, fontWeight: '500' }}>
+                          {it.harvestDate
+                            ? new Date(it.harvestDate).toLocaleDateString(undefined, {
+                                day: '2-digit',
+                                month: 'short',
+                              })
+                            : '—'}
+                        </Text>
+                      </View>
+                      <View style={{ flex: 1 }} />
+                      <Pressable
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 6,
+                          backgroundColor: 'rgba(13,120,60,0.10)',
+                          borderRadius: 999,
+                          paddingHorizontal: 12,
+                          paddingVertical: 7,
+                        }}
+                      >
+                        <Navigation size={14} color={C.primary} />
+                        <Text style={{ fontSize: 12.5, fontWeight: '600', color: C.primary }}>
+                          Navigate
+                        </Text>
+                      </Pressable>
+                    </View>
                   </View>
-                </View>
-              ))}
+                ))}
+              </View>
             </View>
-          </View>
-        ))}
+          ))
+        )}
       </ScrollView>
     </SafeAreaView>
   );

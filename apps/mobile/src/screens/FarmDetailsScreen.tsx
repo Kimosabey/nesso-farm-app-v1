@@ -40,7 +40,7 @@ import {
   ShieldCheck,
 } from 'lucide-react-native';
 import Svg, { Rect, Path, Circle, Defs, Pattern } from 'react-native-svg';
-import { api, type Farm, type Crop } from '@/api/client';
+import { api, type Farm, type Crop, type WeatherSnapshot } from '@/api/client';
 import { useTheme } from '@/theme';
 
 // Local nav/route param lists — FarmDetails + AddCrop are registered by the
@@ -61,6 +61,12 @@ function fmtDate(d?: string): string {
   const dt = new Date(d);
   if (Number.isNaN(dt.getTime())) return '—';
   return dt.toLocaleDateString(undefined, { day: '2-digit', month: 'short' });
+}
+
+function dayShort(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString(undefined, { weekday: 'short' });
 }
 
 /** Large polygon map (~180px). Draws polygonPoints if present, else a default. */
@@ -155,6 +161,8 @@ export function FarmDetailsScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<TabName>('Crops');
+  const [weather, setWeather] = useState<WeatherSnapshot | null>(null);
+  const [weatherTried, setWeatherTried] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -178,6 +186,29 @@ export function FarmDetailsScreen() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  // Weather — lazy fetch the first time the Weather tab is opened, using the
+  // farm's GPS. Offline-safe: a failure leaves `weather` null → static fallback.
+  useEffect(() => {
+    if (tab !== 'Weather' || weatherTried || !farm) return;
+    setWeatherTried(true);
+    let cancelled = false;
+    void (async () => {
+      try {
+        const coords = farm.location?.coordinates;
+        const s =
+          coords && Number.isFinite(coords[0]) && Number.isFinite(coords[1])
+            ? await api.getWeather(coords[1], coords[0]) // [lng, lat] → (lat, lng)
+            : await api.getFarmWeather(farmId);
+        if (!cancelled) setWeather(s);
+      } catch {
+        if (!cancelled) setWeather(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [tab, weatherTried, farm, farmId]);
 
   const areaLabel = useMemo(() => {
     const a = farm?.farmArea ?? 0;
@@ -428,53 +459,72 @@ export function FarmDetailsScreen() {
               ) : null}
 
               {tab === 'Weather' ? (
-                <View style={{ gap: 12 }}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 14,
-                      padding: 16,
-                      borderRadius: 16,
-                      backgroundColor: C.secondary,
-                    }}
-                  >
-                    <CloudSun size={36} color="#fff" strokeWidth={1.6} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ fontSize: 30, fontWeight: '700', color: '#fff' }}>27°</Text>
-                      <Text style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.9)' }}>
-                        {farm?.address?.village ?? farm?.address?.district ?? 'Spraying window till 4 PM'}
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={{ flexDirection: 'row', gap: 8 }}>
-                    {(
-                      [
+                (() => {
+                  const live = weather && Number.isFinite(weather.current.tempC) ? weather : null;
+                  const temp = live ? Math.round(live.current.tempC) : 27;
+                  const caption = live
+                    ? [live.current.description, live.advisories?.[0]].filter(Boolean).join(' · ') ||
+                      (farm?.address?.village ?? farm?.address?.district ?? '')
+                    : farm?.address?.village ??
+                      farm?.address?.district ??
+                      'Spraying window till 4 PM';
+                  const fourDays: Array<[string, number]> = live
+                    ? live.daily
+                        .slice(0, 4)
+                        .map((d) => [dayShort(d.date), Math.round(d.maxC)] as [string, number])
+                    : [
                         ['Mon', 28],
                         ['Tue', 31],
                         ['Wed', 28],
                         ['Thu', 25],
-                      ] as Array<[string, number]>
-                    ).map(([d, t]) => (
+                      ];
+                  return (
+                    <View style={{ gap: 12 }}>
                       <View
-                        key={d}
                         style={{
-                          flex: 1,
+                          flexDirection: 'row',
                           alignItems: 'center',
-                          paddingVertical: 11,
-                          borderRadius: 12,
-                          backgroundColor: C.bgElevated,
-                          borderWidth: 1,
-                          borderColor: C.border,
+                          gap: 14,
+                          padding: 16,
+                          borderRadius: 16,
+                          backgroundColor: C.secondary,
                         }}
                       >
-                        <Text style={{ fontSize: 11, color: C.fgMuted }}>{d}</Text>
-                        <Cloud size={17} color={C.secondaryD} style={{ marginVertical: 6 }} />
-                        <Text style={{ fontSize: 13, fontWeight: '600', color: C.fg }}>{t}°</Text>
+                        <CloudSun size={36} color="#fff" strokeWidth={1.6} />
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ fontSize: 30, fontWeight: '700', color: '#fff' }}>
+                            {temp}°
+                          </Text>
+                          <Text style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.9)' }}>
+                            {caption}
+                          </Text>
+                        </View>
                       </View>
-                    ))}
-                  </View>
-                </View>
+                      <View style={{ flexDirection: 'row', gap: 8 }}>
+                        {fourDays.map(([d, t], i) => (
+                          <View
+                            key={`${d}-${i}`}
+                            style={{
+                              flex: 1,
+                              alignItems: 'center',
+                              paddingVertical: 11,
+                              borderRadius: 12,
+                              backgroundColor: C.bgElevated,
+                              borderWidth: 1,
+                              borderColor: C.border,
+                            }}
+                          >
+                            <Text style={{ fontSize: 11, color: C.fgMuted }}>{d}</Text>
+                            <Cloud size={17} color={C.secondaryD} style={{ marginVertical: 6 }} />
+                            <Text style={{ fontSize: 13, fontWeight: '600', color: C.fg }}>
+                              {t}°
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  );
+                })()
               ) : null}
 
               {tab === 'Certificates' ? (
