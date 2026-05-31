@@ -33,6 +33,7 @@ import { api, clearSession, type MeResponse } from '@/api/client';
 import { sync, type SyncStatus } from '@/sync/SyncManager';
 import { useTheme, type ThemeTokens } from '@/theme';
 import { useT } from '@/i18n';
+import { useToast } from '@/components/Toast';
 
 // Local nav param list — these routes are registered by the parent navigator
 // (some, e.g. Sync / OfflineMaps / LocationPicker, may be wired later). Declared
@@ -68,6 +69,7 @@ function roleLabel(role?: string): string {
 export function SettingsScreen() {
   const C = useTheme().c;
   const { t } = useT();
+  const toast = useToast();
   const navigation = useNavigation<Nav>();
   const [me, setMe] = useState<MeResponse | null>(null);
   const [status, setStatus] = useState<SyncStatus | null>(null);
@@ -180,14 +182,14 @@ export function SettingsScreen() {
             tintColor={C.primary}
             label="Associations"
             value="Belur FPO"
-            onPress={() => Alert.alert('Associations', 'Coming soon.')}
+            onPress={() => toast.info('Associations — coming soon')}
           />
           <Row
             icon={<MapIcon size={18} color={C.secondaryD} />}
             tintColor={C.secondaryD}
             label="My cluster"
             value="Hassan"
-            onPress={() => Alert.alert('Cluster', 'Hassan cluster.')}
+            onPress={() => toast.info('Hassan cluster')}
             last
           />
         </Group>
@@ -235,7 +237,7 @@ export function SettingsScreen() {
             icon={<HelpCircle size={18} color={C.secondaryD} />}
             tintColor={C.secondaryD}
             label={t('settings.help')}
-            onPress={() => Alert.alert('Help', 'Opening help & docs.')}
+            onPress={() => toast.info('Opening help & docs')}
           />
           <Row
             icon={<Shield size={18} color={C.primary} />}

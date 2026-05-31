@@ -14,7 +14,6 @@ import {
   ScrollView,
   Pressable,
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
@@ -24,6 +23,7 @@ import Constants, { ExecutionEnvironment } from 'expo-constants';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { api } from '@/api/client';
+import { useToast } from '@/components/Toast';
 
 // ---------------------------------------------------------------------------
 // Expo Go guard — identical pattern to src/firebase/auth.ts
@@ -128,6 +128,7 @@ function Field({
 // ---------------------------------------------------------------------------
 export function AddFarmScreen({ navigation, route }: Props) {
   const farmerId = route.params?.farmerId ?? '';
+  const toast = useToast();
 
   const [vertices, setVertices] = useState<LatLng[]>([]);
   const [farmName, setFarmName] = useState('');
@@ -148,7 +149,7 @@ export function AddFarmScreen({ navigation, route }: Props) {
   const handleSave = async () => {
     if (!canSave) return;
     if (!farmerId) {
-      Alert.alert('Error', 'No farmer ID provided.');
+      toast.error('No farmer ID provided');
       return;
     }
     setBusy(true);
@@ -168,7 +169,7 @@ export function AddFarmScreen({ navigation, route }: Props) {
       });
       navigation.goBack();
     } catch (e) {
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to save farm');
+      toast.error(e instanceof Error ? e.message : 'Failed to save farm');
     } finally {
       setBusy(false);
     }

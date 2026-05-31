@@ -27,7 +27,6 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -39,6 +38,7 @@ import { sync, type SyncStatus } from '@/sync/SyncManager';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import type { MainTabParamList } from '@/navigation/MainTabs';
 import { useTheme } from '@/theme';
+import { useToast } from '@/components/Toast';
 
 type Nav = BottomTabNavigationProp<MainTabParamList, 'Register'>;
 
@@ -150,11 +150,10 @@ function Field({
 
 function PhotoTile({ label }: { label: string }) {
   const C = useTheme().c;
+  const toast = useToast();
   return (
     <Pressable
-      onPress={() =>
-        Alert.alert('Camera in dev build', 'Photo capture needs a development build of the app.')
-      }
+      onPress={() => toast.info('Photo capture needs a dev build')}
       style={{
         flex: 1,
         aspectRatio: 1.3,
@@ -225,6 +224,7 @@ function FormSection({
 export function RegisterFarmerScreen() {
   const C = useTheme().c;
   const navigation = useNavigation<Nav>();
+  const toast = useToast();
 
   const [step, setStep] = useState(0); // 0..3
   // §1 Personal
@@ -315,27 +315,13 @@ export function RegisterFarmerScreen() {
     try {
       const r = await api.createFarmer(input);
       if (r.mode === 'online') {
-        Alert.alert('Saved', `${r.farmer.firstName} (${r.farmer.farmerId}) — pending approval.`, [
-          {
-            text: 'OK',
-            onPress: () => {
-              reset();
-              navigation.navigate('Farmers');
-            },
-          },
-        ]);
+        toast.success(`${r.farmer.firstName} saved — pending approval`);
       } else {
         void sync.kick();
-        Alert.alert('Saved offline', 'Syncs when online.', [
-          {
-            text: 'OK',
-            onPress: () => {
-              reset();
-              navigation.navigate('Farmers');
-            },
-          },
-        ]);
+        toast.info('Saved offline — syncs when online');
       }
+      reset();
+      navigation.navigate('Farmers');
     } catch (e) {
       setError(e instanceof ApiError ? e.message : e instanceof Error ? e.message : 'Failed');
     } finally {

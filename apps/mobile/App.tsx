@@ -38,6 +38,7 @@ import { sync } from '@/sync/SyncManager';
 import { initSentry, sentry } from '@/sentry';
 import { ThemeProvider } from '@/theme';
 import { LanguageProvider } from '@/i18n';
+import { ToastProvider } from '@/components/Toast';
 
 initSentry();
 
@@ -86,6 +87,7 @@ function App() {
     <ThemeProvider>
       <LanguageProvider>
       <SafeAreaProvider>
+        <ToastProvider>
         <NavigationContainer>
         <StatusBar style="auto" />
         <Stack.Navigator
@@ -123,6 +125,7 @@ function App() {
           <Stack.Screen name="Support" component={SupportScreen} />
         </Stack.Navigator>
         </NavigationContainer>
+        </ToastProvider>
       </SafeAreaProvider>
       </LanguageProvider>
     </ThemeProvider>

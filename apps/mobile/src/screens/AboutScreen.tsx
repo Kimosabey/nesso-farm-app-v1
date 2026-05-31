@@ -9,12 +9,13 @@
  *     Open-source licenses
  *   - Footer: © NR Group
  */
-import { View, Text, Pressable, ScrollView, Image, Alert } from 'react-native';
+import { View, Text, Pressable, ScrollView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ChevronLeft, Shield, FileText, Phone, ScrollText, ChevronRight } from 'lucide-react-native';
 import type { RootStackParamList } from '../../App';
 import { useTheme, type ThemeTokens } from '@/theme';
+import { useToast } from '@/components/Toast';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'About'>;
 
@@ -28,7 +29,8 @@ function tint(c: ThemeTokens, hex: string): string {
 
 export function AboutScreen({ navigation }: Props) {
   const C = useTheme().c;
-  const comingSoon = (what: string) => Alert.alert(what, 'Coming soon.');
+  const toast = useToast();
+  const comingSoon = (what: string) => toast.info(`${what} — coming soon`);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }} edges={['top']}>

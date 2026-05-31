@@ -27,6 +27,7 @@ import { api, type Farmer } from '@/api/client';
 import { sync, type SyncStatus } from '@/sync/SyncManager';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import { useTheme } from '@/theme';
+import { useToast } from '@/components/Toast';
 
 const TABS = ['Pending', 'Approved', 'Rejected'] as const;
 type Tab = (typeof TABS)[number];
@@ -111,6 +112,7 @@ function village_crop_area(f: Farmer): string {
 
 export function VerifyScreen() {
   const C = useTheme().c;
+  const notify = useToast();
   const [tab, setTab] = useState<Tab>('Pending');
   const [farmers, setFarmers] = useState<Farmer[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -157,12 +159,12 @@ export function VerifyScreen() {
         await load(tab);
         flash('Farmer approved');
       } catch (e) {
-        Alert.alert('Approve failed', e instanceof Error ? e.message : 'Unknown error');
+        notify.error(e instanceof Error ? e.message : 'Approve failed');
       } finally {
         setBusyId(null);
       }
     },
-    [load, tab, flash],
+    [load, tab, flash, notify],
   );
 
   const onReject = useCallback(
@@ -172,7 +174,7 @@ export function VerifyScreen() {
         `Reason for rejecting ${farmer.firstName}?`,
         async (reason) => {
           if (!reason || reason.trim().length < 3) {
-            Alert.alert('Reason required', 'Please provide a reason (3+ chars).');
+            notify.error('Please provide a reason (3+ chars)');
             return;
           }
           setBusyId(farmer._id);
@@ -181,7 +183,7 @@ export function VerifyScreen() {
             await load(tab);
             flash('Registration rejected');
           } catch (e) {
-            Alert.alert('Reject failed', e instanceof Error ? e.message : 'Unknown');
+            notify.error(e instanceof Error ? e.message : 'Reject failed');
           } finally {
             setBusyId(null);
           }
@@ -202,7 +204,7 @@ export function VerifyScreen() {
                 await load(tab);
                 flash('Registration rejected');
               } catch (e) {
-                Alert.alert('Reject failed', e instanceof Error ? e.message : 'Unknown');
+                notify.error(e instanceof Error ? e.message : 'Reject failed');
               } finally {
                 setBusyId(null);
               }
@@ -211,7 +213,7 @@ export function VerifyScreen() {
         ]);
       }
     },
-    [load, tab, flash],
+    [load, tab, flash, notify],
   );
 
   const onRefresh = useCallback(async () => {

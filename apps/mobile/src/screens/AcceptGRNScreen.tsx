@@ -12,7 +12,6 @@ import {
   TextInput,
   Pressable,
   ActivityIndicator,
-  Alert,
   Animated,
   Platform,
 } from 'react-native';
@@ -22,6 +21,7 @@ import Constants, { ExecutionEnvironment } from 'expo-constants';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { api, ApiError } from '@/api/client';
+import { useToast } from '@/components/Toast';
 
 // ---------------------------------------------------------------------------
 // Expo Go guard
@@ -105,6 +105,7 @@ function CornerAccent({
 // Main screen
 // ---------------------------------------------------------------------------
 export function AcceptGRNScreen({ navigation }: Props) {
+  const toast = useToast();
   const [step, setStep] = useState<ScreenStep>('scan');
   const [scannedCode, setScannedCode] = useState('');
   const [manualCode, setManualCode] = useState('');
@@ -157,7 +158,7 @@ export function AcceptGRNScreen({ navigation }: Props) {
   const handleManualSubmit = () => {
     const code = manualCode.trim();
     if (!code) {
-      Alert.alert('Error', 'Please enter a GRN code');
+      toast.error('Please enter a GRN code');
       return;
     }
     setScannedCode(code);
@@ -171,8 +172,7 @@ export function AcceptGRNScreen({ navigation }: Props) {
       setSuccessMessage(result.message ?? 'GRN accepted successfully');
       setStep('success');
     } catch (e) {
-      Alert.alert(
-        'Failed',
+      toast.error(
         e instanceof ApiError ? e.message : e instanceof Error ? e.message : 'Could not accept GRN',
       );
     } finally {
