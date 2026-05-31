@@ -8,8 +8,9 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { ChevronRight, Plus, Search, X } from 'lucide-react';
+import { Building2, ChevronRight, Plus, Search, X } from 'lucide-react';
 import type { Farm, Farmer } from '@/lib/api';
+import { EmptyState } from '@/components/dashboard/EmptyState';
 import { StatusPill } from '@/components/dashboard/StatusPill';
 
 export interface FarmRow {
@@ -198,8 +199,12 @@ export function FarmsTable({ rows, total, page, totalPages, query }: Props) {
             <tbody>
               {table.getRowModel().rows.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length} className="px-4 py-16 text-center text-fg-muted">
-                    No farms match these filters.
+                  <td colSpan={columns.length} className="p-0">
+                    <EmptyState
+                      icon={Building2}
+                      title="No farms found"
+                      hint="No farms match these filters. Try clearing the search or filters."
+                    />
                   </td>
                 </tr>
               ) : (
@@ -207,17 +212,10 @@ export function FarmsTable({ rows, total, page, totalPages, query }: Props) {
                   <tr
                     key={row.id}
                     onClick={() => router.push(`/farms/${row.original.id}`)}
-                    className="group cursor-pointer border-b border-border transition hover:bg-bg-muted/50"
+                    className="cursor-pointer border-b border-l-2 border-border border-l-transparent transition-colors hover:border-l-primary hover:bg-bg-muted/60"
                   >
-                    {row.getVisibleCells().map((cell, i) => (
-                      <td
-                        key={cell.id}
-                        className={`relative px-3.5 py-3 align-middle ${
-                          i === 0
-                            ? 'before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-primary before:opacity-0 group-hover:before:opacity-100'
-                            : ''
-                        }`}
-                      >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-3.5 py-3 align-middle">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>
                     ))}

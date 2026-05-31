@@ -1,5 +1,6 @@
 import { Bell, CheckCheck, CloudRain, AlertCircle, RefreshCw } from 'lucide-react';
 import { api, readAccessToken, type NotificationItem } from '@/lib/api';
+import { EmptyState } from '@/components/dashboard/EmptyState';
 import { markAllReadAction } from './actions';
 
 export default async function NotificationsPage() {
@@ -30,9 +31,12 @@ export default async function NotificationsPage() {
 
       <ul className="mt-6 space-y-3">
         {inbox.data.length === 0 ? (
-          <li className="rounded-2xl border border-border bg-bg-elevated p-12 text-center text-fg-muted">
-            No notifications yet. Phase 5.x will start dispatching them (approvals, weather,
-            activity reminders).
+          <li className="rounded-2xl border border-border bg-bg-elevated shadow-sm">
+            <EmptyState
+              icon={Bell}
+              title="No notifications yet"
+              hint="Approvals, weather alerts, and activity reminders will appear here as they arrive."
+            />
           </li>
         ) : (
           inbox.data.map((n) => <NotificationRow key={n._id} n={n} />)

@@ -29,14 +29,14 @@ export default async function InventoryPage({ searchParams }: PageProps) {
         actions={
           <button
             type="button"
-            className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-fg shadow-sm transition hover:bg-primary-700"
+            className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-fg shadow-sm transition hover:bg-primary-700 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <PackageCheck size={16} /> Accept GRN
           </button>
         }
       />
 
-      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MiniStat label="Total batches" value={stats.total} tone="muted" icon={<Boxes size={18} />} />
         <MiniStat
           label="Available"

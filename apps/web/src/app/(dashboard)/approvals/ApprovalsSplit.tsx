@@ -129,7 +129,7 @@ export function ApprovalsSplit({ items }: { items: QueueItem[] }) {
 
         {/* detail */}
         {current ? (
-          <div className="self-start rounded-2xl border border-border bg-bg-elevated p-5 shadow-sm min-[920px]:sticky min-[920px]:top-4">
+          <div className="self-start rounded-2xl border border-border bg-bg-elevated p-5 shadow-sm min-[920px]:sticky min-[920px]:top-[88px]">
             <div className="flex items-center gap-3.5 border-b border-border pb-4">
               <Avatar name={current.who} size={52} />
               <div className="min-w-0 flex-1">

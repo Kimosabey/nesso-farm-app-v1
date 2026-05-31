@@ -9,8 +9,9 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { CheckCircle2, ChevronRight, Download, Plus, Search, X } from 'lucide-react';
+import { CheckCircle2, ChevronRight, Download, Plus, Search, Users, X } from 'lucide-react';
 import { Avatar } from '@/components/dashboard/Avatar';
+import { EmptyState } from '@/components/dashboard/EmptyState';
 import { StatusPill } from '@/components/dashboard/StatusPill';
 
 export interface FarmerRow {
@@ -247,8 +248,12 @@ export function FarmersTable({ rows, total, page, totalPages, query, status, ass
             <tbody>
               {table.getRowModel().rows.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length} className="px-4 py-16 text-center text-fg-muted">
-                    No farmers match these filters.
+                  <td colSpan={columns.length} className="p-0">
+                    <EmptyState
+                      icon={Users}
+                      title="No farmers found"
+                      hint="No farmers match these filters. Try clearing the search or filters."
+                    />
                   </td>
                 </tr>
               ) : (
@@ -256,19 +261,12 @@ export function FarmersTable({ rows, total, page, totalPages, query, status, ass
                   <tr
                     key={row.id}
                     onClick={() => router.push(`/farmers/${row.original.id}`)}
-                    className={`group cursor-pointer border-b border-border transition hover:bg-bg-muted/50 ${
+                    className={`cursor-pointer border-b border-l-2 border-border border-l-transparent transition-colors hover:border-l-primary hover:bg-bg-muted/60 ${
                       row.getIsSelected() ? 'bg-primary/10' : ''
                     }`}
                   >
-                    {row.getVisibleCells().map((cell, i) => (
-                      <td
-                        key={cell.id}
-                        className={`relative px-3.5 py-3 align-middle ${
-                          i === 0
-                            ? 'before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-primary before:opacity-0 group-hover:before:opacity-100'
-                            : ''
-                        }`}
-                      >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-3.5 py-3 align-middle">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>
                     ))}

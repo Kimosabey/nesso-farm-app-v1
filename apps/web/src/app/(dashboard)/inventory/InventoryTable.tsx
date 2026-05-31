@@ -8,8 +8,9 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { ChevronRight, Plus, Search } from 'lucide-react';
+import { Boxes, ChevronRight, Plus, Search } from 'lucide-react';
 import type { InventoryBatch } from '@/lib/api';
+import { EmptyState } from '@/components/dashboard/EmptyState';
 import { StatusPill } from '@/components/dashboard/StatusPill';
 
 export interface InventoryRow {
@@ -224,10 +225,16 @@ export function InventoryTable({ rows, total, page, totalPages, status }: Props)
             <tbody>
               {table.getRowModel().rows.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length} className="px-4 py-16 text-center text-fg-muted">
-                    {active === 'All'
-                      ? 'No inventory yet — accept a GRN to create the first batch.'
-                      : `No ${TAB_LABEL[active].toLowerCase()} batches.`}
+                  <td colSpan={columns.length} className="p-0">
+                    <EmptyState
+                      icon={Boxes}
+                      title={active === 'All' ? 'No inventory yet' : `No ${TAB_LABEL[active].toLowerCase()} batches`}
+                      hint={
+                        active === 'All'
+                          ? 'Accept a GRN to create the first batch.'
+                          : 'No batches match this filter.'
+                      }
+                    />
                   </td>
                 </tr>
               ) : (
@@ -235,17 +242,10 @@ export function InventoryTable({ rows, total, page, totalPages, status }: Props)
                   <tr
                     key={row.id}
                     onClick={() => router.push(`/inventory/${row.original.id}`)}
-                    className="group cursor-pointer border-b border-border transition hover:bg-bg-muted/50"
+                    className="cursor-pointer border-b border-l-2 border-border border-l-transparent transition-colors hover:border-l-primary hover:bg-bg-muted/60"
                   >
-                    {row.getVisibleCells().map((cell, i) => (
-                      <td
-                        key={cell.id}
-                        className={`relative px-3.5 py-3 align-middle ${
-                          i === 0
-                            ? 'before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-primary before:opacity-0 group-hover:before:opacity-100'
-                            : ''
-                        }`}
-                      >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-3.5 py-3 align-middle">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>
                     ))}

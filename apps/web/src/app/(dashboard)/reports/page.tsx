@@ -77,7 +77,7 @@ export default async function ReportsPage({ searchParams }: PageProps) {
 
         <button
           type="submit"
-          className="h-9 rounded-md bg-primary px-4 text-sm font-medium text-primary-fg shadow-sm transition hover:bg-primary-700"
+          className="h-9 rounded-md bg-primary px-4 text-sm font-medium text-primary-fg shadow-sm transition hover:bg-primary-700 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Run
         </button>

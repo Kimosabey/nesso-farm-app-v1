@@ -212,7 +212,7 @@ export function AuditsTable({ rows, total, page, totalPages, status }: Props) {
                 </tr>
               ) : (
                 table.getRowModel().rows.map((row) => (
-                  <tr key={row.id} className="border-b border-border transition hover:bg-bg-muted/50">
+                  <tr key={row.id} className="border-b border-l-2 border-border border-l-transparent transition-colors hover:border-l-primary hover:bg-bg-muted/60">
                     {row.getVisibleCells().map((cell) => (
                       <td key={cell.id} className="px-3.5 py-3 align-middle">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
