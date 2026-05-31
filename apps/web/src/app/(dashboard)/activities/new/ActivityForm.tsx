@@ -2,6 +2,7 @@
 
 import { useActionState, useMemo, useState } from 'react';
 import { useFormStatus } from 'react-dom';
+import Link from 'next/link';
 import { Plus, X } from 'lucide-react';
 import { createActivityAction, type CreateActivityState } from './actions';
 import type { ActivityInput, Crop, Farm, Farmer, InputCatalogItem } from '@/lib/api';
@@ -20,6 +21,9 @@ const ACTIVITY_TYPES = [
 ];
 
 const initial: CreateActivityState = { error: null };
+
+const INPUT =
+  'block h-11 w-full rounded-md border border-border-strong bg-bg-elevated px-3 text-[15px] text-fg outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-55';
 
 export function ActivityForm({
   farmers,
@@ -44,17 +48,18 @@ export function ActivityForm({
   const [notes, setNotes] = useState<string>('');
   const [picked, setPicked] = useState<ActivityInput[]>([]);
   const [inputSearch, setInputSearch] = useState<string>('');
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  const farmsForFarmer = useMemo(() => farms.filter((f) => f.farmerId === farmerId), [farms, farmerId]);
+  const farmsForFarmer = useMemo(
+    () => farms.filter((f) => f.farmerId === farmerId),
+    [farms, farmerId],
+  );
   const cropsForFarm = useMemo(() => crops.filter((c) => c.farmId === farmId), [crops, farmId]);
   const filteredInputs = useMemo(() => {
     const q = inputSearch.trim().toLowerCase();
     if (!q) return inputs.slice(0, 12);
     return inputs
-      .filter((i) =>
-        i.name.toLowerCase().includes(q) ||
-        i.code.toLowerCase().includes(q),
-      )
+      .filter((i) => i.name.toLowerCase().includes(q) || i.code.toLowerCase().includes(q))
       .slice(0, 20);
   }, [inputs, inputSearch]);
 
@@ -62,6 +67,18 @@ export function ActivityForm({
     () => picked.reduce((sum, i) => sum + (i.quantity ?? 0) * (i.cost ?? 0), 0),
     [picked],
   );
+
+  const errors = useMemo(() => {
+    const e: Record<string, string> = {};
+    if (!farmerId) e.farmerId = 'Select a farmer.';
+    if (!farmId) e.farmId = 'Select a farm.';
+    if (!activity.trim()) e.activity = 'Select an activity type.';
+    return e;
+  }, [farmerId, farmId, activity]);
+
+  const valid = Object.keys(errors).length === 0;
+  const show = (k: string) => (touched[k] ? errors[k] : undefined);
+  const blur = (k: string) => () => setTouched((t) => ({ ...t, [k]: true }));
 
   function addInput(item: InputCatalogItem) {
     if (picked.some((p) => p.itemId === item.code)) return;
@@ -87,24 +104,26 @@ export function ActivityForm({
   }
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="space-y-5">
       {/* Hidden inputs that carry actual values */}
       <input type="hidden" name="farmerId" value={farmerId} />
       <input type="hidden" name="farmId" value={farmId} />
       <input type="hidden" name="cropId" value={cropId} />
       <input type="hidden" name="inputsJson" value={JSON.stringify(picked)} />
 
-      <Section title="Where & when">
+      <Section title="Activity" description="What was done, on which farm, and when">
         <Grid>
-          <Field label="Farmer *">
+          <Field label="Farmer" required htmlFor="farmerId" error={show('farmerId')}>
             <select
+              id="farmerId"
               value={farmerId}
               onChange={(e) => {
                 setFarmerId(e.target.value);
                 setFarmId('');
                 setCropId('');
               }}
-              className="input"
+              onBlur={blur('farmerId')}
+              className={INPUT}
             >
               <option value="">— select —</option>
               {farmers.map((f) => (
@@ -116,7 +135,10 @@ export function ActivityForm({
           </Field>
 
           <Field
-            label="Farm *"
+            label="Farm"
+            required
+            htmlFor="farmId"
+            error={show('farmId')}
             hint={
               farmerId && farmsForFarmer.length === 0
                 ? 'This farmer has no farms yet — register one first.'
@@ -124,12 +146,14 @@ export function ActivityForm({
             }
           >
             <select
+              id="farmId"
               value={farmId}
               onChange={(e) => {
                 setFarmId(e.target.value);
                 setCropId('');
               }}
-              className="input"
+              onBlur={blur('farmId')}
+              className={INPUT}
               disabled={!farmerId || farmsForFarmer.length === 0}
             >
               <option value="">— select —</option>
@@ -141,11 +165,29 @@ export function ActivityForm({
             </select>
           </Field>
 
-          <Field label="Crop (optional)">
+          <Field label="Type" required htmlFor="activity" error={show('activity')}>
             <select
+              id="activity"
+              name="activity"
+              value={activity}
+              onChange={(e) => setActivity(e.target.value)}
+              onBlur={blur('activity')}
+              className={INPUT}
+            >
+              {ACTIVITY_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          <Field label="Crop" htmlFor="cropId" hint="Optional">
+            <select
+              id="cropId"
               value={cropId}
               onChange={(e) => setCropId(e.target.value)}
-              className="input"
+              className={INPUT}
               disabled={!farmId || cropsForFarm.length === 0}
             >
               <option value="">— none —</option>
@@ -157,45 +199,18 @@ export function ActivityForm({
             </select>
           </Field>
 
-          <Field label="Completed on">
+          <Field label="Completed on" htmlFor="completedDate">
             <input
+              id="completedDate"
               type="date"
               name="completedDate"
               value={completedDate}
               onChange={(e) => setCompletedDate(e.target.value)}
               max={new Date().toISOString().slice(0, 10)}
-              className="input"
+              className={INPUT}
             />
           </Field>
         </Grid>
-      </Section>
-
-      <Section title="Activity">
-        <Field label="Type *">
-          <select
-            name="activity"
-            value={activity}
-            onChange={(e) => setActivity(e.target.value)}
-            className="input"
-          >
-            {ACTIVITY_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-        </Field>
-
-        <Field label="Notes">
-          <textarea
-            name="notes"
-            rows={3}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Optional — anything worth recording"
-            className="input min-h-[88px] py-2 leading-relaxed"
-          />
-        </Field>
       </Section>
 
       <Section
@@ -206,7 +221,8 @@ export function ActivityForm({
           value={inputSearch}
           onChange={(e) => setInputSearch(e.target.value)}
           placeholder="Search urea, neem, mancozeb, labor…"
-          className="input mb-3"
+          className={`${INPUT} mb-3`}
+          aria-label="Search input catalog"
         />
 
         <div className="grid gap-2 sm:grid-cols-2">
@@ -259,9 +275,7 @@ export function ActivityForm({
                     min="0"
                     step="0.1"
                     value={p.quantity}
-                    onChange={(e) =>
-                      updatePicked(idx, { quantity: Number(e.target.value) || 0 })
-                    }
+                    onChange={(e) => updatePicked(idx, { quantity: Number(e.target.value) || 0 })}
                     className="h-9 w-20 rounded-md border border-border-strong bg-bg px-2 text-sm text-fg"
                     aria-label={`Quantity of ${p.name}`}
                   />
@@ -295,31 +309,50 @@ export function ActivityForm({
         ) : null}
       </Section>
 
+      <Section title="Notes" description="Anything worth recording about this activity">
+        <Field label="Notes" htmlFor="notes">
+          <textarea
+            id="notes"
+            name="notes"
+            rows={3}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Optional — anything worth recording"
+            className="block w-full rounded-md border border-border-strong bg-bg-elevated px-3 py-2 text-[15px] leading-relaxed text-fg outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30 min-h-[88px]"
+          />
+        </Field>
+      </Section>
+
       {state.error ? (
-        <p role="alert" className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
+        <p
+          role="alert"
+          className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger"
+        >
           {state.error}
         </p>
       ) : null}
 
       <div className="flex items-center gap-3">
-        <SubmitButton disabled={!farmerId || !farmId} />
+        <SubmitButton disabled={!valid} />
+        <Link
+          href="/activities"
+          className="inline-flex h-11 items-center rounded-md border border-border-strong px-4 text-sm text-fg transition hover:bg-bg-muted"
+        >
+          Cancel
+        </Link>
       </div>
-
-      <style>{`.input { display:block; height:44px; width:100%; border-radius:8px; border:1px solid rgb(var(--border-strong)); background:rgb(var(--bg-elevated)); padding:0 12px; font-size:16px; color:rgb(var(--fg)); outline:none; transition:border-color 150ms ease, box-shadow 150ms ease; }
-.input:disabled { opacity: 0.55; cursor: not-allowed; }
-.input:focus { border-color:rgb(var(--ring)); box-shadow:0 0 0 3px rgb(var(--ring) / 0.30); }
-textarea.input { height: auto; }`}</style>
     </form>
   );
 }
 
-function SubmitButton({ disabled }: { disabled: boolean }) {
+function SubmitButton({ disabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus();
   return (
     <button
       type="submit"
       disabled={disabled || pending}
-      className="h-11 rounded-md bg-primary px-5 text-sm font-medium text-primary-fg shadow-sm transition hover:bg-primary-700 disabled:opacity-60"
+      aria-busy={pending}
+      className="inline-flex h-11 items-center rounded-md bg-primary px-5 text-sm font-medium text-primary-fg shadow-sm transition hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:cursor-not-allowed disabled:opacity-50"
     >
       {pending ? 'Logging…' : 'Log activity'}
     </button>
@@ -336,11 +369,13 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <fieldset className="rounded-2xl border border-border bg-bg-elevated p-6 shadow-sm">
-      <legend className="px-2 font-display text-lg text-fg">{title}</legend>
-      {description ? <p className="mb-4 text-sm text-fg-muted">{description}</p> : null}
-      {children}
-    </fieldset>
+    <section className="rounded-xl border border-border bg-bg-elevated p-5 shadow-sm">
+      <div className="border-b border-border pb-3">
+        <h2 className="text-[15px] font-semibold text-fg">{title}</h2>
+        {description ? <p className="mt-0.5 text-[13px] text-fg-muted">{description}</p> : null}
+      </div>
+      <div className="pt-4">{children}</div>
+    </section>
   );
 }
 
@@ -350,18 +385,35 @@ function Grid({ children }: { children: React.ReactNode }) {
 
 function Field({
   label,
+  required,
+  htmlFor,
   hint,
+  error,
   children,
 }: {
   label: string;
+  required?: boolean;
+  htmlFor?: string;
   hint?: string;
+  error?: string;
   children: React.ReactNode;
 }) {
   return (
-    <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-fg">{label}</span>
+    <label htmlFor={htmlFor} className="block">
+      {label ? (
+        <span className="mb-1.5 block text-sm font-semibold text-fg">
+          {label}
+          {required ? <span className="ml-0.5 text-danger">*</span> : null}
+        </span>
+      ) : null}
       {children}
-      {hint ? <span className="mt-1 block text-xs text-fg-subtle">{hint}</span> : null}
+      {error ? (
+        <span className="mt-1 block text-xs text-danger" role="alert">
+          {error}
+        </span>
+      ) : hint ? (
+        <span className="mt-1 block text-xs text-fg-subtle">{hint}</span>
+      ) : null}
     </label>
   );
 }
