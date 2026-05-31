@@ -8,10 +8,11 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, ShoppingCart } from 'lucide-react';
 import type { Procurement } from '@/lib/api';
 import { Avatar } from '@/components/dashboard/Avatar';
 import { StatusPill } from '@/components/dashboard/StatusPill';
+import { EmptyState } from '@/components/dashboard/EmptyState';
 
 export interface ProcurementRow {
   id: string;
@@ -216,10 +217,16 @@ export function ProcurementTable({ rows, total, page, totalPages, status }: Prop
             <tbody>
               {table.getRowModel().rows.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length} className="px-4 py-16 text-center text-fg-muted">
-                    {active === 'All'
-                      ? 'No procurement orders yet.'
-                      : `No ${active.toLowerCase()} procurements.`}
+                  <td colSpan={columns.length} className="p-0">
+                    <EmptyState
+                      icon={ShoppingCart}
+                      title={active === 'All' ? 'No procurement orders yet' : `No ${active.toLowerCase()} procurements`}
+                      hint={
+                        active === 'All'
+                          ? 'Crop purchases from farmers will appear here.'
+                          : 'No procurements match this filter.'
+                      }
+                    />
                   </td>
                 </tr>
               ) : (

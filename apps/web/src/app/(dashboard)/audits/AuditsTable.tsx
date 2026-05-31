@@ -11,6 +11,7 @@ import {
 import { Plus, Search, ShieldCheck } from 'lucide-react';
 import type { Audit } from '@/lib/api';
 import { StatusPill } from '@/components/dashboard/StatusPill';
+import { EmptyState } from '@/components/dashboard/EmptyState';
 
 export interface AuditRow {
   id: string;
@@ -204,10 +205,16 @@ export function AuditsTable({ rows, total, page, totalPages, status }: Props) {
             <tbody>
               {table.getRowModel().rows.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length} className="px-4 py-16 text-center text-fg-muted">
-                    {active === 'All'
-                      ? 'No audits on record yet.'
-                      : `No ${active.toLowerCase()} audits.`}
+                  <td colSpan={columns.length} className="p-0">
+                    <EmptyState
+                      icon={ShieldCheck}
+                      title={active === 'All' ? 'No audits on record' : `No ${active.toLowerCase()} audits`}
+                      hint={
+                        active === 'All'
+                          ? 'Internal and external audit records will appear here.'
+                          : 'No audits match this filter.'
+                      }
+                    />
                   </td>
                 </tr>
               ) : (

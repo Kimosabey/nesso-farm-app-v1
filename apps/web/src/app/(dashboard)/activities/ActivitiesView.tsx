@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
+  Activity as ActivityIcon,
   Bug,
   ChevronLeft,
   ChevronRight,
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react';
 import type { Activity } from '@/lib/api';
 import { StatusPill } from '@/components/dashboard/StatusPill';
+import { EmptyState } from '@/components/dashboard/EmptyState';
 
 export interface ActivityRow {
   id: string;
@@ -115,8 +117,14 @@ export function ActivitiesView({ rows }: Props) {
 function ListView({ rows, onOpen }: { rows: ActivityRow[]; onOpen: (id: string) => void }) {
   if (rows.length === 0) {
     return (
-      <div className="rounded-2xl border border-border bg-bg-elevated p-12 text-center text-fg-muted shadow-sm">
-        No activities logged yet.
+      <div className="overflow-hidden rounded-2xl border border-border bg-bg-elevated shadow-sm">
+        <EmptyState
+          icon={ActivityIcon}
+          title="No activities logged"
+          hint="Field operations you log will show up here on a timeline and calendar."
+          actionLabel="Log activity"
+          actionHref="/activities/new"
+        />
       </div>
     );
   }

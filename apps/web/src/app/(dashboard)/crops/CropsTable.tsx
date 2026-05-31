@@ -7,9 +7,10 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { Leaf, Plus, Search, X } from 'lucide-react';
+import { Leaf, Plus, Search, Sprout, X } from 'lucide-react';
 import type { Crop, Farm, Farmer } from '@/lib/api';
 import { StatusPill } from '@/components/dashboard/StatusPill';
+import { EmptyState } from '@/components/dashboard/EmptyState';
 
 export interface CropRow {
   id: string;
@@ -199,8 +200,12 @@ export function CropsTable({ rows, total, query }: Props) {
             <tbody>
               {table.getRowModel().rows.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length} className="px-4 py-16 text-center text-fg-muted">
-                    No crops match these filters.
+                  <td colSpan={columns.length} className="p-0">
+                    <EmptyState
+                      icon={Sprout}
+                      title="No crops yet"
+                      hint="No crops match these filters. Try clearing the search."
+                    />
                   </td>
                 </tr>
               ) : (

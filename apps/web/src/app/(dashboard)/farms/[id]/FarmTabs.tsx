@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Activity as ActivityIcon, CloudRain, Leaf, ShieldCheck } from 'lucide-react';
+import { Activity as ActivityIcon, CloudRain, Leaf, ShieldCheck, Sprout } from 'lucide-react';
 import type { Activity, Crop, WeatherSnapshot } from '@/lib/api';
 import { StatusPill } from '@/components/dashboard/StatusPill';
+import { EmptyState } from '@/components/dashboard/EmptyState';
 
 const TABS = ['Crops', 'Activities', 'Weather', 'Certificates', 'Soil'] as const;
 type Tab = (typeof TABS)[number];
@@ -60,10 +61,12 @@ function fmtDate(iso?: string) {
 function CropsTab({ crops }: { crops: Crop[] }) {
   if (crops.length === 0) {
     return (
-      <Empty
-        icon={<Leaf size={26} />}
+      <EmptyState
+        icon={Sprout}
         title="No crops yet"
-        body="Crops grown on this farm will appear here."
+        hint="Crops grown on this farm will appear here."
+        actionLabel="Add crop"
+        actionHref="/crops"
       />
     );
   }
@@ -102,10 +105,12 @@ const ACT_PILL: Record<Activity['status'], 'approved' | 'pending' | 'rejected' |
 function ActivitiesTab({ activities }: { activities: Activity[] }) {
   if (activities.length === 0) {
     return (
-      <Empty
-        icon={<ActivityIcon size={26} />}
-        title="No activities yet"
-        body="Field operations logged for this farm will appear here."
+      <EmptyState
+        icon={ActivityIcon}
+        title="No activities logged"
+        hint="Field operations logged for this farm will appear here."
+        actionLabel="Log activity"
+        actionHref="/activities/new"
       />
     );
   }
@@ -145,10 +150,10 @@ function ActivitiesTab({ activities }: { activities: Activity[] }) {
 function WeatherTab({ weather }: { weather: WeatherSnapshot | null }) {
   if (!weather) {
     return (
-      <Empty
-        icon={<CloudRain size={26} />}
+      <EmptyState
+        icon={CloudRain}
         title="Weather unavailable"
-        body="The farm may not have GPS set, or the forecast service timed out."
+        hint="The farm may not have GPS set, or the forecast service timed out."
       />
     );
   }
@@ -244,26 +249,6 @@ function SoilTab({ soil }: { soil?: string }) {
           <div className="mt-1 font-display text-[17px] font-bold text-fg">{v}</div>
         </div>
       ))}
-    </div>
-  );
-}
-
-function Empty({
-  icon,
-  title,
-  body,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  body: string;
-}) {
-  return (
-    <div className="grid place-items-center px-4 py-14 text-center">
-      <span className="grid h-12 w-12 place-items-center rounded-2xl bg-bg-muted text-fg-subtle">
-        {icon}
-      </span>
-      <div className="mt-3 text-sm font-semibold text-fg">{title}</div>
-      <p className="mt-1 max-w-xs text-[13px] text-fg-muted">{body}</p>
     </div>
   );
 }

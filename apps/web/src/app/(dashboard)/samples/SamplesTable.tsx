@@ -8,9 +8,10 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { Plus, Search } from 'lucide-react';
+import { FlaskConical, Plus, Search } from 'lucide-react';
 import type { Sample } from '@/lib/api';
 import { StatusPill } from '@/components/dashboard/StatusPill';
+import { EmptyState } from '@/components/dashboard/EmptyState';
 
 export interface SampleRow {
   id: string;
@@ -212,10 +213,16 @@ export function SamplesTable({ rows, total, page, totalPages, query, status }: P
             <tbody>
               {table.getRowModel().rows.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length} className="px-4 py-16 text-center text-fg-muted">
-                    {active === 'All'
-                      ? 'No samples logged yet.'
-                      : `No ${active.toLowerCase()} samples.`}
+                  <td colSpan={columns.length} className="p-0">
+                    <EmptyState
+                      icon={FlaskConical}
+                      title={active === 'All' ? 'No samples yet' : `No ${active.toLowerCase()} samples`}
+                      hint={
+                        active === 'All'
+                          ? 'Lab samples submitted for testing will appear here.'
+                          : 'No samples match this filter.'
+                      }
+                    />
                   </td>
                 </tr>
               ) : (

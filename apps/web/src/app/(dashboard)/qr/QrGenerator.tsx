@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Download, ExternalLink } from 'lucide-react';
+import { Download, ExternalLink, QrCode } from 'lucide-react';
 import { TraceQr, traceCodeFromBatch } from '@/components/dashboard/TraceQr';
+import { EmptyState } from '@/components/dashboard/EmptyState';
 
 export interface BatchOption {
   id: string;
@@ -122,7 +123,11 @@ export function QrGenerator({ batches }: { batches: BatchOption[] }) {
             </div>
           </>
         ) : (
-          <p className="text-sm text-fg-muted">Enter a batch code to preview its label.</p>
+          <EmptyState
+            icon={QrCode}
+            title={hasBatches ? 'Pick a batch to generate its QR' : 'Enter a batch code to generate its QR'}
+            hint="A scannable label and public trace link will preview here."
+          />
         )}
       </div>
     </div>

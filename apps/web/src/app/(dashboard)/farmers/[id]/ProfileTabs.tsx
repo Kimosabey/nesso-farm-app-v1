@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Activity, FileText, Leaf, MapPin, ShieldCheck, Sprout } from 'lucide-react';
 import type { Farm, Farmer } from '@/lib/api';
 import { StatusPill } from '@/components/dashboard/StatusPill';
+import { EmptyState } from '@/components/dashboard/EmptyState';
 
 const TABS = ['Farms', 'Crops', 'Activities', 'Samples', 'Documents'] as const;
 type Tab = (typeof TABS)[number];
@@ -39,17 +40,19 @@ export function ProfileTabs({ farmer, farms }: { farmer: Farmer; farms: Farm[] }
         {tab === 'Farms' && <FarmsTab farms={farms} />}
         {tab === 'Crops' && <CropsTab crops={farmer.selectedCrops ?? []} />}
         {tab === 'Activities' && (
-          <Empty
-            icon={<Activity size={26} />}
-            title="No activities yet"
-            body="Field operations logged for this farmer will appear here."
+          <EmptyState
+            icon={Activity}
+            title="No activities logged"
+            hint="Field operations logged for this farmer will appear here."
+            actionLabel="Log activity"
+            actionHref="/activities/new"
           />
         )}
         {tab === 'Samples' && (
-          <Empty
-            icon={<Sprout size={26} />}
+          <EmptyState
+            icon={Sprout}
             title="No lab samples"
-            body="Quality samples submitted for this farmer will appear here."
+            hint="Quality samples submitted for this farmer will appear here."
           />
         )}
         {tab === 'Documents' && <DocumentsTab status={farmer.approvalStatus} />}
@@ -61,10 +64,12 @@ export function ProfileTabs({ farmer, farms }: { farmer: Farmer; farms: Farm[] }
 function FarmsTab({ farms }: { farms: Farm[] }) {
   if (farms.length === 0) {
     return (
-      <Empty
-        icon={<MapPin size={26} />}
+      <EmptyState
+        icon={MapPin}
         title="No farms mapped"
-        body="Mapped plots for this farmer will appear here as cards."
+        hint="Mapped plots for this farmer will appear here as cards."
+        actionLabel="Register farm"
+        actionHref="/farms/new"
       />
     );
   }
@@ -98,10 +103,10 @@ function FarmsTab({ farms }: { farms: Farm[] }) {
 function CropsTab({ crops }: { crops: string[] }) {
   if (crops.length === 0) {
     return (
-      <Empty
-        icon={<Leaf size={26} />}
+      <EmptyState
+        icon={Leaf}
         title="No crops selected"
-        body="Crops this farmer grows will appear here."
+        hint="Crops this farmer grows will appear here."
       />
     );
   }
@@ -156,26 +161,6 @@ function DocumentsTab({ status }: { status: Farmer['approvalStatus'] }) {
           </div>
         </div>
       ))}
-    </div>
-  );
-}
-
-function Empty({
-  icon,
-  title,
-  body,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  body: string;
-}) {
-  return (
-    <div className="grid place-items-center px-4 py-14 text-center">
-      <span className="grid h-12 w-12 place-items-center rounded-2xl bg-bg-muted text-fg-subtle">
-        {icon}
-      </span>
-      <div className="mt-3 text-sm font-semibold text-fg">{title}</div>
-      <p className="mt-1 max-w-xs text-[13px] text-fg-muted">{body}</p>
     </div>
   );
 }
