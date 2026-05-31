@@ -1,8 +1,27 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { CloudRain, MapPin, Wind, Droplets, Thermometer } from 'lucide-react';
-import { api, ApiError, readAccessToken, type WeatherSnapshot } from '@/lib/api';
-import { StatusBadge } from '@/components/dashboard/Badges';
+import { Droplets, Leaf, MapPin, Ruler, Sprout, User } from 'lucide-react';
+import {
+  api,
+  ApiError,
+  readAccessToken,
+  type Activity,
+  type Crop,
+  type WeatherSnapshot,
+} from '@/lib/api';
+import { PageHeader } from '@/components/dashboard/PageHeader';
+import { StatusPill } from '@/components/dashboard/StatusPill';
+import { MiniMap } from '@/components/dashboard/charts/MiniMap';
+import { FarmTabs } from './FarmTabs';
+
+const STATUS_PILL: Record<
+  'pending' | 'approved' | 'rejected',
+  { kind: 'pending' | 'approved' | 'rejected'; label: string }
+> = {
+  pending: { kind: 'pending', label: 'Approval pending' },
+  approved: { kind: 'approved', label: 'Approved' },
+  rejected: { kind: 'rejected', label: 'Rejected' },
+};
 
 export default async function FarmDetailPage({
   params,
@@ -20,205 +39,141 @@ export default async function FarmDetailPage({
     throw err;
   }
 
-  const [farmer, weather] = await Promise.all([
+  const [farmer, weather, crops, activities] = await Promise.all([
     api.getFarmer(token, farm.farmerId).catch(() => null),
     api.weatherForFarm(token, id).catch((): WeatherSnapshot | null => null),
+    api
+      .listCrops(token, { farmId: id })
+      .then((r) => r.data)
+      .catch((): Crop[] => []),
+    api
+      .listActivities(token, { farmId: id, pageSize: 20 })
+      .then((r) => r.data)
+      .catch((): Activity[] => []),
   ]);
 
-  const lat = farm.location?.coordinates[1];
-  const lng = farm.location?.coordinates[0];
+  const farmerName = farmer
+    ? [farmer.firstName, farmer.lastName].filter(Boolean).join(' ').trim() || farmer.farmerId
+    : '—';
+  const pill = STATUS_PILL[farm.approvalStatus];
+  const lat = farm.location?.coordinates?.[1];
+  const lng = farm.location?.coordinates?.[0];
+  const centroid =
+    Number.isFinite(lat) && Number.isFinite(lng)
+      ? `${lat!.toFixed(4)}°, ${lng!.toFixed(4)}°`
+      : '—';
+  const primaryCrop = crops[0]?.cropName ?? '—';
 
   return (
-    <section className="mx-auto max-w-5xl px-6 py-8">
+    <section className="mx-auto max-w-6xl px-6 py-8">
       <div className="mb-2 text-sm text-fg-muted">
         <Link href="/farms" className="hover:text-primary">
-          ← Farms
+          &larr; Farms
         </Link>
       </div>
 
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="font-display text-3xl tracking-tight text-fg">{farm.farmName}</h1>
-          <p className="mt-1 font-mono text-sm text-fg-subtle">{farm.farmId}</p>
-        </div>
-        <StatusBadge
-          label={farm.approvalStatus}
-          tone={
-            farm.approvalStatus === 'approved'
-              ? 'success'
-              : farm.approvalStatus === 'rejected'
-                ? 'danger'
-                : 'pending'
-          }
-        />
-      </div>
+      <PageHeader
+        title={farm.farmName}
+        sub={`${farm.farmId} · ${farm.address?.district ?? '—'} · ${farmerName}`}
+        actions={<StatusPill kind={pill.kind}>{pill.label}</StatusPill>}
+      />
 
-      <div className="mt-8 grid gap-4 md:grid-cols-2">
-        {/* Farm details */}
-        <Card title="Farm">
-          <Row label="Owner" value={farm.farmName} />
-          <Row label="Area" value={`${farm.farmArea.toFixed(2)} acres`} />
-          <Row label="Growing area" value={`${farm.growingArea.toFixed(2)} acres`} />
-          <Row label="Organic stage" value={farm.organicStage} />
-          {farmer ? (
-            <Row
+      <div className="grid items-start gap-5 lg:[grid-template-columns:360px_1fr]">
+        {/* left panel */}
+        <div className="self-start overflow-hidden rounded-2xl border border-border bg-bg-elevated shadow-sm">
+          <div className="h-44">
+            <MiniMap />
+          </div>
+          <div className="border-b border-border p-5">
+            <h2 className="font-display text-[18px] font-bold text-fg">{farm.farmName}</h2>
+            <p className="mt-1 font-mono text-[12.5px] text-fg-subtle">{farm.farmId}</p>
+          </div>
+
+          <div className="flex flex-col gap-3.5 border-b border-border p-5">
+            <InfoRow
+              icon={<Ruler size={15} />}
+              label="Area"
+              value={`${(farm.farmArea ?? 0).toFixed(2)} ac`}
+            />
+            <InfoRow
+              icon={<Sprout size={15} />}
+              label="Growing area"
+              value={`${(farm.growingArea ?? 0).toFixed(2)} ac`}
+            />
+            <InfoRow icon={<Leaf size={15} />} label="Practice" value={farm.organicStage ?? '—'} />
+            <InfoRow icon={<Droplets size={15} />} label="Crop" value={primaryCrop} />
+            <InfoRow
+              icon={<User size={15} />}
               label="Farmer"
               value={
-                <Link
-                  href={`/farmers/${farmer._id}`}
-                  className="text-primary hover:underline"
-                >
-                  {farmer.firstName} {farmer.lastName ?? ''}
-                </Link>
+                farmer ? (
+                  <Link href={`/farmers/${farmer._id}`} className="text-primary hover:underline">
+                    {farmerName}
+                  </Link>
+                ) : (
+                  '—'
+                )
               }
             />
-          ) : null}
-        </Card>
-
-        {/* Location */}
-        <Card title="Location">
-          <Row label="Village" value={farm.address?.village ?? '—'} />
-          <Row label="District" value={farm.address?.district ?? '—'} />
-          <Row label="State" value={farm.address?.state ?? '—'} />
-          {Number.isFinite(lat) && Number.isFinite(lng) ? (
-            <Row
-              label="Coordinates"
-              value={
-                <span className="inline-flex items-center gap-1">
-                  <MapPin className="size-3 text-fg-subtle" aria-hidden />
-                  <code className="font-mono text-xs">
-                    {lat!.toFixed(5)}, {lng!.toFixed(5)}
-                  </code>
-                </span>
-              }
+            <InfoRow
+              icon={<MapPin size={15} />}
+              label="Village"
+              value={farm.address?.village ?? '—'}
             />
-          ) : null}
-        </Card>
+          </div>
 
-        {/* Weather */}
-        <div className="md:col-span-2">
-          {weather ? <WeatherCard w={weather} /> : <WeatherUnavailable />}
+          <div className="grid grid-cols-3 gap-3 p-5">
+            <Stat label="Crops" value={String(crops.length)} />
+            <Stat label="Activities" value={String(activities.length)} />
+            <Stat label="Centroid" value={centroid} mono />
+          </div>
         </div>
 
-        {/* Timestamps */}
-        <Card title="Registered">
-          <Row label="Created" value={new Date(farm.createdAt).toLocaleString()} />
-        </Card>
+        {/* right tabs */}
+        <FarmTabs
+          crops={crops}
+          activities={activities}
+          weather={weather}
+          soil={undefined}
+        />
       </div>
     </section>
   );
 }
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+function InfoRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+}) {
   return (
-    <div className="rounded-2xl border border-border bg-bg-elevated p-5 shadow-sm">
-      <h2 className="text-xs uppercase tracking-wider text-fg-subtle">{title}</h2>
-      <dl className="mt-3 space-y-2">{children}</dl>
+    <div className="flex items-center justify-between gap-3">
+      <span className="flex items-center gap-2 text-[13px] text-fg-muted">
+        <span className="text-fg-subtle">{icon}</span>
+        {label}
+      </span>
+      <span className="truncate text-[13.5px] font-semibold text-fg">{value}</span>
     </div>
   );
 }
 
-function Row({ label, value }: { label: string; value: React.ReactNode }) {
+function Stat({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="flex items-baseline justify-between gap-3">
-      <dt className="text-xs text-fg-subtle">{label}</dt>
-      <dd className="truncate text-sm text-fg">{value}</dd>
-    </div>
-  );
-}
-
-function WeatherUnavailable() {
-  return (
-    <div className="rounded-2xl border border-border bg-bg-muted/40 p-5">
-      <h2 className="text-xs uppercase tracking-wider text-fg-subtle">Weather</h2>
-      <p className="mt-2 text-sm text-fg-muted">
-        Couldn't fetch weather. The farm may not have GPS set, or Open-Meteo timed out.
-      </p>
-    </div>
-  );
-}
-
-function WeatherCard({ w }: { w: WeatherSnapshot }) {
-  const today = w.daily[0];
-  return (
-    <div className="rounded-2xl border border-border bg-bg-elevated p-5 shadow-sm">
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-xs uppercase tracking-wider text-fg-subtle">Weather (Open-Meteo)</h2>
-        <span className="text-[10px] text-fg-subtle">
-          {new Date(w.fetchedAt).toLocaleTimeString()}
-        </span>
+    <div className="min-w-0">
+      <div className="text-[11px] font-bold uppercase tracking-[0.04em] text-fg-subtle">
+        {label}
       </div>
-
-      {/* Current */}
-      <div className="mt-4 flex flex-wrap items-baseline gap-4">
-        <div>
-          <p className="font-display text-5xl tabular-nums text-fg">
-            {Math.round(w.current.tempC)}°
-            <span className="ml-1 text-base text-fg-muted">C</span>
-          </p>
-          {w.current.description ? (
-            <p className="mt-1 text-sm text-fg-muted">{w.current.description}</p>
-          ) : null}
-        </div>
-        <ul className="flex flex-wrap gap-4 text-sm text-fg-muted">
-          {w.current.feelsLikeC !== undefined ? (
-            <li className="inline-flex items-center gap-1.5">
-              <Thermometer className="size-3.5" />
-              Feels {Math.round(w.current.feelsLikeC)}°
-            </li>
-          ) : null}
-          {w.current.humidity !== undefined ? (
-            <li className="inline-flex items-center gap-1.5">
-              <Droplets className="size-3.5" />
-              {w.current.humidity}% humidity
-            </li>
-          ) : null}
-          {w.current.windKmh !== undefined ? (
-            <li className="inline-flex items-center gap-1.5">
-              <Wind className="size-3.5" />
-              {Math.round(w.current.windKmh)} km/h
-            </li>
-          ) : null}
-          {today?.precipMm !== undefined ? (
-            <li className="inline-flex items-center gap-1.5">
-              <CloudRain className="size-3.5" />
-              {today.precipMm.toFixed(1)} mm today
-            </li>
-          ) : null}
-        </ul>
+      <div
+        className={`mt-1 truncate font-bold text-fg ${
+          mono ? 'font-mono text-[12.5px]' : 'font-display text-lg'
+        }`}
+      >
+        {value}
       </div>
-
-      {/* Advisories */}
-      {w.advisories.length > 0 ? (
-        <ul className="mt-4 space-y-1.5">
-          {w.advisories.map((a, i) => (
-            <li
-              key={i}
-              className="rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-fg"
-            >
-              {a}
-            </li>
-          ))}
-        </ul>
-      ) : null}
-
-      {/* 7-day */}
-      <ol className="mt-5 grid grid-cols-7 gap-2 text-center">
-        {w.daily.map((d, i) => (
-          <li key={d.date} className="rounded-lg border border-border bg-bg-muted/30 px-2 py-3">
-            <p className="text-[10px] uppercase tracking-wider text-fg-subtle">
-              {i === 0 ? 'Today' : new Date(d.date).toLocaleDateString(undefined, { weekday: 'short' })}
-            </p>
-            <p className="mt-1 font-mono text-sm tabular-nums text-fg">
-              {Math.round(d.maxC)}°
-            </p>
-            <p className="font-mono text-xs text-fg-subtle tabular-nums">{Math.round(d.minC)}°</p>
-            {d.precipProbability && d.precipProbability >= 30 ? (
-              <p className="mt-1 text-[10px] text-info">{d.precipProbability}%</p>
-            ) : null}
-          </li>
-        ))}
-      </ol>
     </div>
   );
 }
