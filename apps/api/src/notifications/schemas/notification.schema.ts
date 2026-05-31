@@ -49,3 +49,4 @@ export class Notification {
 
 export const NotificationSchema = SchemaFactory.createForClass(Notification);
 NotificationSchema.index({ userId: 1, status: 1, createdAt: -1 });
+NotificationSchema.index({ createdAt: -1 });

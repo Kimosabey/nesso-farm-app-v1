@@ -95,3 +95,4 @@ export class Activity {
 export const ActivitySchema = SchemaFactory.createForClass(Activity);
 ActivitySchema.index({ farmId: 1, scheduledOn: -1 });
 ActivitySchema.index({ status: 1, scheduledOn: 1 });
+ActivitySchema.index({ scheduledOn: -1 });
