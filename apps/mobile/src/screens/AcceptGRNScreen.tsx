@@ -1,9 +1,15 @@
 /**
  * AcceptGRNScreen — scan a QR / barcode to accept a Goods Receipt Note.
  *
- * expo-barcode-scanner requires a dev build (not Expo Go).
- * We guard the import with the same isExpoGo + try/catch pattern
- * used in src/firebase/auth.ts.
+ * Spec source: design_handoff_nesso/app/screens_create2.jsx — AcceptGrnScreen
+ *   - Dark camera view, corner reticle + an animated sweeping scan-line, flash
+ *     toggle, format chips (QR/EAN-13/PDF417/Aztec/DataMatrix). Tap reticle (or
+ *     "Simulate scan" in Expo Go) → green flash + spring-in checkmark → confirm
+ *     bottom sheet (batch, crop·grade, qty, supplier, farm) → "Accept GRN".
+ *   - Manual-code entry fallback preserved.
+ *
+ * expo-barcode-scanner requires a dev build (not Expo Go); guarded with the
+ * isExpoGo + try/catch pattern from src/firebase/auth.ts.
  */
 import { useState, useEffect, useRef } from 'react';
 import {
@@ -13,22 +19,24 @@ import {
   Pressable,
   ActivityIndicator,
   Animated,
+  Modal,
   Platform,
+  Easing,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ChevronLeft, QrCode, CheckCircle } from 'lucide-react-native';
+import { ChevronLeft, Flashlight, Check, Edit3, ScanLine, X } from 'lucide-react-native';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { api, ApiError } from '@/api/client';
 import { useToast } from '@/components/Toast';
+import { useTheme } from '@/theme';
 
 // ---------------------------------------------------------------------------
 // Expo Go guard
 // ---------------------------------------------------------------------------
 const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 
-// Lazily-loaded expo-barcode-scanner types
 interface BarCodeScannerResult {
   type: string;
   data: string;
@@ -57,47 +65,74 @@ function loadScanner(): BarCodeScannerModule | null {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
+const RETICLE = 236;
+const FORMATS = ['QR', 'EAN-13', 'PDF417', 'Aztec', 'DataMatrix'] as const;
+
 type Props = NativeStackScreenProps<RootStackParamList, 'AcceptGRN'>;
-
-type ScreenStep = 'scan' | 'confirm' | 'success';
+type ScreenStep = 'scan' | 'manual';
 
 // ---------------------------------------------------------------------------
-// Corner accent helper (decorative scanner corners)
+// L-shaped corner bracket
 // ---------------------------------------------------------------------------
-function CornerAccent({
-  top,
-  left,
-  right,
-  bottom,
+function Corner({
+  pos,
+  color,
 }: {
-  top?: boolean;
-  left?: boolean;
-  right?: boolean;
-  bottom?: boolean;
+  pos: 'tl' | 'tr' | 'bl' | 'br';
+  color: string;
 }) {
-  const size = 20;
-  const thickness = 3;
-  const color = '#0D783C';
+  const t = 4;
+  const isTop = pos[0] === 't';
+  const isLeft = pos[1] === 'l';
   return (
     <View
       style={{
         position: 'absolute',
-        top: top !== undefined ? (top ? 0 : undefined) : undefined,
-        bottom: bottom !== undefined ? (bottom ? 0 : undefined) : undefined,
-        left: left !== undefined ? (left ? 0 : undefined) : undefined,
-        right: right !== undefined ? (right ? 0 : undefined) : undefined,
-        width: size,
-        height: size,
-        borderTopWidth: top ? thickness : 0,
-        borderBottomWidth: bottom ? thickness : 0,
-        borderLeftWidth: left ? thickness : 0,
-        borderRightWidth: right ? thickness : 0,
+        width: 40,
+        height: 40,
+        top: isTop ? 0 : undefined,
+        bottom: isTop ? undefined : 0,
+        left: isLeft ? 0 : undefined,
+        right: isLeft ? undefined : 0,
+        borderTopWidth: isTop ? t : 0,
+        borderBottomWidth: isTop ? 0 : t,
+        borderLeftWidth: isLeft ? t : 0,
+        borderRightWidth: isLeft ? 0 : t,
         borderColor: color,
+        borderTopLeftRadius: pos === 'tl' ? 16 : 0,
+        borderTopRightRadius: pos === 'tr' ? 16 : 0,
+        borderBottomLeftRadius: pos === 'bl' ? 16 : 0,
+        borderBottomRightRadius: pos === 'br' ? 16 : 0,
       }}
     />
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Press-scale pressable
+// ---------------------------------------------------------------------------
+function Scale({
+  onPress,
+  disabled,
+  style,
+  children,
+  hitSlop,
+}: {
+  onPress?: () => void;
+  disabled?: boolean;
+  style?: object;
+  children: React.ReactNode;
+  hitSlop?: number;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      hitSlop={hitSlop}
+      style={({ pressed }) => [style, { transform: [{ scale: pressed ? 0.94 : 1 }], opacity: disabled ? 0.5 : 1 }]}
+    >
+      {children}
+    </Pressable>
   );
 }
 
@@ -105,54 +140,70 @@ function CornerAccent({
 // Main screen
 // ---------------------------------------------------------------------------
 export function AcceptGRNScreen({ navigation }: Props) {
+  const C = useTheme().c;
   const toast = useToast();
+  const mod = loadScanner();
+
   const [step, setStep] = useState<ScreenStep>('scan');
   const [scannedCode, setScannedCode] = useState('');
   const [manualCode, setManualCode] = useState('');
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
+  const [flash, setFlash] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
 
-  // Animated values for success state
-  const scaleAnim = useRef(new Animated.Value(0)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
+  // Sweeping scan-line (loops top↔bottom while idle)
+  const sweep = useRef(new Animated.Value(0)).current;
+  // Success checkmark spring-in
+  const checkScale = useRef(new Animated.Value(0)).current;
 
-  const mod = loadScanner();
-
-  // Request camera permission (dev build only)
+  // Camera permission (dev build only)
   useEffect(() => {
     if (isExpoGo || !mod) return;
     void (async () => {
       const { status } = await mod.BarCodeScanner.requestPermissionsAsync();
       setHasPermission(status === 'granted');
     })();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Run success animation
+  // Loop the scan-line until a code is detected.
   useEffect(() => {
-    if (step === 'success') {
-      Animated.parallel([
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          useNativeDriver: true,
-          tension: 100,
-          friction: 8,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  }, [step, scaleAnim, opacityAnim]);
+    if (scanned) return;
+    sweep.setValue(0);
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(sweep, { toValue: 1, duration: 1600, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(sweep, { toValue: 0, duration: 1600, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [scanned, sweep]);
+
+  // Spring the checkmark in on detect, then open the confirm sheet.
+  useEffect(() => {
+    if (!scanned) return;
+    checkScale.setValue(0);
+    Animated.spring(checkScale, { toValue: 1, useNativeDriver: true, tension: 110, friction: 6 }).start();
+    const t = setTimeout(() => setConfirmOpen(true), 550);
+    return () => clearTimeout(t);
+  }, [scanned, checkScale]);
+
+  const detect = (code: string) => {
+    setScannedCode(code);
+    setScanned(true);
+  };
 
   const handleBarCodeScanned = ({ data }: BarCodeScannerResult) => {
-    setScanned(true);
-    setScannedCode(data);
-    setStep('confirm');
+    if (scanned) return;
+    detect(data);
+  };
+
+  const handleSimulate = () => {
+    if (scanned) return;
+    detect('BATCH-TBR-0291');
   };
 
   const handleManualSubmit = () => {
@@ -161,256 +212,350 @@ export function AcceptGRNScreen({ navigation }: Props) {
       toast.error('Please enter a GRN code');
       return;
     }
-    setScannedCode(code);
-    setStep('confirm');
+    detect(code);
+  };
+
+  const resetScan = () => {
+    setConfirmOpen(false);
+    setScanned(false);
+    setScannedCode('');
+    setManualCode('');
+    setStep('scan');
   };
 
   const handleAccept = async () => {
     setBusy(true);
     try {
       const result = await api.acceptGRN(scannedCode);
-      setSuccessMessage(result.message ?? 'GRN accepted successfully');
-      setStep('success');
+      toast.success(result.message ?? 'GRN accepted · 320 kg in');
+      navigation.goBack();
     } catch (e) {
-      toast.error(
-        e instanceof ApiError ? e.message : e instanceof Error ? e.message : 'Could not accept GRN',
-      );
+      toast.error(e instanceof ApiError ? e.message : e instanceof Error ? e.message : 'Could not accept GRN');
     } finally {
       setBusy(false);
     }
   };
 
-  const handleCancel = () => {
-    setScannedCode('');
-    setScanned(false);
-    setManualCode('');
-    setStep('scan');
-  };
+  const sweepY = sweep.interpolate({ inputRange: [0, 1], outputRange: [14, RETICLE - 18] });
+  const reticleColor = scanned ? C.primary : C.accent;
 
-  return (
-    <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
-      {/* ------------------------------------------------------------------ */}
-      {/* Header                                                               */}
-      {/* ------------------------------------------------------------------ */}
-      <View className="flex-row items-center border-b border-border bg-bg-elevated px-4 py-3">
-        <Pressable
-          onPress={() => (step === 'confirm' ? handleCancel() : navigation.goBack())}
-          className="size-10 items-center justify-center rounded-full"
-          hitSlop={8}
+  // -------------------------------------------------------------------------
+  // Manual entry step (fallback)
+  // -------------------------------------------------------------------------
+  if (step === 'manual') {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }} edges={['top']}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+            borderBottomWidth: 1,
+            borderBottomColor: C.border,
+            backgroundColor: C.bgElevated,
+            paddingHorizontal: 12,
+            paddingVertical: 10,
+          }}
         >
-          <ChevronLeft size={24} color="#0F1A14" />
-        </Pressable>
-        <Text className="ml-2 text-base font-semibold text-fg">Scan GRN</Text>
-      </View>
+          <Scale
+            onPress={() => setStep('scan')}
+            hitSlop={8}
+            style={{ width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
+          >
+            <ChevronLeft size={24} color={C.fg} />
+          </Scale>
+          <Text style={{ fontSize: 17, fontWeight: '700', color: C.fg }}>Enter GRN code</Text>
+        </View>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Success screen                                                        */}
-      {/* ------------------------------------------------------------------ */}
-      {step === 'success' ? (
-        <View className="flex-1 items-center justify-center px-6 gap-6">
+        <View style={{ padding: 20, gap: 14 }}>
+          <Text style={{ fontSize: 14, fontWeight: '600', color: C.fg }}>GRN / batch code</Text>
+          <TextInput
+            value={manualCode}
+            onChangeText={setManualCode}
+            placeholder="e.g. GRN-2025-001234"
+            placeholderTextColor={C.fgSubtle}
+            autoCapitalize="characters"
+            autoCorrect={false}
+            style={{
+              height: 54,
+              borderRadius: 13,
+              borderWidth: 1.5,
+              borderColor: C.borderStrong,
+              backgroundColor: C.bgElevated,
+              paddingHorizontal: 14,
+              fontSize: 16,
+              color: C.fg,
+              fontFamily: 'monospace',
+            }}
+          />
+          <Scale
+            onPress={handleManualSubmit}
+            style={{ paddingVertical: 15, borderRadius: 14, backgroundColor: C.primary, alignItems: 'center' }}
+          >
+            <Text style={{ fontSize: 15, fontWeight: '700', color: C.onPrimary }}>Continue</Text>
+          </Scale>
+        </View>
+
+        {renderConfirm()}
+      </SafeAreaView>
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Confirm bottom sheet (shared)
+  // -------------------------------------------------------------------------
+  function renderConfirm() {
+    const rows: Array<[string, string]> = [
+      ['Crop', 'Tuberose · Grade A'],
+      ['Quantity', '320 kg'],
+      ['Supplier', 'Belur FPO'],
+      ['Farm', 'Belur Estate · FARM-117'],
+    ];
+    return (
+      <Modal visible={confirmOpen} transparent animationType="slide" onRequestClose={resetScan}>
+        <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }} onPress={resetScan} />
+        <SafeAreaView edges={['bottom']} style={{ backgroundColor: C.bgElevated, borderTopLeftRadius: 24, borderTopRightRadius: 24 }}>
+          <View style={{ padding: 18 }}>
+            <View style={{ alignSelf: 'center', width: 38, height: 4, borderRadius: 2, backgroundColor: C.borderStrong, marginBottom: 14 }} />
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <Text style={{ fontSize: 17, fontWeight: '700', color: C.fg }}>Confirm GRN</Text>
+              <Scale onPress={resetScan} hitSlop={8} style={{ padding: 4 }}>
+                <X size={22} color={C.fgMuted} />
+              </Scale>
+            </View>
+
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+              <View
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
+                  backgroundColor: C.primary50,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <ScanLine size={22} color={C.primary} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 15, fontWeight: '600', color: C.fg, fontFamily: 'monospace' }} numberOfLines={1}>
+                  {scannedCode}
+                </Text>
+                <Text style={{ fontSize: 12.5, color: C.fgMuted }}>Detected · just now</Text>
+              </View>
+            </View>
+
+            <View style={{ backgroundColor: C.bgMuted, borderRadius: 14, overflow: 'hidden', marginBottom: 18 }}>
+              {rows.map(([k, v], i) => (
+                <View
+                  key={k}
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    paddingHorizontal: 14,
+                    paddingVertical: 12,
+                    borderTopWidth: i ? 1 : 0,
+                    borderTopColor: C.border,
+                  }}
+                >
+                  <Text style={{ fontSize: 13, color: C.fgMuted }}>{k}</Text>
+                  <Text style={{ fontSize: 13.5, fontWeight: '600', color: C.fg }}>{v}</Text>
+                </View>
+              ))}
+            </View>
+
+            <Scale
+              onPress={handleAccept}
+              disabled={busy}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 9,
+                paddingVertical: 15,
+                borderRadius: 14,
+                backgroundColor: C.primary,
+              }}
+            >
+              {busy ? (
+                <ActivityIndicator color={C.onPrimary} />
+              ) : (
+                <>
+                  <Check size={20} color={C.onPrimary} />
+                  <Text style={{ fontSize: 15, fontWeight: '700', color: C.onPrimary }}>Accept GRN</Text>
+                </>
+              )}
+            </Scale>
+          </View>
+        </SafeAreaView>
+      </Modal>
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Scanner reticle overlay (shared between camera + faux camera)
+  // -------------------------------------------------------------------------
+  const Overlay = (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 26 }}>
+      <Scale onPress={handleSimulate} disabled={scanned} style={{ width: RETICLE, height: RETICLE }}>
+        <Corner pos="tl" color={reticleColor} />
+        <Corner pos="tr" color={reticleColor} />
+        <Corner pos="bl" color={reticleColor} />
+        <Corner pos="br" color={reticleColor} />
+        {!scanned ? (
           <Animated.View
             style={{
-              transform: [{ scale: scaleAnim }],
-              opacity: opacityAnim,
+              position: 'absolute',
+              left: 14,
+              right: 14,
+              height: 3,
+              borderRadius: 2,
+              backgroundColor: C.accent,
+              shadowColor: C.accent,
+              shadowOpacity: 0.9,
+              shadowRadius: 8,
+              transform: [{ translateY: sweepY }],
+            }}
+          />
+        ) : (
+          <View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center' }}>
+            <Animated.View
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: 32,
+                backgroundColor: C.primary,
+                alignItems: 'center',
+                justifyContent: 'center',
+                transform: [{ scale: checkScale }],
+              }}
+            >
+              <Check size={36} color={C.onPrimary} strokeWidth={3} />
+            </Animated.View>
+          </View>
+        )}
+      </Scale>
+
+      <View style={{ alignItems: 'center', gap: 4 }}>
+        <Text style={{ fontSize: 14.5, fontWeight: '600', color: 'rgba(255,255,255,0.9)', textAlign: 'center' }}>
+          {scanned ? 'Code detected' : 'Align the QR or barcode inside the frame'}
+        </Text>
+        {!scanned ? (
+          <Text style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.5)' }}>(tap the frame to simulate a scan)</Text>
+        ) : null}
+      </View>
+
+      {/* Format chips */}
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, justifyContent: 'center', maxWidth: 300 }}>
+        {FORMATS.map((f) => (
+          <View
+            key={f}
+            style={{
+              paddingHorizontal: 10,
+              paddingVertical: 5,
+              borderRadius: 999,
+              backgroundColor: 'rgba(255,255,255,0.12)',
             }}
           >
-            <CheckCircle size={72} color="#0D783C" />
-          </Animated.View>
-          <View className="items-center gap-2">
-            <Text className="text-xl font-bold text-fg">GRN Accepted</Text>
-            <Text className="text-center text-sm text-fg-muted">{successMessage}</Text>
-            <View className="mt-1 rounded-lg bg-bg-elevated border border-border px-4 py-2">
-              <Text className="font-mono text-sm text-fg">{scannedCode}</Text>
-            </View>
+            <Text style={{ fontSize: 11, fontWeight: '500', color: 'rgba(255,255,255,0.8)', fontFamily: 'monospace' }}>{f}</Text>
           </View>
-          <Pressable
+        ))}
+      </View>
+    </View>
+  );
+
+  // -------------------------------------------------------------------------
+  // Scan step
+  // -------------------------------------------------------------------------
+  const showCamera = !isExpoGo && !!mod && hasPermission === true;
+
+  return (
+    <View style={{ flex: 1, backgroundColor: '#0a0f0c' }}>
+      {/* Faux camera gradient (Expo Go / no permission) */}
+      {!showCamera ? (
+        <View style={{ position: 'absolute', inset: 0, backgroundColor: '#0c120e' }} />
+      ) : null}
+
+      {/* Camera feed when available */}
+      {showCamera && mod ? (
+        <mod.BarCodeScanner
+          style={{ position: 'absolute', inset: 0 }}
+          onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+        />
+      ) : null}
+
+      {/* Dim mask */}
+      <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(6,12,8,0.55)' }} />
+
+      <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
+        {/* Top bar */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingTop: 6 }}>
+          <Scale
             onPress={() => navigation.goBack()}
-            className="w-full rounded-xl bg-primary py-4 items-center"
+            hitSlop={8}
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 21,
+              backgroundColor: 'rgba(255,255,255,0.14)',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
           >
-            <Text className="text-base font-semibold text-white">Done</Text>
-          </Pressable>
+            <ChevronLeft size={22} color="#FFFFFF" />
+          </Scale>
+          <Text style={{ flex: 1, fontSize: 17, fontWeight: '700', color: '#FFFFFF' }}>Scan GRN</Text>
+          <Scale
+            onPress={() => setFlash((f) => !f)}
+            hitSlop={8}
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 21,
+              backgroundColor: flash ? C.accent : 'rgba(255,255,255,0.14)',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Flashlight size={19} color={flash ? '#0F1A14' : '#FFFFFF'} />
+          </Scale>
         </View>
-      ) : step === 'confirm' ? (
-        /* ------------------------------------------------------------------ */
-        /* Confirm card                                                         */
-        /* ------------------------------------------------------------------ */
-        <View className="flex-1 justify-center px-6 gap-5">
-          <View className="rounded-2xl border border-border bg-bg-elevated p-6 gap-4">
-            <View className="items-center gap-2">
-              <QrCode size={32} color="#0D783C" />
-              <Text className="text-base font-semibold text-fg">GRN Code Scanned</Text>
-            </View>
 
-            {/* Code display */}
-            <View className="items-center rounded-xl bg-bg border border-border px-4 py-4">
-              <Text
-                style={{ fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace', fontSize: 18 }}
-                className="font-bold text-fg tracking-widest text-center"
-                numberOfLines={2}
-              >
-                {scannedCode}
-              </Text>
-            </View>
-
-            <Text className="text-center text-sm text-fg-muted">
-              Confirm that you want to accept this Goods Receipt Note.
+        {/* Permission-pending / denied notes (dev build) */}
+        {!isExpoGo && mod && hasPermission === false ? (
+          <View style={{ paddingHorizontal: 24, paddingTop: 16 }}>
+            <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 13, textAlign: 'center' }}>
+              Camera permission denied — use manual entry below.
             </Text>
-
-            {/* Buttons */}
-            <View className="gap-3">
-              <Pressable
-                onPress={handleAccept}
-                disabled={busy}
-                className="w-full rounded-xl bg-primary py-4 items-center"
-              >
-                {busy ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <Text className="text-base font-semibold text-white">Accept GRN</Text>
-                )}
-              </Pressable>
-
-              <Pressable
-                onPress={handleCancel}
-                disabled={busy}
-                className="w-full rounded-xl border border-border bg-bg-elevated py-4 items-center"
-              >
-                <Text className="text-base font-medium text-fg">Cancel</Text>
-              </Pressable>
-            </View>
           </View>
-        </View>
-      ) : (
-        /* ------------------------------------------------------------------ */
-        /* Scan step                                                            */
-        /* ------------------------------------------------------------------ */
-        <View className="flex-1">
-          {isExpoGo || !mod ? (
-            /* --- Expo Go placeholder -------------------------------------- */
-            <View className="flex-1 items-center justify-center px-6 gap-6">
-              <View className="items-center rounded-2xl border border-border bg-bg-elevated p-6 gap-3 w-full">
-                <View className="size-12 items-center justify-center rounded-full bg-primary/10">
-                  <QrCode size={24} color="#0D783C" />
-                </View>
-                <Text className="text-center text-sm font-semibold text-fg">
-                  Scanner requires a dev build
-                </Text>
-                <Text className="text-center text-xs text-fg-muted">
-                  The camera scanner is unavailable in Expo Go. You can still enter a GRN code
-                  manually below.
-                </Text>
-              </View>
+        ) : null}
 
-              {/* Manual entry */}
-              <View className="w-full gap-3">
-                <Text className="text-sm font-medium text-fg">Enter GRN code manually</Text>
-                <TextInput
-                  value={manualCode}
-                  onChangeText={setManualCode}
-                  placeholder="e.g. GRN-2025-001234"
-                  placeholderTextColor="#7A8A82"
-                  autoCapitalize="characters"
-                  autoCorrect={false}
-                  className="h-12 rounded-md border border-border bg-bg-elevated px-3 text-base text-fg"
-                />
-                <Pressable
-                  onPress={handleManualSubmit}
-                  className="w-full rounded-xl bg-primary py-4 items-center"
-                >
-                  <Text className="text-base font-semibold text-white">Continue</Text>
-                </Pressable>
-              </View>
-            </View>
-          ) : hasPermission === null ? (
-            /* Permission loading */
-            <View className="flex-1 items-center justify-center gap-3">
-              <ActivityIndicator size="large" color="#0D783C" />
-              <Text className="text-sm text-fg-muted">Requesting camera permission…</Text>
-            </View>
-          ) : hasPermission === false ? (
-            /* Permission denied */
-            <View className="flex-1 items-center justify-center px-6 gap-4">
-              <View className="size-16 items-center justify-center rounded-full bg-red-50">
-                <QrCode size={28} color="#DC2626" />
-              </View>
-              <Text className="text-center text-base font-semibold text-fg">
-                Camera permission denied
-              </Text>
-              <Text className="text-center text-sm text-fg-muted">
-                Please allow camera access in your device Settings to scan barcodes.
-              </Text>
-              <Pressable
-                onPress={() =>
-                  void (async () => {
-                    const { status } = await mod.BarCodeScanner.requestPermissionsAsync();
-                    setHasPermission(status === 'granted');
-                  })()
-                }
-                className="rounded-xl bg-primary px-6 py-3"
-              >
-                <Text className="text-sm font-semibold text-white">Retry</Text>
-              </Pressable>
-            </View>
-          ) : (
-            /* Full-screen scanner */
-            <View className="flex-1">
-              <mod.BarCodeScanner
-                style={{ flex: 1 }}
-                onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-              >
-                {/* Scanning frame overlay */}
-                <View className="flex-1 items-center justify-center">
-                  {/* Dark surrounds */}
-                  <View
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      backgroundColor: 'rgba(0,0,0,0.55)',
-                    }}
-                  />
-                  {/* Clear window (cut out effect via negative margin trick) */}
-                  <View
-                    style={{
-                      width: 280,
-                      height: 280,
-                      backgroundColor: 'transparent',
-                      zIndex: 1,
-                    }}
-                  >
-                    {/* White border */}
-                    <View
-                      style={{
-                        position: 'absolute',
-                        inset: 0,
-                        borderWidth: 2,
-                        borderColor: 'rgba(255,255,255,0.4)',
-                        borderRadius: 8,
-                      }}
-                    />
-                    {/* Corner accents */}
-                    <CornerAccent top left />
-                    <CornerAccent top right />
-                    <CornerAccent bottom left />
-                    <CornerAccent bottom right />
-                  </View>
+        {/* Reticle + chips */}
+        {Overlay}
 
-                  {/* Hint text */}
-                  <View
-                    style={{ position: 'absolute', bottom: 60, left: 0, right: 0, zIndex: 2 }}
-                    className="items-center"
-                  >
-                    <Text
-                      style={{ color: '#FFFFFF', fontSize: 13, textAlign: 'center' }}
-                    >
-                      Position QR code in the frame
-                    </Text>
-                  </View>
-                </View>
-              </mod.BarCodeScanner>
-            </View>
-          )}
+        {/* Manual entry */}
+        <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+          <Scale
+            onPress={() => setStep('manual')}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 9,
+              paddingVertical: 14,
+              borderRadius: 14,
+              backgroundColor: 'rgba(255,255,255,0.12)',
+              borderWidth: 1.5,
+              borderColor: 'rgba(255,255,255,0.18)',
+            }}
+          >
+            <Edit3 size={18} color="#FFFFFF" />
+            <Text style={{ fontSize: 14.5, fontWeight: '600', color: '#FFFFFF' }}>Enter code manually</Text>
+          </Scale>
         </View>
-      )}
-    </SafeAreaView>
+      </SafeAreaView>
+
+      {renderConfirm()}
+    </View>
   );
 }
