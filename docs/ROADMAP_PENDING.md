@@ -65,7 +65,10 @@ Last updated: 2026-05-31
 - [ ] **Sentry events** — trigger `/debug/sentry/throw`, confirm in dashboard
 - [ ] **API smoke** — `pwsh ./scripts/smoke-test-api.ps1` (43 checks)
 
-### P5 · Phase 6 (production — paid, deliberate)
+### P5 · Phase 6 (production — paid, deliberate) — ⛔ ON HOLD
+> **Do NOT start any Phase 6 / production item until the user explicitly says so.**
+> (User directive, 2026-05-31.) Everything below stays untouched until then.
+
 - [ ] MongoDB Atlas, AWS S3, Redis Cloud, Vercel (web+portal), API host (Render/Fly), domain + DNS
 - [ ] Sentry source-map upload (`SENTRY_AUTH_TOKEN`) + release tagging
 - [ ] EAS production builds + store submission
