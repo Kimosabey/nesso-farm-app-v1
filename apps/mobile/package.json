@@ -21,6 +21,8 @@
     "@nesso/shared-types": "workspace:*",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/netinfo": "11.4.1",
+    "@react-native-firebase/app": "^24.0.0",
+    "@react-native-firebase/auth": "^24.0.0",
     "@react-navigation/bottom-tabs": "^7.0.7",
     "@react-navigation/native": "^7.0.7",
     "@react-navigation/native-stack": "^7.1.7",
@@ -69,10 +71,5 @@
     "rimraf": "^6.0.1",
     "tailwindcss": "^3.4.15",
     "typescript": "~5.9.2"
-  },
-  "_disabledDependencies": {
-    "@react-native-firebase/app": "^24.0.0",
-    "@react-native-firebase/auth": "^24.0.0",
-    "//": "Temporarily disabled — Gradle fails without google-services.json. To re-enable: (1) Drop apps/mobile/google-services.json in place (download from Firebase console, package app.nesso.farmer). (2) Move these two entries back into the `dependencies` block above. (3) Run `pnpm install` from the repo root. (4) Re-run `eas build --profile development --platform android`. The runtime guard in src/firebase/auth.ts keeps the app working with or without these installed."
   }
 }
