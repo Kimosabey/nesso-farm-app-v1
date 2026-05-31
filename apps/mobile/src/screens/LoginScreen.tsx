@@ -134,8 +134,11 @@ export function LoginScreen({ navigation }: Props) {
         </View>
 
         {/* Fields scroll; the primary CTA lives in a fixed footer below
-            (outside the scroll) so it is ALWAYS visible on screen. */}
+            (outside the scroll) so it is ALWAYS visible on screen.
+            `flex: 1` bounds the scroll area so the footer stays pinned —
+            without it the content expands and pushes the button off-screen. */}
         <ScrollView
+          style={{ flex: 1 }}
           contentContainerStyle={{ paddingHorizontal: 26, paddingBottom: 16 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
