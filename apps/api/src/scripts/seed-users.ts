@@ -96,6 +96,32 @@ async function main(): Promise<void> {
     table.push({ role, phone, password: DEMO_PASSWORD, action: 'created' });
   }
 
+  // --- Firebase OTP test-number users -----------------------------------------
+  // These phones are registered as Firebase "test numbers" in the console
+  // (no real SMS). The backend /auth/otp/verify looks the phone up in `users`
+  // after Firebase validates the token, so each must exist here. The bootstrap
+  // admin (9066666481) is seeded by seed-admin; we add the field-officer test
+  // number 9876543210 so BOTH OTP test logins resolve to a real active user.
+  const otpTestUsers: Array<{ phone: string; role: string; firstName: string; lastName: string }> = [
+    { phone: '9876543210', role: 'fieldOfficer', firstName: 'OTP', lastName: 'Tester' },
+  ];
+  for (const u of otpTestUsers) {
+    const existing = await users.findByPhone(u.phone);
+    if (existing) {
+      table.push({ role: u.role + ' (OTP)', phone: u.phone, password: '(unchanged)', action: 'kept' });
+      continue;
+    }
+    await users.create({
+      phone: u.phone,
+      password: DEMO_PASSWORD,
+      firstName: u.firstName,
+      lastName: u.lastName,
+      role: u.role,
+      mustChangePassword: false,
+    });
+    table.push({ role: u.role + ' (OTP)', phone: u.phone, password: DEMO_PASSWORD, action: 'created' });
+  }
+
   // --- Summary table ---------------------------------------------------------
   const roleW = Math.max(4, ...table.map((r) => r.role.length));
   const phoneW = 10;
