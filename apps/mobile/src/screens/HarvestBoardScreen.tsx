@@ -12,11 +12,13 @@
  * a failed fetch falls back to an empty board, never crashes.
  */
 import { useEffect, useState } from 'react';
-import { View, Text, Pressable, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft, Wheat, MapPin, Navigation } from 'lucide-react-native';
 import { api, type Crop, type Farm } from '@/api/client';
+import { EmptyState } from '@/components/EmptyState';
+import { ListSkeleton } from '@/components/Skeleton';
 import { useTheme } from '@/theme';
 
 type Nav = { goBack: () => void };
@@ -139,14 +141,15 @@ export function HarvestBoardScreen() {
         </View>
 
         {loading ? (
-          <View style={{ paddingVertical: 60, alignItems: 'center' }}>
-            <ActivityIndicator color={C.primary} />
+          <View style={{ marginHorizontal: -16 }}>
+            <ListSkeleton />
           </View>
         ) : groups.length === 0 ? (
-          <View style={{ alignItems: 'center', paddingVertical: 56, gap: 12 }}>
-            <Wheat size={36} color="rgba(13,120,60,0.4)" />
-            <Text style={{ fontSize: 14, color: C.fgSubtle }}>No upcoming harvests</Text>
-          </View>
+          <EmptyState
+            icon={Wheat}
+            title="No upcoming harvests"
+            hint="Crops with a harvest date in the next 30 days will appear here."
+          />
         ) : (
           groups.map((grp) => (
             <View key={grp.g} style={{ marginBottom: 18 }}>
@@ -243,15 +246,18 @@ export function HarvestBoardScreen() {
                       </View>
                       <View style={{ flex: 1 }} />
                       <Pressable
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          gap: 6,
-                          backgroundColor: 'rgba(13,120,60,0.10)',
-                          borderRadius: 999,
-                          paddingHorizontal: 12,
-                          paddingVertical: 7,
-                        }}
+                        style={({ pressed }) => [
+                          {
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            gap: 6,
+                            backgroundColor: 'rgba(13,120,60,0.10)',
+                            borderRadius: 999,
+                            paddingHorizontal: 12,
+                            paddingVertical: 7,
+                            transform: [{ scale: pressed ? 0.97 : 1 }],
+                          },
+                        ]}
                       >
                         <Navigation size={14} color={C.primary} />
                         <Text style={{ fontSize: 12.5, fontWeight: '600', color: C.primary }}>

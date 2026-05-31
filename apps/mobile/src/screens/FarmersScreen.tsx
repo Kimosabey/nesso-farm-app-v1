@@ -14,10 +14,12 @@ import { View, Text, FlatList, Pressable, RefreshControl, TextInput } from 'reac
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Search, SlidersHorizontal, MapPin, Sprout, ChevronRight } from 'lucide-react-native';
+import { Search, SlidersHorizontal, MapPin, Sprout, ChevronRight, Users } from 'lucide-react-native';
 import { api, type Farmer } from '@/api/client';
 import { sync, type SyncStatus } from '@/sync/SyncManager';
 import { OfflineBanner } from '@/components/OfflineBanner';
+import { EmptyState } from '@/components/EmptyState';
+import { ListSkeleton } from '@/components/Skeleton';
 import { useTheme } from '@/theme';
 import { useT } from '@/i18n';
 import type { RootStackParamList } from '../../App';
@@ -85,6 +87,7 @@ export function FarmersScreen() {
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<Chip>('All');
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
 
   const load = useCallback(async () => {
@@ -94,6 +97,8 @@ export function FarmersScreen() {
       setFarmers(r.data);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load');
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -232,16 +237,19 @@ export function FarmersScreen() {
           <View style={{ paddingHorizontal: 20, paddingBottom: 10 }}>
             <Pressable
               onPress={() => navigation.navigate('FarmerProfile', { farmerId: item._id })}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 13,
-                backgroundColor: C.bgElevated,
-                borderRadius: 16,
-                padding: 13,
-                borderWidth: 1,
-                borderColor: C.border,
-              }}
+              style={({ pressed }) => [
+                {
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 13,
+                  backgroundColor: C.bgElevated,
+                  borderRadius: 16,
+                  padding: 13,
+                  borderWidth: 1,
+                  borderColor: C.border,
+                  transform: [{ scale: pressed ? 0.97 : 1 }],
+                },
+              ]}
             >
               <Avatar first={item.firstName} last={item.lastName} size={46} />
               <View style={{ flex: 1, minWidth: 0 }}>
@@ -278,9 +286,21 @@ export function FarmersScreen() {
           </View>
         )}
         ListEmptyComponent={
-          <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-            <Text style={{ fontSize: 14, color: C.fgSubtle }}>{t('farmers.noMatch')}</Text>
-          </View>
+          isLoading ? (
+            <ListSkeleton />
+          ) : farmers.length === 0 ? (
+            <EmptyState
+              icon={Users}
+              title="No farmers yet"
+              hint="Register your first farmer to start building your cluster."
+              actionLabel="Register"
+              onAction={() => navigation.getParent()?.navigate('Register')}
+            />
+          ) : (
+            <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+              <Text style={{ fontSize: 14, color: C.fgSubtle }}>{t('farmers.noMatch')}</Text>
+            </View>
+          )
         }
       />
     </SafeAreaView>

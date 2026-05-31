@@ -24,6 +24,8 @@ import {
   type LucideIcon,
 } from 'lucide-react-native';
 import { api, type ActivityRow } from '@/api/client';
+import { EmptyState } from '@/components/EmptyState';
+import { ListSkeleton } from '@/components/Skeleton';
 import { useTheme } from '@/theme';
 
 const TABS = ['Pending', 'Approved'] as const;
@@ -74,6 +76,7 @@ export function ActivitiesScreen() {
   const [tab, setTab] = useState<Tab>('Pending');
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const load = useCallback(async () => {
     setError(null);
@@ -82,6 +85,8 @@ export function ActivitiesScreen() {
       setActivities(r.data);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load');
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -228,12 +233,15 @@ export function ActivitiesScreen() {
           );
         }}
         ListEmptyComponent={
-          <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-            <ActivityIcon size={28} color={C.fgSubtle} />
-            <Text style={{ fontSize: 14, color: C.fgMuted, marginTop: 8 }}>
-              No {tab.toLowerCase()} activities.
-            </Text>
-          </View>
+          isLoading ? (
+            <ListSkeleton />
+          ) : (
+            <EmptyState
+              icon={ActivityIcon}
+              title="No activities"
+              hint={`No ${tab.toLowerCase()} activities to show.`}
+            />
+          )
         }
       />
     </SafeAreaView>

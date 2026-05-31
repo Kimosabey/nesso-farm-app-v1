@@ -12,8 +12,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, FlatList, Pressable, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { ChevronLeft, Plus } from 'lucide-react-native';
+import { ChevronLeft, Plus, ReceiptText } from 'lucide-react-native';
 import { api, type ProcurementRow } from '@/api/client';
+import { EmptyState } from '@/components/EmptyState';
+import { ListSkeleton } from '@/components/Skeleton';
 import { useTheme } from '@/theme';
 
 const TABS = ['All', 'Pending', 'Paid'] as const;
@@ -73,6 +75,7 @@ export function ProcurementScreen() {
   const [tab, setTab] = useState<Tab>('All');
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const load = useCallback(async () => {
     setError(null);
@@ -81,6 +84,8 @@ export function ProcurementScreen() {
       setRows(r.data);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load');
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -209,9 +214,15 @@ export function ProcurementScreen() {
           </View>
         )}
         ListEmptyComponent={
-          <View style={{ alignItems: 'center', paddingVertical: 50 }}>
-            <Text style={{ fontSize: 14, color: C.fgMuted }}>No procurement records.</Text>
-          </View>
+          isLoading ? (
+            <ListSkeleton />
+          ) : (
+            <EmptyState
+              icon={ReceiptText}
+              title="No procurement records"
+              hint="Record a procurement to track quantities and payments."
+            />
+          )
         }
       />
 
@@ -228,15 +239,18 @@ export function ProcurementScreen() {
       >
         <Pressable
           onPress={onRefresh}
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-            height: 52,
-            borderRadius: 14,
-            backgroundColor: C.primary,
-          }}
+          style={({ pressed }) => [
+            {
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              height: 52,
+              borderRadius: 14,
+              backgroundColor: C.primary,
+              transform: [{ scale: pressed ? 0.97 : 1 }],
+            },
+          ]}
         >
           <Plus size={20} color={C.onPrimary} />
           <Text style={{ fontSize: 15.5, fontWeight: '700', color: C.onPrimary }}>

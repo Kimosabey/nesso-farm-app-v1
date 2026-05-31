@@ -361,28 +361,29 @@ export function RegisterFarmerScreen() {
         </Text>
       </View>
 
-      {/* progress bar — 4 segments, completed = checked, active = highlighted */}
+      {/* progress bar — 4 segments: filled = primary, current = primary, upcoming = border */}
       <View style={{ paddingHorizontal: 16, paddingTop: 14 }}>
         <View style={{ flexDirection: 'row', gap: 6 }}>
           {STEPS.map((s, i) => {
             const done = i < step;
             const active = i === step;
+            const reached = done || active;
             return (
               <View key={s} style={{ flex: 1 }}>
                 <View
                   style={{
-                    height: 4,
-                    borderRadius: 2,
-                    backgroundColor: done || active ? C.primary : C.borderStrong,
+                    height: 6,
+                    borderRadius: 3,
+                    backgroundColor: reached ? C.primary : C.border,
                   }}
                 />
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6 }}>
-                  {done ? <Check size={11} color={C.primary} /> : null}
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 7 }}>
+                  {done ? <Check size={12} color={C.primary} strokeWidth={3} /> : null}
                   <Text
                     style={{
-                      fontSize: 10.5,
-                      fontWeight: '600',
-                      color: done || active ? C.primary : C.fgSubtle,
+                      fontSize: 11.5,
+                      fontWeight: active ? '700' : '600',
+                      color: reached ? C.primary : C.fgSubtle,
                     }}
                   >
                     {s}
@@ -526,7 +527,15 @@ export function RegisterFarmerScreen() {
 
               <Pressable
                 onPress={() => setConsent((v) => !v)}
-                style={{ flexDirection: 'row', gap: 11, paddingHorizontal: 4, paddingBottom: 8 }}
+                style={({ pressed }) => [
+                  {
+                    flexDirection: 'row',
+                    gap: 11,
+                    paddingHorizontal: 4,
+                    paddingBottom: 8,
+                    transform: [{ scale: pressed ? 0.98 : 1 }],
+                  },
+                ]}
               >
                 <View
                   style={{
@@ -606,17 +615,20 @@ export function RegisterFarmerScreen() {
             <Pressable
               onPress={submit}
               disabled={busy || !canSave}
-              style={{
-                flex: 1,
-                height: 50,
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 8,
-                borderRadius: 14,
-                backgroundColor: C.primary,
-                opacity: busy || !canSave ? 0.5 : 1,
-              }}
+              style={({ pressed }) => [
+                {
+                  flex: 1,
+                  height: 50,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  borderRadius: 14,
+                  backgroundColor: C.primary,
+                  opacity: busy || !canSave ? 0.5 : 1,
+                  transform: [{ scale: pressed ? 0.97 : 1 }],
+                },
+              ]}
             >
               {busy ? (
                 <ActivityIndicator color={C.onPrimary} />
@@ -633,17 +645,20 @@ export function RegisterFarmerScreen() {
             <Pressable
               onPress={next}
               disabled={busy}
-              style={{
-                flex: 1,
-                height: 50,
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 8,
-                borderRadius: 14,
-                backgroundColor: C.primary,
-                opacity: busy ? 0.6 : 1,
-              }}
+              style={({ pressed }) => [
+                {
+                  flex: 1,
+                  height: 50,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  borderRadius: 14,
+                  backgroundColor: C.primary,
+                  opacity: busy ? 0.6 : 1,
+                  transform: [{ scale: pressed ? 0.97 : 1 }],
+                },
+              ]}
             >
               <Text style={{ fontSize: 15, fontWeight: '700', color: C.onPrimary }}>Next</Text>
               <ArrowRight size={18} color={C.onPrimary} />

@@ -14,8 +14,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, FlatList, Pressable, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { ChevronLeft, X, Check } from 'lucide-react-native';
+import { ChevronLeft, X, Check, ClipboardCheck } from 'lucide-react-native';
 import { api, type AuditRow } from '@/api/client';
+import { EmptyState } from '@/components/EmptyState';
+import { ListSkeleton } from '@/components/Skeleton';
 import { useTheme } from '@/theme';
 
 const TABS = ['Pending', 'Approved', 'Rejected'] as const;
@@ -64,6 +66,7 @@ export function AuditScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const load = useCallback(async () => {
     setError(null);
@@ -72,6 +75,8 @@ export function AuditScreen() {
       setAudits(r.data);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load');
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -225,19 +230,22 @@ export function AuditScreen() {
                   <Pressable
                     disabled={busy}
                     onPress={() => review(item._id, false)}
-                    style={{
-                      flex: 1,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 6,
-                      height: 42,
-                      borderRadius: 12,
-                      borderWidth: 1.5,
-                      borderColor: C.border,
-                      backgroundColor: C.bgElevated,
-                      opacity: busy ? 0.6 : 1,
-                    }}
+                    style={({ pressed }) => [
+                      {
+                        flex: 1,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 6,
+                        height: 42,
+                        borderRadius: 12,
+                        borderWidth: 1.5,
+                        borderColor: C.border,
+                        backgroundColor: C.bgElevated,
+                        opacity: busy ? 0.6 : 1,
+                        transform: [{ scale: pressed ? 0.97 : 1 }],
+                      },
+                    ]}
                   >
                     <X size={17} color={C.danger} />
                     <Text style={{ fontSize: 14, fontWeight: '700', color: C.danger }}>Reject</Text>
@@ -245,17 +253,20 @@ export function AuditScreen() {
                   <Pressable
                     disabled={busy}
                     onPress={() => review(item._id, true)}
-                    style={{
-                      flex: 1,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 6,
-                      height: 42,
-                      borderRadius: 12,
-                      backgroundColor: C.primary,
-                      opacity: busy ? 0.6 : 1,
-                    }}
+                    style={({ pressed }) => [
+                      {
+                        flex: 1,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 6,
+                        height: 42,
+                        borderRadius: 12,
+                        backgroundColor: C.primary,
+                        opacity: busy ? 0.6 : 1,
+                        transform: [{ scale: pressed ? 0.97 : 1 }],
+                      },
+                    ]}
                   >
                     <Check size={17} color={C.onPrimary} />
                     <Text style={{ fontSize: 14, fontWeight: '700', color: C.onPrimary }}>Approve</Text>
@@ -266,9 +277,15 @@ export function AuditScreen() {
           );
         }}
         ListEmptyComponent={
-          <View style={{ alignItems: 'center', paddingVertical: 50 }}>
-            <Text style={{ fontSize: 14, color: C.fgMuted }}>No {tab.toLowerCase()} audits.</Text>
-          </View>
+          isLoading ? (
+            <ListSkeleton />
+          ) : (
+            <EmptyState
+              icon={ClipboardCheck}
+              title="No audits"
+              hint={`No ${tab.toLowerCase()} audits to show.`}
+            />
+          )
         }
       />
     </SafeAreaView>

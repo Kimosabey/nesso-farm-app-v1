@@ -22,6 +22,8 @@ import {
   type LucideIcon,
 } from 'lucide-react-native';
 import { api, type NotificationRow } from '@/api/client';
+import { EmptyState } from '@/components/EmptyState';
+import { ListSkeleton } from '@/components/Skeleton';
 import { useTheme, type ThemeTokens } from '@/theme';
 
 type Nav = { goBack: () => void };
@@ -76,6 +78,7 @@ export function NotificationsScreen() {
   const [items, setItems] = useState<NotificationRow[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const load = useCallback(async () => {
     setError(null);
@@ -84,6 +87,8 @@ export function NotificationsScreen() {
       setItems(r.data);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load');
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -170,7 +175,10 @@ export function NotificationsScreen() {
           </View>
         ) : null}
 
-        {groups.map((g) => (
+        {!error && isLoading ? <View style={{ paddingTop: 12 }}><ListSkeleton /></View> : null}
+
+        {!error && !isLoading
+          ? groups.map((g) => (
           <View key={g.label} style={{ marginTop: 14 }}>
             <Text
               style={{
@@ -240,15 +248,15 @@ export function NotificationsScreen() {
               })}
             </View>
           </View>
-        ))}
+            ))
+          : null}
 
-        {!error && groups.length === 0 ? (
-          <View style={{ alignItems: 'center', paddingVertical: 60 }}>
-            <Bell size={28} color={C.fgSubtle} />
-            <Text style={{ fontSize: 14, color: C.fgMuted, marginTop: 8 }}>
-              You're all caught up.
-            </Text>
-          </View>
+        {!error && !isLoading && groups.length === 0 ? (
+          <EmptyState
+            icon={Bell}
+            title="You're all caught up"
+            hint="New approvals, weather alerts and reminders will appear here."
+          />
         ) : null}
       </ScrollView>
     </SafeAreaView>

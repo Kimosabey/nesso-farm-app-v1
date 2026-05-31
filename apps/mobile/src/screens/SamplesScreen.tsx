@@ -15,6 +15,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft, Droplet } from 'lucide-react-native';
 import { api, type SampleRow } from '@/api/client';
+import { EmptyState } from '@/components/EmptyState';
+import { ListSkeleton } from '@/components/Skeleton';
 import { useTheme } from '@/theme';
 
 const TABS = ['Queue', 'Sent'] as const;
@@ -57,6 +59,7 @@ export function SamplesScreen() {
   const [tab, setTab] = useState<Tab>('Queue');
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const load = useCallback(async () => {
     setError(null);
@@ -65,6 +68,8 @@ export function SamplesScreen() {
       setSamples(r.data);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load');
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -199,10 +204,15 @@ export function SamplesScreen() {
           </View>
         )}
         ListEmptyComponent={
-          <View style={{ alignItems: 'center', paddingVertical: 50 }}>
-            <Droplet size={28} color={C.fgSubtle} />
-            <Text style={{ fontSize: 14, color: C.fgMuted, marginTop: 8 }}>No samples here.</Text>
-          </View>
+          isLoading ? (
+            <ListSkeleton />
+          ) : (
+            <EmptyState
+              icon={Droplet}
+              title="No samples"
+              hint={tab === 'Queue' ? 'Samples queued for dispatch will appear here.' : 'Sent samples will appear here.'}
+            />
+          )
         }
       />
     </SafeAreaView>

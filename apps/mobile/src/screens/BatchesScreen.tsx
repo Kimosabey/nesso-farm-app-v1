@@ -14,6 +14,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft, Box, ScanLine } from 'lucide-react-native';
 import { api, type InventoryBatch } from '@/api/client';
+import { EmptyState } from '@/components/EmptyState';
+import { ListSkeleton } from '@/components/Skeleton';
 import { useTheme, type ThemeTokens } from '@/theme';
 
 const VIEWS = ['Order', 'Batch'] as const;
@@ -61,6 +63,7 @@ export function BatchesScreen() {
   const [view, setView] = useState<ViewKind>('Batch');
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const load = useCallback(async () => {
     setError(null);
@@ -69,6 +72,8 @@ export function BatchesScreen() {
       setBatches(r.data);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load');
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -207,10 +212,15 @@ export function BatchesScreen() {
           </View>
         )}
         ListEmptyComponent={
-          <View style={{ alignItems: 'center', paddingVertical: 50 }}>
-            <Box size={28} color={C.fgSubtle} />
-            <Text style={{ fontSize: 14, color: C.fgMuted, marginTop: 8 }}>No batches yet.</Text>
-          </View>
+          isLoading ? (
+            <ListSkeleton />
+          ) : (
+            <EmptyState
+              icon={Box}
+              title="No batches yet"
+              hint="Scan a GRN to bring batches into storage."
+            />
+          )
         }
       />
 
@@ -218,22 +228,25 @@ export function BatchesScreen() {
       <Pressable
         accessibilityLabel="Scan GRN"
         onPress={() => navigation.navigate('AcceptGRN')}
-        style={{
-          position: 'absolute',
-          right: 18,
-          bottom: 30,
-          width: 60,
-          height: 60,
-          borderRadius: 30,
-          backgroundColor: C.primary,
-          alignItems: 'center',
-          justifyContent: 'center',
-          shadowColor: C.primary,
-          shadowOpacity: 0.4,
-          shadowRadius: 12,
-          shadowOffset: { width: 0, height: 8 },
-          elevation: 6,
-        }}
+        style={({ pressed }) => [
+          {
+            position: 'absolute',
+            right: 18,
+            bottom: 30,
+            width: 60,
+            height: 60,
+            borderRadius: 30,
+            backgroundColor: C.primary,
+            alignItems: 'center',
+            justifyContent: 'center',
+            shadowColor: C.primary,
+            shadowOpacity: 0.4,
+            shadowRadius: 12,
+            shadowOffset: { width: 0, height: 8 },
+            elevation: 6,
+            transform: [{ scale: pressed ? 0.97 : 1 }],
+          },
+        ]}
       >
         <ScanLine size={26} color={C.onPrimary} />
       </Pressable>

@@ -24,8 +24,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { ChevronLeft, Box, ChevronRight, X, Check } from 'lucide-react-native';
+import { ChevronLeft, Box, ChevronRight, X, Check, PackageOpen } from 'lucide-react-native';
 import { api, ApiError, type InventoryBatch } from '@/api/client';
+import { EmptyState } from '@/components/EmptyState';
+import { ListSkeleton } from '@/components/Skeleton';
 import { useTheme } from '@/theme';
 
 const STAGES = ['Sell', 'Transfer', 'Process'] as const;
@@ -44,6 +46,7 @@ export function InventoryScreen() {
   const [batches, setBatches] = useState<InventoryBatch[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Move sheet state
   const [active, setActive] = useState<InventoryBatch | null>(null);
@@ -61,6 +64,8 @@ export function InventoryScreen() {
       setBatches(r.data);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load');
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -178,16 +183,19 @@ export function InventoryScreen() {
         renderItem={({ item }) => (
           <Pressable
             onPress={() => openSheet(item)}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 13,
-              backgroundColor: C.bgElevated,
-              borderRadius: 16,
-              borderWidth: 1,
-              borderColor: C.border,
-              padding: 14,
-            }}
+            style={({ pressed }) => [
+              {
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 13,
+                backgroundColor: C.bgElevated,
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor: C.border,
+                padding: 14,
+                transform: [{ scale: pressed ? 0.97 : 1 }],
+              },
+            ]}
           >
             <View
               style={{
@@ -211,10 +219,15 @@ export function InventoryScreen() {
           </Pressable>
         )}
         ListEmptyComponent={
-          <View style={{ alignItems: 'center', paddingVertical: 50 }}>
-            <Box size={28} color={C.fgSubtle} />
-            <Text style={{ fontSize: 14, color: C.fgMuted, marginTop: 8 }}>No inventory yet.</Text>
-          </View>
+          isLoading ? (
+            <ListSkeleton />
+          ) : (
+            <EmptyState
+              icon={PackageOpen}
+              title="No inventory yet"
+              hint="Accepted batches in storage will show up here."
+            />
+          )
         }
       />
 
@@ -320,17 +333,20 @@ export function InventoryScreen() {
               <Pressable
                 onPress={confirm}
                 disabled={submitting}
-                style={{
-                  marginTop: 20,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                  height: 52,
-                  borderRadius: 14,
-                  backgroundColor: C.primary,
-                  opacity: submitting ? 0.6 : 1,
-                }}
+                style={({ pressed }) => [
+                  {
+                    marginTop: 20,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8,
+                    height: 52,
+                    borderRadius: 14,
+                    backgroundColor: C.primary,
+                    opacity: submitting ? 0.6 : 1,
+                    transform: [{ scale: pressed ? 0.97 : 1 }],
+                  },
+                ]}
               >
                 <Check size={20} color={C.onPrimary} />
                 <Text style={{ fontSize: 15.5, fontWeight: '700', color: C.onPrimary }}>

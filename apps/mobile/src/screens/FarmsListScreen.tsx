@@ -23,12 +23,15 @@ import Svg, { Rect, Path, Circle, Defs, Pattern } from 'react-native-svg';
 import { api, type Farm, type Crop } from '@/api/client';
 import { sync, type SyncStatus } from '@/sync/SyncManager';
 import { OfflineBanner } from '@/components/OfflineBanner';
+import { EmptyState } from '@/components/EmptyState';
+import { ListSkeleton } from '@/components/Skeleton';
 import { useTheme } from '@/theme';
 
-// Local nav param list — FarmDetails is registered by the parent navigator.
+// Local nav param list — FarmDetails/AddFarm are registered by the parent navigator.
 // Declared here so navigation typechecks without editing App.tsx / MainTabs.tsx.
 type FarmsNavParamList = {
   FarmDetails: { farmId: string };
+  AddFarm: { farmerId?: string };
 };
 type Nav = NativeStackNavigationProp<FarmsNavParamList>;
 
@@ -123,6 +126,7 @@ export function FarmsListScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [q, setQ] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
 
   const load = useCallback(async () => {
@@ -143,6 +147,8 @@ export function FarmsListScreen() {
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load');
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -251,16 +257,19 @@ export function FarmsListScreen() {
             <View style={{ paddingHorizontal: 20, paddingBottom: 10 }}>
               <Pressable
                 onPress={() => navigation.navigate('FarmDetails', { farmId: item._id })}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 13,
-                  backgroundColor: C.bgElevated,
-                  borderRadius: 16,
-                  padding: 13,
-                  borderWidth: 1,
-                  borderColor: C.border,
-                }}
+                style={({ pressed }) => [
+                  {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 13,
+                    backgroundColor: C.bgElevated,
+                    borderRadius: 16,
+                    padding: 13,
+                    borderWidth: 1,
+                    borderColor: C.border,
+                    transform: [{ scale: pressed ? 0.97 : 1 }],
+                  },
+                ]}
               >
                 <PolyThumb polygonPoints={item.polygonPoints} seed={index} size={56} />
                 <View style={{ flex: 1, minWidth: 0 }}>
@@ -315,9 +324,19 @@ export function FarmsListScreen() {
           );
         }}
         ListEmptyComponent={
-          error ? null : (
+          isLoading ? (
+            <ListSkeleton />
+          ) : error ? null : farms.length === 0 ? (
+            <EmptyState
+              icon={MapPin}
+              title="No farms mapped"
+              hint="Map a farm boundary to track its crops and area."
+              actionLabel="Add farm"
+              onAction={() => navigation.navigate('AddFarm', {})}
+            />
+          ) : (
             <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-              <Text style={{ fontSize: 14, color: C.fgSubtle }}>No farms yet.</Text>
+              <Text style={{ fontSize: 14, color: C.fgSubtle }}>No farms match.</Text>
             </View>
           )
         }
