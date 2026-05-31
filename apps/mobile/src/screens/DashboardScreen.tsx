@@ -8,7 +8,6 @@ import {
   type ViewStyle,
 } from 'react-native';
 import Svg, { Polyline } from 'react-native-svg';
-import { MotiView } from 'moti';
 import {
   Users,
   MapPin,
@@ -163,7 +162,6 @@ function KpiCard({
   icon,
   color,
   spark,
-  index = 0,
 }: {
   label: string;
   value: number;
@@ -171,16 +169,12 @@ function KpiCard({
   icon: React.ReactNode;
   color: string;
   spark: number[];
-  index?: number;
 }) {
   const C = useTheme().c;
   const displayed = useCountUp(value, 800);
   const text = value >= 100 ? displayed.toLocaleString() : String(displayed);
   return (
-    <MotiView
-      from={{ opacity: 0, translateY: 10 }}
-      animate={{ opacity: 1, translateY: 0 }}
-      transition={{ type: 'timing', duration: 320, delay: 80 * index }}
+    <View
       style={[
         {
           flex: 1,
@@ -229,7 +223,7 @@ function KpiCard({
           {Math.abs(delta)}
         </Text>
       </View>
-    </MotiView>
+    </View>
   );
 }
 
@@ -792,7 +786,6 @@ export function DashboardScreen() {
               icon={<Users size={18} color={C.primary} strokeWidth={2} />}
               color={C.primary}
               spark={[3, 5, 4, 6, 7, 8, 10]}
-              index={0}
             />
             <KpiCard
               label="Farms mapped"
@@ -801,7 +794,6 @@ export function DashboardScreen() {
               icon={<MapPin size={18} color={C.secondaryD} strokeWidth={2} />}
               color={C.secondaryD}
               spark={[2, 3, 3, 5, 6, 6, 8]}
-              index={1}
             />
           </View>
           <View style={{ flexDirection: 'row', gap: 12 }}>
@@ -812,7 +804,6 @@ export function DashboardScreen() {
               icon={<Sprout size={18} color={C.info} strokeWidth={2} />}
               color={C.info}
               spark={[5, 4, 5, 6, 6, 7, 7]}
-              index={2}
             />
             <KpiCard
               label="Pending"
@@ -821,7 +812,6 @@ export function DashboardScreen() {
               icon={<Clock size={18} color={C.warning} strokeWidth={2} />}
               color={C.warning}
               spark={[8, 7, 6, 7, 5, 4, 3]}
-              index={3}
             />
           </View>
         </View>
